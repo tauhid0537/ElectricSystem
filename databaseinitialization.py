@@ -36,19 +36,6 @@ class frmInitialize_dialog(QDialog, Ui_frmIntialize):
         self.cmdConductor.clicked.connect(self.openConductorForm)
         self.cmdClose.clicked.connect(self.onClose)
 
-    def getText1(self):
-        floc = utility.drvpath
-        msgBox = QtGui.QMessageBox()
-        msgBox.setWindowTitle("Main Form")
-        msgBox.setText(floc)
-        ret = msgBox.exec_()
-
-    def getText(self):
-
-
-        usr = utility.basicOps.usrname
-        QMessageBox.critical(self.iface.mainWindow(),"Connection Error",usr)
-
     def createSpatialTables(self):
         sub = self.txtSub.text()
         fed = self.txtFed.text()
