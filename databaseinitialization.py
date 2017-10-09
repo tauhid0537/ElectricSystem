@@ -91,9 +91,11 @@ class frmInitialize_dialog(QDialog, Ui_frmIntialize):
                 geom geometry(POINT, 3857)
                 )
                 """
+                subgeomIndexSQL = """create index """+ subName + """_gix on esystems.""" + subName + """ using GIST(geom);"""
                 try:
                     curdb.execute("create sequence esystems."+subName+"_id_seq;")
                     curdb.execute(createsubSQL)
+                    curdb.execute(subgeomIndexSQL)
                 except psycopg2.Error as e:
                     QMessageBox.critical(self.iface.mainWindow(),"Substation Table Creation Error",str("Unable to Create Substation!\n{0}").format(e))
             else:
@@ -135,9 +137,11 @@ class frmInitialize_dialog(QDialog, Ui_frmIntialize):
                     geom geometry(POINT, 3857)
                     )
                     """
+                polegeomIndexSQL = """create index """+ poleName + """_gix on esystems.""" + poleName + """ using GIST(geom);"""
                 try:
                     curdb.execute("create sequence esystems."+poleName+"_id_seq;")
                     curdb.execute(createFedPoleSQL)
+                    curdb.execute(polegeomIndexSQL)
                 except psycopg2.Error as e:
                     QMessageBox.critical(self.iface.mainWindow(),"Pole Table Creation Error",str("Unable to Create Pole Table!\n{0}").format(e))
             else:
@@ -167,9 +171,11 @@ class frmInitialize_dialog(QDialog, Ui_frmIntialize):
                     geom geometry(LINESTRING, 3857)
                     )
                     """
+                linegeomIndexSQL = """create index """+ lineName + """_gix on esystems.""" + lineName + """ using GIST(geom);"""
                 try:
                     curdb.execute("create sequence esystems."+lineName+"_id_seq;")
                     curdb.execute(createfedLineSQL)
+                    curdb.execute(linegeomIndexSQL)
                 except psycopg2.Error as e:
                     QMessageBox.critical(self.iface.mainWindow(),"Line Table Creation Error",str("Unable to Create Line Table!\n{0}").format(e))
             else:
