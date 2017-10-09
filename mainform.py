@@ -13,6 +13,8 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/ValidateDatabase"
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/FinancialAnalysis")
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/Resources/FormIcons")
 
+import utility
+
 from frmMain import *
 from databaseinitialization import *
 from processfielddata import *
@@ -48,7 +50,8 @@ class frmMain_dialog(QDialog, Ui_frmMain):
         proname = self.txtPro.text()
         self.close()
         intialize = frmInitialize_dialog(self.iface)
-        intialize.txtPro.setText(proname)
+        intialize.txtPro.setText(utility.basicOps.usrname)
+        intialize.txtPBS.setText(utility.basicOps.dbasename)
         intialize.exec_()
 
     def openProcess(self):

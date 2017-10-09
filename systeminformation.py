@@ -80,13 +80,13 @@ class frmSystemInfo_dialog(QDialog, Ui_frmSysInfo):
 
     def createDb(self):
         hostname = self.txtHost.text()
-        utilities.hostname = hostname
+        utility.hostname = hostname
         username = self.txtUserName.text()
-        utilities.usrname = username
+        utility.usrname = username
         password = self.txtPassword.text()
-        utilities.password = password
+        utility.password = password
         dbasename = self.txtDatabase.text()
-        utilities.dbasename = dbasename
+        utility.dbasename = dbasename
         phaseconf = str(self.cmbSysPhase.currentText())
         try:
             con1 = psycopg2.connect(user = username, host = hostname, password = password)
@@ -229,17 +229,17 @@ class frmSystemInfo_dialog(QDialog, Ui_frmSysInfo):
         dbname = self.tableView.model().data(index)
 
         hostname = self.txtHost.text()
-        test2.basicOps.hostname = hostname
+        utility.basicOps.hostname = hostname
         password = self.txtPassword.text()
-        test2.basicOps.password = password
+        utility.basicOps.password = password
         #dbasename = self.txtDatabase.text()
-        test2.basicOps.dbasename = dbname
+        utility.basicOps.dbasename = dbname
 
 
         username = self.txtUserName.text()
         #Global.usrname = username
-        test2.basicOps.usrname = username
-        test2.pbsname = dbname
+        utility.basicOps.usrname = username
+        utility.pbsname = dbname
         self.close()
 
         sysinfo = frmMain_dialog(self.iface)

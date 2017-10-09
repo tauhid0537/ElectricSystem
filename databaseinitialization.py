@@ -11,11 +11,7 @@ from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 from psycopg2 import connect
 import psycopg2
 
-import test2
-
-sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/Utilities")
-import utilities
-
+import utility
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/DatabaseInitialization")
 from frmInitialize import *
@@ -41,7 +37,7 @@ class frmInitialize_dialog(QDialog, Ui_frmIntialize):
         self.cmdClose.clicked.connect(self.onClose)
 
     def getText1(self):
-        floc = utilities.drvpath
+        floc = utility.drvpath
         msgBox = QtGui.QMessageBox()
         msgBox.setWindowTitle("Main Form")
         msgBox.setText(floc)
@@ -50,7 +46,7 @@ class frmInitialize_dialog(QDialog, Ui_frmIntialize):
     def getText(self):
 
 
-        usr = test2.basicOps.usrname
+        usr = utility.basicOps.usrname
         QMessageBox.critical(self.iface.mainWindow(),"Connection Error",usr)
 
     def createSpatialTables(self):
@@ -66,10 +62,10 @@ class frmInitialize_dialog(QDialog, Ui_frmIntialize):
         subTableSQL = "select to_regclass('esystems."+subName+"');"
         fedpoleSQL = "select to_regclass('esystems."+poleName+"');"
         fedlineSQL = "select to_regclass('esystems."+lineName+"');"
-        usr = test2.basicOps.usrname
-        hst = test2.basicOps.hostname
-        paswrd = test2.basicOps.password
-        db = test2.basicOps.dbasename
+        usr = utility.basicOps.usrname
+        hst = utility.basicOps.hostname
+        paswrd = utility.basicOps.password
+        db = utility.basicOps.dbasename
 
         try:
             condb = psycopg2.connect(user = usr, host = hst, password = paswrd, dbname = db)
@@ -92,10 +88,12 @@ class frmInitialize_dialog(QDialog, Ui_frmIntialize):
                 )
                 """
                 subgeomIndexSQL = """create index """+ subName + """_gix on esystems.""" + subName + """ using GIST(geom);"""
+                subobjidIndexSQL = """create index """+ subName + """_objidix on esystems.""" + subName + """ using btree(objectid);"""
                 try:
                     curdb.execute("create sequence esystems."+subName+"_id_seq;")
                     curdb.execute(createsubSQL)
                     curdb.execute(subgeomIndexSQL)
+                    curdb.execute(subobjidIndexSQL)
                 except psycopg2.Error as e:
                     QMessageBox.critical(self.iface.mainWindow(),"Substation Table Creation Error",str("Unable to Create Substation!\n{0}").format(e))
             else:
@@ -138,10 +136,12 @@ class frmInitialize_dialog(QDialog, Ui_frmIntialize):
                     )
                     """
                 polegeomIndexSQL = """create index """+ poleName + """_gix on esystems.""" + poleName + """ using GIST(geom);"""
+                poleobjidIndexSQL = """create index """+ poleName + """_objidix on esystems.""" + poleName + """ using btree(objectid);"""
                 try:
                     curdb.execute("create sequence esystems."+poleName+"_id_seq;")
                     curdb.execute(createFedPoleSQL)
                     curdb.execute(polegeomIndexSQL)
+                    curdb.execute(poleobjidIndexSQL)
                 except psycopg2.Error as e:
                     QMessageBox.critical(self.iface.mainWindow(),"Pole Table Creation Error",str("Unable to Create Pole Table!\n{0}").format(e))
             else:
@@ -172,10 +172,12 @@ class frmInitialize_dialog(QDialog, Ui_frmIntialize):
                     )
                     """
                 linegeomIndexSQL = """create index """+ lineName + """_gix on esystems.""" + lineName + """ using GIST(geom);"""
+                lineobjidIndexSQL = """create index """+ lineName + """_objidix on esystems.""" + lineName + """ using btree(objectid);"""
                 try:
                     curdb.execute("create sequence esystems."+lineName+"_id_seq;")
                     curdb.execute(createfedLineSQL)
                     curdb.execute(linegeomIndexSQL)
+                    curdb.execute(lineobjidIndexSQL)
                 except psycopg2.Error as e:
                     QMessageBox.critical(self.iface.mainWindow(),"Line Table Creation Error",str("Unable to Create Line Table!\n{0}").format(e))
             else:
