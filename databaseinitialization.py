@@ -91,8 +91,11 @@ class frmInitialize_dialog(QDialog, Ui_frmIntialize):
                 geom geometry(POINT, 3857)
                 )
                 """
-                curdb.execute("create sequence esystems."+subName+"_id_seq;")
-                curdb.execute(createsubSQL)
+                try:
+                    curdb.execute("create sequence esystems."+subName+"_id_seq;")
+                    curdb.execute(createsubSQL)
+                except psycopg2.Error as e:
+                    QMessageBox.critical(self.iface.mainWindow(),"Substation Table Creation Error",str("Unable to Create Substation!\n{0}").format(e))
             else:
                 QMessageBox.critical(self.iface.mainWindow(),"Database initialization",str("Substation table already exists!\n{0}").format(subName))
 
@@ -132,8 +135,11 @@ class frmInitialize_dialog(QDialog, Ui_frmIntialize):
                     geom geometry(POINT, 3857)
                     )
                     """
-                curdb.execute("create sequence esystems."+poleName+"_id_seq;")
-                curdb.execute(createFedPoleSQL)
+                try:
+                    curdb.execute("create sequence esystems."+poleName+"_id_seq;")
+                    curdb.execute(createFedPoleSQL)
+                except psycopg2.Error as e:
+                    QMessageBox.critical(self.iface.mainWindow(),"Pole Table Creation Error",str("Unable to Create Pole Table!\n{0}").format(e))
             else:
                 QMessageBox.critical(self.iface.mainWindow(),"Database initialization",str("Pole table already exists!\n{0}").format(poleName))
 
@@ -161,8 +167,11 @@ class frmInitialize_dialog(QDialog, Ui_frmIntialize):
                     geom geometry(LINESTRING, 3857)
                     )
                     """
-                curdb.execute("create sequence esystems."+lineName+"_id_seq;")
-                curdb.execute(createfedLineSQL)
+                try:
+                    curdb.execute("create sequence esystems."+lineName+"_id_seq;")
+                    curdb.execute(createfedLineSQL)
+                except psycopg2.Error as e:
+                    QMessageBox.critical(self.iface.mainWindow(),"Line Table Creation Error",str("Unable to Create Line Table!\n{0}").format(e))
             else:
                 QMessageBox.critical(self.iface.mainWindow(),"Database initialization",str("Line table already exists!\n{0}").format(lineName))
             QMessageBox.information(self.iface.mainWindow(),"Database initialization","Tables Created")
