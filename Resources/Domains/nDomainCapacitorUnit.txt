@@ -1,0 +1,7 @@
+Text
+Coded Values
+Default Value
+Default Value
+Single Phase,Single Phase
+Capacitor Bank,Capacitor Bank
+Multi-Phase Unit,Multi-Phase Unit

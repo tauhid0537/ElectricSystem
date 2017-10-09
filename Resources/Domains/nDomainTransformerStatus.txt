@@ -1,0 +1,7 @@
+Text
+Coded Values
+Default Value
+Default Value
+In Operation,In Operation
+Out of Order,Out of Order
+Stand By,Stand By

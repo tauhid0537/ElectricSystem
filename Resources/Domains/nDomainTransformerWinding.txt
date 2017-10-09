@@ -1,0 +1,17 @@
+Text
+Coded Values
+Default Value
+Default Value
+Y-Y,Y-Y
+D-Y,D-Y
+Grounded Y-D,Grounded Y-D
+Ungrounded Y-D,Ungrounded Y-D
+Open Y-D,Open Y-D
+D-D,D-D
+Y-Y Grounded Imp,Y-Y Grounded Imp
+Y-Y 3ph Core Type,Y-Y 3ph Core Type
+D-D One,D-D One
+D-D Open,D-D Open
+Y-Y-D Ground,Y-Y-D Ground
+Y-D One,Y-D One
+D-Y Open,D-Y Open

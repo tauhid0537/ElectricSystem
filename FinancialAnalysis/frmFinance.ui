@@ -1,0 +1,866 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>frmFinance</class>
+ <widget class="QMainWindow" name="frmFinance">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>760</width>
+    <height>450</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>760</width>
+    <height>450</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>760</width>
+    <height>450</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>Financial Analysis</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="../Resources/FormIcons/resources.qrc">
+    <normaloff>:/plugins/ElectricSystems/Resources/FormIcons/formfinance.png</normaloff>:/plugins/ElectricSystems/Resources/FormIcons/formfinance.png</iconset>
+  </property>
+  <property name="windowOpacity">
+   <double>1.000000000000000</double>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QGroupBox" name="groupBox">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>358</y>
+      <width>591</width>
+      <height>83</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string/>
+    </property>
+    <widget class="QLabel" name="label">
+     <property name="geometry">
+      <rect>
+       <x>94</x>
+       <y>19</y>
+       <width>71</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Project</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="txtPro">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>170</x>
+       <y>16</y>
+       <width>160</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string/>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_2">
+     <property name="geometry">
+      <rect>
+       <x>348</x>
+       <y>19</y>
+       <width>51</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Database</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_3">
+     <property name="geometry">
+      <rect>
+       <x>94</x>
+       <y>49</y>
+       <width>71</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Substation</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_4">
+     <property name="geometry">
+      <rect>
+       <x>348</x>
+       <y>49</y>
+       <width>51</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Feeder</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="txtSub">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>170</x>
+       <y>46</y>
+       <width>160</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string/>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="txtPBS">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>416</x>
+       <y>16</y>
+       <width>160</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string/>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="txtFed">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>416</x>
+       <y>46</y>
+       <width>160</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string/>
+     </property>
+    </widget>
+    <widget class="QFrame" name="frame">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>10</y>
+       <width>62</width>
+       <height>62</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">image: url(:/plugins/ElectricSystems/Resources/FormIcons/basicnreca.png);</string>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::Panel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Sunken</enum>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QGroupBox" name="groupBox_2">
+    <property name="geometry">
+     <rect>
+      <x>610</x>
+      <y>10</y>
+      <width>139</width>
+      <height>431</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string/>
+    </property>
+    <widget class="QPushButton" name="cmdInputTable">
+     <property name="geometry">
+      <rect>
+       <x>17</x>
+       <y>30</y>
+       <width>50</width>
+       <height>40</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>Open Input Tables</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="../Resources/FormIcons/resources.qrc">
+       <normaloff>:/plugins/ElectricSystems/Resources/FormIcons/maptable.png</normaloff>:/plugins/ElectricSystems/Resources/FormIcons/maptable.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>32</width>
+       <height>32</height>
+      </size>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="cmdCreatePro">
+     <property name="geometry">
+      <rect>
+       <x>74</x>
+       <y>30</y>
+       <width>50</width>
+       <height>40</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>Create New Extension Project</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="../Resources/FormIcons/resources.qrc">
+       <normaloff>:/plugins/ElectricSystems/Resources/FormIcons/mapedit.png</normaloff>:/plugins/ElectricSystems/Resources/FormIcons/mapedit.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>32</width>
+       <height>32</height>
+      </size>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="cmdAddPro">
+     <property name="geometry">
+      <rect>
+       <x>17</x>
+       <y>78</y>
+       <width>50</width>
+       <height>40</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>Add Expansion Project to Map</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="../Resources/FormIcons/resources.qrc">
+       <normaloff>:/plugins/ElectricSystems/Resources/FormIcons/mapadd.png</normaloff>:/plugins/ElectricSystems/Resources/FormIcons/mapadd.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>32</width>
+       <height>32</height>
+      </size>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="cmdDelPro">
+     <property name="geometry">
+      <rect>
+       <x>74</x>
+       <y>78</y>
+       <width>50</width>
+       <height>40</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>Delete Expension Project from Map</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="../Resources/FormIcons/resources.qrc">
+       <normaloff>:/plugins/ElectricSystems/Resources/FormIcons/mapdelete.png</normaloff>:/plugins/ElectricSystems/Resources/FormIcons/mapdelete.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>32</width>
+       <height>32</height>
+      </size>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="cmdCalCon">
+     <property name="geometry">
+      <rect>
+       <x>17</x>
+       <y>186</y>
+       <width>50</width>
+       <height>40</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>Calculate Project Construction Cost</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="../Resources/FormIcons/resources.qrc">
+       <normaloff>:/plugins/ElectricSystems/Resources/FormIcons/mapcons.png</normaloff>:/plugins/ElectricSystems/Resources/FormIcons/mapcons.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>32</width>
+       <height>32</height>
+      </size>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="cmdRepCon">
+     <property name="geometry">
+      <rect>
+       <x>74</x>
+       <y>186</y>
+       <width>50</width>
+       <height>40</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>View Project Construction Report</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="../Resources/FormIcons/resources.qrc">
+       <normaloff>:/plugins/ElectricSystems/Resources/FormIcons/reportconstruction.png</normaloff>:/plugins/ElectricSystems/Resources/FormIcons/reportconstruction.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>32</width>
+       <height>32</height>
+      </size>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="cmdCalFin">
+     <property name="geometry">
+      <rect>
+       <x>17</x>
+       <y>234</y>
+       <width>50</width>
+       <height>40</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>Perform Cash Flow Analysis</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="../Resources/FormIcons/resources.qrc">
+       <normaloff>:/plugins/ElectricSystems/Resources/FormIcons/mapfinancial.png</normaloff>:/plugins/ElectricSystems/Resources/FormIcons/mapfinancial.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>32</width>
+       <height>32</height>
+      </size>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="cmdRepFin">
+     <property name="geometry">
+      <rect>
+       <x>74</x>
+       <y>234</y>
+       <width>50</width>
+       <height>40</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>Show Cash Flow Report</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="../Resources/FormIcons/resources.qrc">
+       <normaloff>:/plugins/ElectricSystems/Resources/FormIcons/reportfinance.png</normaloff>:/plugins/ElectricSystems/Resources/FormIcons/reportfinance.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>32</width>
+       <height>32</height>
+      </size>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="cmdHelp">
+     <property name="geometry">
+      <rect>
+       <x>17</x>
+       <y>360</y>
+       <width>50</width>
+       <height>40</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>Help</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="../Resources/FormIcons/resources.qrc">
+       <normaloff>:/plugins/ElectricSystems/Resources/FormIcons/basichelp.png</normaloff>:/plugins/ElectricSystems/Resources/FormIcons/basichelp.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>32</width>
+       <height>32</height>
+      </size>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="cmdClose">
+     <property name="geometry">
+      <rect>
+       <x>74</x>
+       <y>360</y>
+       <width>50</width>
+       <height>40</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>Close</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="../Resources/FormIcons/resources.qrc">
+       <normaloff>:/plugins/ElectricSystems/Resources/FormIcons/basicexit.png</normaloff>:/plugins/ElectricSystems/Resources/FormIcons/basicexit.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>32</width>
+       <height>32</height>
+      </size>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QTabWidget" name="tabWidget">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>10</y>
+      <width>593</width>
+      <height>341</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true"/>
+    </property>
+    <property name="tabShape">
+     <enum>QTabWidget::Rounded</enum>
+    </property>
+    <property name="currentIndex">
+     <number>1</number>
+    </property>
+    <property name="iconSize">
+     <size>
+      <width>24</width>
+      <height>24</height>
+     </size>
+    </property>
+    <widget class="QWidget" name="tabExtProjects">
+     <attribute name="icon">
+      <iconset resource="../Resources/FormIcons/resources.qrc">
+       <normaloff>:/plugins/ElectricSystems/Resources/FormIcons/finextension.png</normaloff>:/plugins/ElectricSystems/Resources/FormIcons/finextension.png</iconset>
+     </attribute>
+     <attribute name="title">
+      <string>Extension Projects</string>
+     </attribute>
+     <widget class="QTableView" name="tableView">
+      <property name="geometry">
+       <rect>
+        <x>5</x>
+        <y>5</y>
+        <width>578</width>
+        <height>295</height>
+       </rect>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::StyledPanel</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Plain</enum>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="tabProProperties">
+     <attribute name="icon">
+      <iconset resource="../Resources/FormIcons/resources.qrc">
+       <normaloff>:/plugins/ElectricSystems/Resources/FormIcons/finproperties.png</normaloff>:/plugins/ElectricSystems/Resources/FormIcons/finproperties.png</iconset>
+     </attribute>
+     <attribute name="title">
+      <string>Project Properties</string>
+     </attribute>
+     <widget class="QGroupBox" name="groupBox_3">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>10</y>
+        <width>280</width>
+        <height>121</height>
+       </rect>
+      </property>
+      <property name="title">
+       <string>Prposed Extension Project</string>
+      </property>
+      <property name="flat">
+       <bool>false</bool>
+      </property>
+      <widget class="QLabel" name="label_5">
+       <property name="geometry">
+        <rect>
+         <x>15</x>
+         <y>25</y>
+         <width>81</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Project Number</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_6">
+       <property name="geometry">
+        <rect>
+         <x>15</x>
+         <y>55</y>
+         <width>71</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Project Name</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="txtProNum">
+       <property name="geometry">
+        <rect>
+         <x>115</x>
+         <y>23</y>
+         <width>151</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="toolTip">
+        <string>Enter Extension Project Number</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="txtProName">
+       <property name="geometry">
+        <rect>
+         <x>115</x>
+         <y>53</y>
+         <width>151</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="toolTip">
+        <string>Enter Extension Project Name</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_7">
+       <property name="geometry">
+        <rect>
+         <x>15</x>
+         <y>86</y>
+         <width>81</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Project Site</string>
+       </property>
+      </widget>
+      <widget class="QComboBox" name="cmbProSite">
+       <property name="geometry">
+        <rect>
+         <x>115</x>
+         <y>83</y>
+         <width>151</width>
+         <height>22</height>
+        </rect>
+       </property>
+      </widget>
+     </widget>
+     <widget class="QGroupBox" name="groupBox_4">
+      <property name="geometry">
+       <rect>
+        <x>299</x>
+        <y>10</y>
+        <width>280</width>
+        <height>121</height>
+       </rect>
+      </property>
+      <property name="title">
+       <string>Population Data Source</string>
+      </property>
+      <widget class="QRadioButton" name="radSet">
+       <property name="geometry">
+        <rect>
+         <x>40</x>
+         <y>25</y>
+         <width>151</width>
+         <height>17</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Settlement Cluster</string>
+       </property>
+      </widget>
+      <widget class="QRadioButton" name="radStr">
+       <property name="geometry">
+        <rect>
+         <x>40</x>
+         <y>55</y>
+         <width>151</width>
+         <height>17</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Household Structure</string>
+       </property>
+      </widget>
+      <widget class="QRadioButton" name="radVil">
+       <property name="geometry">
+        <rect>
+         <x>40</x>
+         <y>84</y>
+         <width>151</width>
+         <height>17</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Village Area</string>
+       </property>
+      </widget>
+     </widget>
+     <widget class="QGroupBox" name="groupBox_5">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>135</y>
+        <width>280</width>
+        <height>93</height>
+       </rect>
+      </property>
+      <property name="title">
+       <string>Primary Line Design Paramaters</string>
+      </property>
+      <widget class="QLabel" name="label_8">
+       <property name="geometry">
+        <rect>
+         <x>15</x>
+         <y>26</y>
+         <width>81</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Line Type</string>
+       </property>
+      </widget>
+      <widget class="QComboBox" name="cmbPrLineType">
+       <property name="geometry">
+        <rect>
+         <x>115</x>
+         <y>23</y>
+         <width>151</width>
+         <height>22</height>
+        </rect>
+       </property>
+       <property name="toolTip">
+        <string>Select Primary Line Type</string>
+       </property>
+      </widget>
+      <widget class="QComboBox" name="cmbPrLineVolt">
+       <property name="geometry">
+        <rect>
+         <x>115</x>
+         <y>54</y>
+         <width>151</width>
+         <height>22</height>
+        </rect>
+       </property>
+       <property name="toolTip">
+        <string>Select Primary Line Voltage</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_9">
+       <property name="geometry">
+        <rect>
+         <x>15</x>
+         <y>57</y>
+         <width>81</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Line Voltage</string>
+       </property>
+      </widget>
+     </widget>
+     <widget class="QGroupBox" name="groupBox_6">
+      <property name="geometry">
+       <rect>
+        <x>299</x>
+        <y>135</y>
+        <width>280</width>
+        <height>93</height>
+       </rect>
+      </property>
+      <property name="title">
+       <string>Secondary Line Parameters</string>
+      </property>
+      <widget class="QLabel" name="label_10">
+       <property name="geometry">
+        <rect>
+         <x>15</x>
+         <y>26</y>
+         <width>81</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Conductor Size</string>
+       </property>
+      </widget>
+      <widget class="QComboBox" name="cmbScConSize">
+       <property name="geometry">
+        <rect>
+         <x>115</x>
+         <y>23</y>
+         <width>151</width>
+         <height>22</height>
+        </rect>
+       </property>
+       <property name="toolTip">
+        <string>Select Secondary Conductor Size</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="txtAvgTrLen">
+       <property name="geometry">
+        <rect>
+         <x>215</x>
+         <y>54</y>
+         <width>51</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="toolTip">
+        <string>Enter Average Length in km per Transformer</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_11">
+       <property name="geometry">
+        <rect>
+         <x>15</x>
+         <y>57</y>
+         <width>191</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Average Length of Transformer per km</string>
+       </property>
+      </widget>
+     </widget>
+     <widget class="QGroupBox" name="groupBox_7">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>233</y>
+        <width>569</width>
+        <height>63</height>
+       </rect>
+      </property>
+      <property name="title">
+       <string>Change Legend</string>
+      </property>
+      <widget class="QLabel" name="label_12">
+       <property name="geometry">
+        <rect>
+         <x>15</x>
+         <y>26</y>
+         <width>81</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Proposed Line</string>
+       </property>
+      </widget>
+      <widget class="QComboBox" name="cmbLegLine">
+       <property name="geometry">
+        <rect>
+         <x>115</x>
+         <y>23</y>
+         <width>151</width>
+         <height>22</height>
+        </rect>
+       </property>
+       <property name="toolTip">
+        <string>Select Legend for Proposed Line</string>
+       </property>
+      </widget>
+      <widget class="QComboBox" name="cmbLegPole">
+       <property name="geometry">
+        <rect>
+         <x>405</x>
+         <y>23</y>
+         <width>151</width>
+         <height>22</height>
+        </rect>
+       </property>
+       <property name="toolTip">
+        <string>Select Legend for Proposed Pole</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_13">
+       <property name="geometry">
+        <rect>
+         <x>290</x>
+         <y>26</y>
+         <width>81</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Proposed Pole</string>
+       </property>
+      </widget>
+     </widget>
+    </widget>
+   </widget>
+  </widget>
+ </widget>
+ <resources>
+  <include location="../Resources/FormIcons/resources.qrc"/>
+ </resources>
+ <connections/>
+</ui>

@@ -1,0 +1,15 @@
+Text
+Coded Values
+Default Value
+Default Value
+Aluminum,Aluminum
+Concrete,Concrete
+Fiberglass,Fiberglass
+Galvanized Steel,Galvanized Steel
+Steel,Steel
+Spun Pre-Stressed Concrete,Spun Pre-Stressed Concrete
+Wood,Wood
+Wood-Treated,Wood-Treated
+Wood-Untreated,Wood-Untreated
+Other,Other
+Unknown,Unknown

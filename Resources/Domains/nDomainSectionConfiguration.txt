@@ -1,0 +1,7 @@
+Text
+Coded Values
+Default Value
+Default Value
+Horizontal,Horizontal
+Triangular,Triangular
+Vertical,Vertical

@@ -1,0 +1,10 @@
+Text
+Coded Values
+Default Value
+Default Value
+Manual,Manual
+Voltage,Voltage
+Current,Current
+Reactive Amps,Reactive Amps
+Time,Time
+Temperature,Temperature

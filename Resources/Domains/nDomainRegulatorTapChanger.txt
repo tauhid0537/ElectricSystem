@@ -1,0 +1,11 @@
+Text
+Coded Values
+Default Value
+Default Value
+No Reverse Mode,No Reverse Mode
+Locked Forward,Locked Forward
+Locked Reverse,Locked Reverse
+Idle Reverse,Idle Reverse
+Bi Directional,Bi Directional
+Idle Neutral,Idle Neutral
+Cogeneration,Cogeneration

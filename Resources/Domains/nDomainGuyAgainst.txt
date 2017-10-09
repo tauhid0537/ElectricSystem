@@ -1,0 +1,10 @@
+Text
+Coded Values
+Default Value
+Default Value
+Dead-End,Dead-End
+Angle,Angle
+Strom-Right,Storm-Right
+Storm-Left,Storm-Left
+Other,Other
+Unknown,Unknown

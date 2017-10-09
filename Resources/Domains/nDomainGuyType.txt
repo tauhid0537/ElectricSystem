@@ -1,0 +1,8 @@
+Text
+Coded Values
+Default Value
+Default Value
+Down,Down
+Double Down,Double Down
+Other,Other
+Unknown,Unknown

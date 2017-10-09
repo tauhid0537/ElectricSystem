@@ -1,0 +1,7 @@
+Text
+Coded Values
+Default Value
+Default Value
+Field Survey,Field Survey
+Generated,Generated
+Other,Other

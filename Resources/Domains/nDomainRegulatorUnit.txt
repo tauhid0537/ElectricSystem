@@ -1,0 +1,7 @@
+Text
+Coded Values
+Default Value
+Default Value
+Single Phase,Single Phase
+Regulator Bank,Regulator Bank
+Multi-Phase Unit,Multi-Phase Unit

@@ -1,0 +1,8 @@
+Text
+Coded Values
+Default Value
+Default Value
+Inverse Time,Inverse Time
+Differential Time,Differential Time
+Instantaneous,Instantaneous
+Instantaneous Curve,Instantaneous Curve

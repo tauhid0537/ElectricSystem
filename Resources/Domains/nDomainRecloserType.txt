@@ -1,0 +1,7 @@
+Text
+Coded Values
+Default Value
+Default Value
+Electronic Recloser,Electronic Recloser
+Hydraulic Recloser,Hydraulic Recloser
+Relay,Relay

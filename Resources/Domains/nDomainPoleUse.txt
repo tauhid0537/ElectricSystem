@@ -1,0 +1,10 @@
+Text
+Coded Values
+Default Value
+Default Value
+Primary Distribution,Primary Distribution
+Secondary Distribution,Secondary Distribution
+Underbuild,Underbuild
+Service,Service
+Other,Other
+Unknown,Unknown

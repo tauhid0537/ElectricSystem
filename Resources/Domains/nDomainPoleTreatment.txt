@@ -1,0 +1,14 @@
+Text
+Coded Values
+Default Value
+Default Value
+Butt,Butt
+Natural,Natural
+Penta,Penta
+Creosote,Creosote
+CCA,CCA
+Chemonite,Chemonite
+Napthena,Napthena
+Cellon,Cellon
+Other,Other
+Unknown,Unknown

@@ -1,0 +1,15 @@
+Text
+Coded Values
+Default Value
+Default Value
+Breaker,Breaker
+Capacitor,Capacitor
+Fuse,Fuse
+Meter,Meter
+Recloser,Recloser
+Regulator,Regulator
+Sectionalizer,Sectionalizer
+Switch,Switch
+Transformer,Transformer
+No Equipment,No Equipment
+Other,Other

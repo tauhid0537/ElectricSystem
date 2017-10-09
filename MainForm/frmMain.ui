@@ -1,0 +1,750 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>frmMain</class>
+ <widget class="QMainWindow" name="frmMain">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>693</width>
+    <height>301</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>693</width>
+    <height>301</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>NRECA Electric Systems</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="../Resources/FormIcons/resources.qrc">
+    <normaloff>:/plugins/ElectricSystems/Resources/FormIcons/formworld.png</normaloff>:/plugins/ElectricSystems/Resources/FormIcons/formworld.png</iconset>
+  </property>
+  <property name="tabShape">
+   <enum>QTabWidget::Rounded</enum>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QGroupBox" name="groupBox">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>10</y>
+      <width>442</width>
+      <height>87</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Dataset</string>
+    </property>
+    <widget class="QLabel" name="label">
+     <property name="geometry">
+      <rect>
+       <x>12</x>
+       <y>23</y>
+       <width>71</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>User Name</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="txtPro">
+     <property name="geometry">
+      <rect>
+       <x>100</x>
+       <y>20</y>
+       <width>121</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>Project Name</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_2">
+     <property name="geometry">
+      <rect>
+       <x>240</x>
+       <y>23</y>
+       <width>51</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Database</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_3">
+     <property name="geometry">
+      <rect>
+       <x>12</x>
+       <y>53</y>
+       <width>71</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Substation</string>
+     </property>
+    </widget>
+    <widget class="QComboBox" name="cmbSub">
+     <property name="geometry">
+      <rect>
+       <x>100</x>
+       <y>50</y>
+       <width>121</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>Select Substation</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_4">
+     <property name="geometry">
+      <rect>
+       <x>240</x>
+       <y>53</y>
+       <width>51</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Feeder</string>
+     </property>
+    </widget>
+    <widget class="QComboBox" name="cmbFed">
+     <property name="geometry">
+      <rect>
+       <x>308</x>
+       <y>50</y>
+       <width>121</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>Select Feeder</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="txtDatabase">
+     <property name="geometry">
+      <rect>
+       <x>308</x>
+       <y>20</y>
+       <width>121</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>Project Name</string>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QGroupBox" name="groupBox_2">
+    <property name="geometry">
+     <rect>
+      <x>460</x>
+      <y>16</y>
+      <width>81</width>
+      <height>81</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string/>
+    </property>
+    <widget class="QPushButton" name="cmdNew">
+     <property name="geometry">
+      <rect>
+       <x>15</x>
+       <y>20</y>
+       <width>50</width>
+       <height>40</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>Define New Project</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="../Resources/FormIcons/resources.qrc">
+       <normaloff>:/plugins/ElectricSystems/Resources/FormIcons/database_process.png</normaloff>:/plugins/ElectricSystems/Resources/FormIcons/database_process.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>32</width>
+       <height>32</height>
+      </size>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QGroupBox" name="groupBox_3">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>100</y>
+      <width>231</width>
+      <height>87</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Change Legend</string>
+    </property>
+    <widget class="QComboBox" name="cmbLegLine">
+     <property name="geometry">
+      <rect>
+       <x>100</x>
+       <y>20</y>
+       <width>121</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>Select Legend for Electric Line</string>
+     </property>
+    </widget>
+    <widget class="QComboBox" name="cmbLegPole">
+     <property name="geometry">
+      <rect>
+       <x>100</x>
+       <y>50</y>
+       <width>121</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>Select Legend for Electric Pole</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_5">
+     <property name="geometry">
+      <rect>
+       <x>12</x>
+       <y>23</y>
+       <width>71</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Electric Line</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_6">
+     <property name="geometry">
+      <rect>
+       <x>12</x>
+       <y>53</y>
+       <width>71</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Electric Pole</string>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QGroupBox" name="groupBox_4">
+    <property name="geometry">
+     <rect>
+      <x>250</x>
+      <y>100</y>
+      <width>291</width>
+      <height>87</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>LandBase</string>
+    </property>
+    <widget class="QLabel" name="label_8">
+     <property name="geometry">
+      <rect>
+       <x>12</x>
+       <y>53</y>
+       <width>41</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Legend</string>
+     </property>
+    </widget>
+    <widget class="QComboBox" name="cmbLayers">
+     <property name="geometry">
+      <rect>
+       <x>68</x>
+       <y>20</y>
+       <width>169</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>Available LandBase Layers</string>
+     </property>
+    </widget>
+    <widget class="QComboBox" name="cmbLegend">
+     <property name="geometry">
+      <rect>
+       <x>68</x>
+       <y>50</y>
+       <width>169</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>Legends for LandBase Layers</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_7">
+     <property name="geometry">
+      <rect>
+       <x>12</x>
+       <y>23</y>
+       <width>51</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Layers</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pushButton_2">
+     <property name="geometry">
+      <rect>
+       <x>244</x>
+       <y>12</y>
+       <width>38</width>
+       <height>32</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>Get LandBase Layers</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="../Resources/FormIcons/resources.qrc">
+       <normaloff>:/plugins/ElectricSystems/Resources/FormIcons/mapsearchsmall.png</normaloff>:/plugins/ElectricSystems/Resources/FormIcons/mapsearchsmall.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>24</width>
+       <height>24</height>
+      </size>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pushButton_3">
+     <property name="geometry">
+      <rect>
+       <x>244</x>
+       <y>48</y>
+       <width>38</width>
+       <height>32</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>Add LandBase to Map</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="../Resources/FormIcons/resources.qrc">
+       <normaloff>:/plugins/ElectricSystems/Resources/FormIcons/mapaddsmall.png</normaloff>:/plugins/ElectricSystems/Resources/FormIcons/mapaddsmall.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>24</width>
+       <height>24</height>
+      </size>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QGroupBox" name="groupBox_5">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>196</y>
+      <width>531</width>
+      <height>93</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string/>
+    </property>
+    <widget class="QFrame" name="frame">
+     <property name="geometry">
+      <rect>
+       <x>13</x>
+       <y>15</y>
+       <width>62</width>
+       <height>62</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">image: url(:/plugins/ElectricSystems/Resources/FormIcons/basicnreca.png);</string>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::Panel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Sunken</enum>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="cmdAddlayer">
+     <property name="geometry">
+      <rect>
+       <x>130</x>
+       <y>25</y>
+       <width>50</width>
+       <height>40</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>Add Feeder Electric Layers</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="../Resources/FormIcons/resources.qrc">
+       <normaloff>:/plugins/ElectricSystems/Resources/FormIcons/mapadd.png</normaloff>:/plugins/ElectricSystems/Resources/FormIcons/mapadd.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>32</width>
+       <height>32</height>
+      </size>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="cmdClear">
+     <property name="geometry">
+      <rect>
+       <x>240</x>
+       <y>25</y>
+       <width>50</width>
+       <height>40</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>Clear Map</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="../Resources/FormIcons/resources.qrc">
+       <normaloff>:/plugins/ElectricSystems/Resources/FormIcons/mapdelete.png</normaloff>:/plugins/ElectricSystems/Resources/FormIcons/mapdelete.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>32</width>
+       <height>32</height>
+      </size>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="cmdHelp">
+     <property name="geometry">
+      <rect>
+       <x>350</x>
+       <y>25</y>
+       <width>50</width>
+       <height>40</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>Help</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="../Resources/FormIcons/resources.qrc">
+       <normaloff>:/plugins/ElectricSystems/Resources/FormIcons/basichelp.png</normaloff>:/plugins/ElectricSystems/Resources/FormIcons/basichelp.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>32</width>
+       <height>32</height>
+      </size>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="cmdClose">
+     <property name="geometry">
+      <rect>
+       <x>460</x>
+       <y>25</y>
+       <width>50</width>
+       <height>40</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>Close</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="../Resources/FormIcons/resources.qrc">
+       <normaloff>:/plugins/ElectricSystems/Resources/FormIcons/basicexit.png</normaloff>:/plugins/ElectricSystems/Resources/FormIcons/basicexit.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>32</width>
+       <height>32</height>
+      </size>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QGroupBox" name="groupBox_6">
+    <property name="geometry">
+     <rect>
+      <x>550</x>
+      <y>16</y>
+      <width>131</width>
+      <height>81</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string/>
+    </property>
+    <widget class="QPushButton" name="cmdMain">
+     <property name="geometry">
+      <rect>
+       <x>13</x>
+       <y>20</y>
+       <width>50</width>
+       <height>40</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>Database Development and Analysis</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="../Resources/FormIcons/resources.qrc">
+       <normaloff>:/plugins/ElectricSystems/Resources/FormIcons/mapsettings.png</normaloff>:/plugins/ElectricSystems/Resources/FormIcons/mapsettings.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>32</width>
+       <height>32</height>
+      </size>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="cmdEquip">
+     <property name="geometry">
+      <rect>
+       <x>68</x>
+       <y>20</y>
+       <width>50</width>
+       <height>40</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>Equipment Database</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="../Resources/FormIcons/resources.qrc">
+       <normaloff>:/plugins/ElectricSystems/Resources/FormIcons/mapinfo.png</normaloff>:/plugins/ElectricSystems/Resources/FormIcons/mapinfo.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>32</width>
+       <height>32</height>
+      </size>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QGroupBox" name="groupBox_7">
+    <property name="geometry">
+     <rect>
+      <x>550</x>
+      <y>106</y>
+      <width>131</width>
+      <height>183</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string/>
+    </property>
+    <widget class="QPushButton" name="cmdCreate">
+     <property name="geometry">
+      <rect>
+       <x>13</x>
+       <y>23</y>
+       <width>50</width>
+       <height>40</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>Database Intialization</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="../Resources/FormIcons/resources.qrc">
+       <normaloff>:/plugins/ElectricSystems/Resources/FormIcons/mapedit.png</normaloff>:/plugins/ElectricSystems/Resources/FormIcons/mapedit.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>32</width>
+       <height>32</height>
+      </size>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="cmdProcess">
+     <property name="geometry">
+      <rect>
+       <x>68</x>
+       <y>23</y>
+       <width>50</width>
+       <height>40</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>Process Field Data</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="../Resources/FormIcons/resources.qrc">
+       <normaloff>:/plugins/ElectricSystems/Resources/FormIcons/mapgps.png</normaloff>:/plugins/ElectricSystems/Resources/FormIcons/mapgps.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>32</width>
+       <height>32</height>
+      </size>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="cmdValidate">
+     <property name="geometry">
+      <rect>
+       <x>13</x>
+       <y>70</y>
+       <width>50</width>
+       <height>40</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>Database Validation</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="../Resources/FormIcons/resources.qrc">
+       <normaloff>:/plugins/ElectricSystems/Resources/FormIcons/mapaccept.png</normaloff>:/plugins/ElectricSystems/Resources/FormIcons/mapaccept.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>32</width>
+       <height>32</height>
+      </size>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="cmdFinance">
+     <property name="geometry">
+      <rect>
+       <x>68</x>
+       <y>70</y>
+       <width>50</width>
+       <height>40</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>Financial Analysis</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="../Resources/FormIcons/resources.qrc">
+       <normaloff>:/plugins/ElectricSystems/Resources/FormIcons/mapfinance.png</normaloff>:/plugins/ElectricSystems/Resources/FormIcons/mapfinance.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>32</width>
+       <height>32</height>
+      </size>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="cmdMilsoft">
+     <property name="geometry">
+      <rect>
+       <x>68</x>
+       <y>117</y>
+       <width>50</width>
+       <height>40</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>Database Conversion to WindMil</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="../Resources/FormIcons/resources.qrc">
+       <normaloff>:/plugins/ElectricSystems/Resources/FormIcons/mapmilsoft.png</normaloff>:/plugins/ElectricSystems/Resources/FormIcons/mapmilsoft.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>32</width>
+       <height>32</height>
+      </size>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="cmdVoltage">
+     <property name="geometry">
+      <rect>
+       <x>13</x>
+       <y>117</y>
+       <width>50</width>
+       <height>40</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>Voltage Analysis</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="../Resources/FormIcons/resources.qrc">
+       <normaloff>:/plugins/ElectricSystems/Resources/FormIcons/mapvoltage.png</normaloff>:/plugins/ElectricSystems/Resources/FormIcons/mapvoltage.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>32</width>
+       <height>32</height>
+      </size>
+     </property>
+    </widget>
+   </widget>
+  </widget>
+ </widget>
+ <resources>
+  <include location="../Resources/FormIcons/resources.qrc"/>
+ </resources>
+ <connections/>
+</ui>

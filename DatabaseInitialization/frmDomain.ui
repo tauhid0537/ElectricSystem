@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>frmDomain</class>
+ <widget class="QMainWindow" name="frmDomain">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>440</width>
+    <height>545</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>440</width>
+    <height>545</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>Attribute Domain</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="../Resources/FormIcons/resources.qrc">
+    <normaloff>:/plugins/ElectricSystems/Resources/FormIcons/domain.png</normaloff>:/plugins/ElectricSystems/Resources/FormIcons/domain.png</iconset>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QGroupBox" name="groupBox">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>10</y>
+      <width>420</width>
+      <height>191</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Domain</string>
+    </property>
+    <widget class="QTableView" name="dgvDomain">
+     <property name="geometry">
+      <rect>
+       <x>4</x>
+       <y>20</y>
+       <width>412</width>
+       <height>167</height>
+      </rect>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Plain</enum>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QGroupBox" name="groupBox_2">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>206</y>
+      <width>420</width>
+      <height>231</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Coded Values</string>
+    </property>
+    <widget class="QTableView" name="dgvCode">
+     <property name="geometry">
+      <rect>
+       <x>4</x>
+       <y>20</y>
+       <width>412</width>
+       <height>206</height>
+      </rect>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Plain</enum>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QGroupBox" name="groupBox_3">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>446</y>
+      <width>420</width>
+      <height>86</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="title">
+     <string/>
+    </property>
+    <property name="flat">
+     <bool>false</bool>
+    </property>
+    <property name="checkable">
+     <bool>false</bool>
+    </property>
+    <property name="checked">
+     <bool>false</bool>
+    </property>
+    <widget class="QFrame" name="frame">
+     <property name="geometry">
+      <rect>
+       <x>11</x>
+       <y>12</y>
+       <width>62</width>
+       <height>62</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">image: url(:/plugins/ElectricSystems/Resources/FormIcons/basicnreca.png);</string>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::Panel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Sunken</enum>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="cmdDomEdit">
+     <property name="geometry">
+      <rect>
+       <x>185</x>
+       <y>23</y>
+       <width>50</width>
+       <height>40</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>Edit Domain Values</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="../Resources/FormIcons/resources.qrc">
+       <normaloff>:/plugins/ElectricSystems/Resources/FormIcons/domainedit.png</normaloff>:/plugins/ElectricSystems/Resources/FormIcons/domainedit.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>32</width>
+       <height>32</height>
+      </size>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="cmdDomSave">
+     <property name="geometry">
+      <rect>
+       <x>240</x>
+       <y>23</y>
+       <width>50</width>
+       <height>40</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>Save Domain Values</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="../Resources/FormIcons/resources.qrc">
+       <normaloff>:/plugins/ElectricSystems/Resources/FormIcons/domainsave.png</normaloff>:/plugins/ElectricSystems/Resources/FormIcons/domainsave.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>32</width>
+       <height>32</height>
+      </size>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="cmdHelp">
+     <property name="geometry">
+      <rect>
+       <x>295</x>
+       <y>23</y>
+       <width>50</width>
+       <height>40</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>Help</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="../Resources/FormIcons/resources.qrc">
+       <normaloff>:/plugins/ElectricSystems/Resources/FormIcons/basichelp.png</normaloff>:/plugins/ElectricSystems/Resources/FormIcons/basichelp.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>32</width>
+       <height>32</height>
+      </size>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="cmdClose">
+     <property name="geometry">
+      <rect>
+       <x>350</x>
+       <y>23</y>
+       <width>50</width>
+       <height>40</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>Close</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="../Resources/FormIcons/resources.qrc">
+       <normaloff>:/plugins/ElectricSystems/Resources/FormIcons/basicexit.png</normaloff>:/plugins/ElectricSystems/Resources/FormIcons/basicexit.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>32</width>
+       <height>32</height>
+      </size>
+     </property>
+    </widget>
+   </widget>
+  </widget>
+ </widget>
+ <resources>
+  <include location="../Resources/FormIcons/resources.qrc"/>
+ </resources>
+ <connections/>
+</ui>

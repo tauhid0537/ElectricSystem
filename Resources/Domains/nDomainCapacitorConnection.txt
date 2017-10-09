@@ -1,0 +1,7 @@
+Text
+Coded Values
+Default Value
+Default Value
+Wye,Wye
+Delta,Delta
+Same as Parent,Same as Parent

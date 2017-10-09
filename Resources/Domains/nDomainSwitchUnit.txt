@@ -1,0 +1,6 @@
+Text
+Coded Values
+Default Value
+Default Value
+Single Phase,Single Phase
+Multi-Phase Unit,Multi-Phase Unit

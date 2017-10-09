@@ -1,0 +1,44 @@
+nDomainAllConnectionStatus,All Equipment Connection Status
+nDomainAllPhase,Phase for All
+nDomainAllYesNo,Yes or No Value for All Fetaure Class
+nDomainBreakerOperationType,Breaker Operation Type
+nDomainBreakerRelayType,Breaker Relay Type
+nDomainBreakerStagePickup,Breaker Stage Pickup Type
+nDomainBreakerUnit,Breaker Unit Type
+nDomainCapacitorBank,Capacitor Bank
+nDomainCapacitorConnection,Capacitor Connection
+nDomainCapacitorUnit,Capacitor Unit
+nDomainCapacitorSwitchType,Capacitor Switch Type
+nDomainEquipmentMount,Equipment Mounting
+nDomainEquipmentType,Equipment Type
+nDomainEquipmentUnit,Equipment Unit
+nDomainEquipmentUse,Equipment Use
+nDomainFeederOnPole,Number of Feeders on Pole
+nDomainGuyAgainst,Pole Guy Against
+nDomainGuyType,Pole Guy Type
+nDomainMeteringPhase,Equipment Metering Phase
+nDomainMeterType,Type of Meter
+nDomainPoleClass,Pole Class
+nDomainPoleDataSource,Pole Data Source
+nDomainPoleFittingBiPhase,Pole Assembly Unit for Bi Phase
+nDomainPoleFittingSinglePhase,Pole Assembly Unit for Single Phase
+nDomainPoleFittingTriplePhase,Pole Assemby Unit for Triple Phase
+nDomainPoleStructure,Pole Structure Type
+nDomainPoleTreatment,Pole Treatment for Wodden Pole
+nDomainPoleUse,Pole Type
+nDomainRecloserType,Recloser Type
+nDomainRegulatorConnection,Regulator Connection
+nDomainRegulatorTapChanger,Regulator Tap Changer Controller Mode
+nDomainRegulatorUnit,Regulator Unit
+nDomainSectionAlignment,Section Alignment
+nDomainSectionConfiguration,Line Section Configuration
+nDomainSectionLoadConnection,Section Load Connection
+nDomainSectionTransposition,Section Transposition Code
+nDomainSectionType,Line Type
+nDomainSubstationConnection,Substation Connection
+nDomainSwitchType,Switch Type
+nDomainSwitchUnit,Switch Unit
+nDomainTransformerSourceConfiguration,Transformer Source Side Configuration
+nDomainTransformerStatus,Transformer Status
+nDomainTransformerUnitType,Transformer Unit Type
+nDomainTransformerWinding,Transformer Winding

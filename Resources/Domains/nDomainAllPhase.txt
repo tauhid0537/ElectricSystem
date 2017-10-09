@@ -1,0 +1,11 @@
+Text
+Coded Values
+Default Value
+Default Value
+A,A
+B,B
+C,C
+A-B,A-B
+B-C,B-C
+C-A,C-A
+A-B-C,A-B-C

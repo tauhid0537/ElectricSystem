@@ -1,0 +1,7 @@
+Text
+Coded Values
+Default Value
+Default Value
+Secondary,Secondary
+Primary,Primary
+I(n),I(n)

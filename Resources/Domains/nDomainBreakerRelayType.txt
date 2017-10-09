@@ -1,0 +1,7 @@
+Text
+Coded Values
+Default Value
+Default Value
+Phase,Phase
+Ground,Ground
+HIER,HIER
