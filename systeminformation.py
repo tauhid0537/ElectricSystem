@@ -12,9 +12,7 @@ import psycopg2
 import csv
 import sys
 import os
-
-sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/Utilities")
-import utilities
+import utility
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/SystemInformation")
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/MainForm")
