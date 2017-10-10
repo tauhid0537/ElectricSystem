@@ -6,3 +6,5 @@ class basicOps:
     hostname = None
     password = None
     dbasename = None
+    drvpath = None
+    proname = None

@@ -7,9 +7,8 @@ import qgis
 import csv
 import sys
 import os
-
-sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/Utilities")
-import utilities
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir)))
+import utility
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/DatabaseInitialization")
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/Resources/FormIcons")
@@ -37,14 +36,14 @@ class frmConductor_dialog(QDialog, Ui_frmConductor):
 
     def loadTable(self):
         # Load Conductor Table to DataGridView
-        drv = utilities.drvpath
-        pro = utilities.proname
+        drv = utility.drvpath
+        pro = utility.proname
         sub = self.txtSub.text()
         fed = self.txtFed.text()
         pbs = self.txtPBS.text()
 
 
-        tabLoc = drv + ":\\" + pro + "\\Database\\" + pbs + "\\Tables\\SysConductor.dbf" 
+        tabLoc = drv + ":\\" + pro + "\\Database\\" + pbs + "\\Tables\\SysConductor.dbf"
         pTable = QgsVectorLayer(tabLoc, 'SysConductor', 'ogr')
         pCursor = pTable.getFeatures()
 
