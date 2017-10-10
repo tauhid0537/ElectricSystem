@@ -61,6 +61,8 @@ class frmInitialize_dialog(QDialog, Ui_frmIntialize):
         else:
             condb.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
             curdb = condb.cursor()
+            subCheckSQL = """select * from sysinp.sys_substation where substation = %s;""".format(sub)
+            fedCheckSQL = """select * from sysinp.sys_feeder where substation = %s and feeder = %s;""".format(sub, fed)
             curdb.execute(subTableSQL)
             row = curdb.fetchone()
             if row[0] is None:
@@ -83,6 +85,13 @@ class frmInitialize_dialog(QDialog, Ui_frmIntialize):
                     curdb.execute(subobjidIndexSQL)
                 except psycopg2.Error as e:
                     QMessageBox.critical(self.iface.mainWindow(),"Substation Table Creation Error",str("Unable to Create Substation!\n{0}").format(e))
+            try:
+                curdb.execute(subCheckSQL)
+                if curdb.rowcount == 0:
+                    subinsertSQL = """ insert into sysinp.sys_substation (substation, sub_code) values(%s, %s);""".format(sub, subcode)
+                    curdb.execute(subinsertSQL)
+            except psycopg2.Error as e:
+                QMessageBox.critical(self.iface.mainWindow(),"System Substation Table Insert Error",str("Unable to insert data into system substation table!\n{0}").format(e))
             else:
                 QMessageBox.critical(self.iface.mainWindow(),"Database initialization",str("Substation table already exists!\n{0}").format(subName))
 
@@ -131,6 +140,13 @@ class frmInitialize_dialog(QDialog, Ui_frmIntialize):
                     curdb.execute(poleobjidIndexSQL)
                 except psycopg2.Error as e:
                     QMessageBox.critical(self.iface.mainWindow(),"Pole Table Creation Error",str("Unable to Create Pole Table!\n{0}").format(e))
+            try:
+                curdb.execute(fedCheckSQL)
+                if curdb.rowcount ==0:
+                    fedinsertSQL =""" insert into sysinp.sys_feeder (substation, feeder, fed_code) values(%s, %s, %s);""".format(sub, fed, fedcode)
+                    curdb.execute(fedinsertSQL)
+            except psycopg2.Error as e:
+                QMessageBox.critical(self.iface.mainWindow(),"System Feeder Table Insert Error",str("Unable to insert data into system feeder table!\n{0}").format(e))
             else:
                 QMessageBox.critical(self.iface.mainWindow(),"Database initialization",str("Pole table already exists!\n{0}").format(poleName))
 
