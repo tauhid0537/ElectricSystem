@@ -12,6 +12,7 @@ from psycopg2 import connect
 import psycopg2
 
 import utility
+from utility import *
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/DatabaseInitialization")
 from frmInitialize import *
@@ -31,10 +32,22 @@ class frmInitialize_dialog(QDialog, Ui_frmIntialize):
         self.setupUi(self)
 
         #self.cmdFolder.clicked.connect(self.createFolder)
+        self.txtSub.textChanged.connect(self.subTextChanged)
+        self.txtFed.textChanged.connect(self.fedTextChanged)
         self.cmdShapefile.clicked.connect(self.createSpatialTables)
         self.cmdDomain.clicked.connect(self.openDomainForm)
         self.cmdConductor.clicked.connect(self.openConductorForm)
         self.cmdClose.clicked.connect(self.onClose)
+
+    def subTextChanged(self):
+        subname = self.txtSub.text()
+        subcode = subname[:3].lower()
+        self.txtSubCode.setText(subcode)
+
+    def fedTextChanged(self):
+        fedname = self.txtFed.text()
+        fedcode = fedname[:3].lower()
+        self.txtFedCode.setText(fedcode)
 
     def createSpatialTables(self):
         sub = self.txtSub.text()
@@ -49,10 +62,10 @@ class frmInitialize_dialog(QDialog, Ui_frmIntialize):
         subTableSQL = "select to_regclass('esystems."+subName+"');"
         fedpoleSQL = "select to_regclass('esystems."+poleName+"');"
         fedlineSQL = "select to_regclass('esystems."+lineName+"');"
-        usr = utility.basicOps.usrname
-        hst = utility.basicOps.hostname
-        paswrd = utility.basicOps.password
-        db = utility.basicOps.dbasename
+        usr = basicOps.usrname
+        hst = basicOps.hostname
+        paswrd = basicOps.password
+        db = basicOps.dbasename
 
         try:
             condb = psycopg2.connect(user = usr, host = hst, password = paswrd, dbname = db)
@@ -61,7 +74,7 @@ class frmInitialize_dialog(QDialog, Ui_frmIntialize):
         else:
             condb.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
             curdb = condb.cursor()
-            subCheckSQL = "select * from sysinp.sys_substation where substation = '%s';" % (sub)
+
             fedCheckSQL = "select * from sysinp.sys_feeder where substation = '%s' and feeder = '%s';" % (sub, fed)
             curdb.execute(subTableSQL)
             row = curdb.fetchone()
@@ -78,20 +91,19 @@ class frmInitialize_dialog(QDialog, Ui_frmIntialize):
                 """
                 subgeomIndexSQL = """create index """+ subName + """_gix on esystems.""" + subName + """ using GIST(geom);"""
                 subobjidIndexSQL = """create index """+ subName + """_objidix on esystems.""" + subName + """ using btree(objectid);"""
+                subinsertSQL1 = "insert into sysinp.sys_substation (substation, sub_code) values('%s', '%s');" % (sub, subcode)
+                try:
+                    curdb.execute(subinsertSQL1)
+                except psycopg2.Error as e:
+                    QMessageBox.critical(self.iface.mainWindow(),"System Substation Table Data Insert Error",str("Unable to Create Substation!\n{0}").format(e))
                 try:
                     curdb.execute("create sequence esystems."+subName+"_id_seq;")
                     curdb.execute(createsubSQL)
                     curdb.execute(subgeomIndexSQL)
                     curdb.execute(subobjidIndexSQL)
+
                 except psycopg2.Error as e:
                     QMessageBox.critical(self.iface.mainWindow(),"Substation Table Creation Error",str("Unable to Create Substation!\n{0}").format(e))
-                try:
-                    curdb.execute(subCheckSQL)
-                    if curdb.rowcount == 0:
-                        subinsertSQL = "insert into sysinp.sys_substation (substation, sub_code) values('%s', '%s');" % (sub, subcode)
-                        curdb.execute(subinsertSQL)
-                except psycopg2.Error as e:
-                    QMessageBox.critical(self.iface.mainWindow(),"System Substation Table Insert Error",str("Unable to insert data into system substation table!\n{0}").format(e))
             else:
                 QMessageBox.critical(self.iface.mainWindow(),"Database initialization",str("Substation table already exists!\n{0}").format(subName))
 
@@ -140,13 +152,6 @@ class frmInitialize_dialog(QDialog, Ui_frmIntialize):
                     curdb.execute(poleobjidIndexSQL)
                 except psycopg2.Error as e:
                     QMessageBox.critical(self.iface.mainWindow(),"Pole Table Creation Error",str("Unable to Create Pole Table!\n{0}").format(e))
-                try:
-                    curdb.execute(fedCheckSQL)
-                    if curdb.rowcount ==0:
-                        fedinsertSQL ="insert into sysinp.sys_feeder (substation, feeder, fed_code) values('%s', '%s', '%s');" % (sub, fed, fedcode)
-                        curdb.execute(fedinsertSQL)
-                except psycopg2.Error as e:
-                    QMessageBox.critical(self.iface.mainWindow(),"System Feeder Table Insert Error",str("Unable to insert data into system feeder table!\n{0}").format(e))
             else:
                 QMessageBox.critical(self.iface.mainWindow(),"Database initialization",str("Pole table already exists!\n{0}").format(poleName))
 
@@ -185,6 +190,21 @@ class frmInitialize_dialog(QDialog, Ui_frmIntialize):
                     QMessageBox.critical(self.iface.mainWindow(),"Line Table Creation Error",str("Unable to Create Line Table!\n{0}").format(e))
             else:
                 QMessageBox.critical(self.iface.mainWindow(),"Database initialization",str("Line table already exists!\n{0}").format(lineName))
+            try:
+                    subCheckSQL = "select * from sysinp.sys_substation where substation = '%s';" % (sub)
+                    curdb.execute(subCheckSQL)
+                    if curdb.rowcount == 0:
+                        subinsertSQL = "insert into sysinp.sys_substation (substation, sub_code) values('%s', '%s');" % (sub, subcode)
+                        curdb.execute(subinsertSQL)
+            except psycopg2.Error as e:
+                QMessageBox.critical(self.iface.mainWindow(),"System Substation Table Insert Error",str("Unable to insert data into system substation table!\n{0}").format(e))
+            try:
+                    curdb.execute(fedCheckSQL)
+                    if curdb.rowcount == 0:
+                        fedinsertSQL ="insert into sysinp.sys_feeder (substation, feeder, fed_code) values('%s', '%s', '%s');" % (sub, fed, fedcode)
+                        curdb.execute(fedinsertSQL)
+            except psycopg2.Error as e:
+                QMessageBox.critical(self.iface.mainWindow(),"System Feeder Table Insert Error",str("Unable to insert data into system feeder table!\n{0}").format(e))
             QMessageBox.information(self.iface.mainWindow(),"Database initialization","Tables Created")
 
 

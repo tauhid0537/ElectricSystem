@@ -50,20 +50,33 @@ class frmMain_dialog(QDialog, Ui_frmMain):
         hst = basicOps.hostname
         paswrd = basicOps.password
         dbase = basicOps.dbasename
-        QMessageBox.information(self.iface.mainWindow(),"Add Layers",str([usr,paswrd,hst,dbase]))
+
+        #QMessageBox.information(self.iface.mainWindow(),"Add Layers",str([usr,paswrd,hst,dbase]))
+        curdb = self.getCursor(usr, hst, paswrd, dbase)
         sub = self.cmbSub.currentText()
         bsOps = utility.basicOps()
-        fedlist = bsOps.getFeederList(usr, hst, paswrd, dbase, sub)
+        fedlist = bsOps.getFeederList(curdb, sub)
         self.cmbFed.clear()
         #sysinfo.cmbFed.clear()
-        self.cmbFed.addItems(sublist)
+        self.cmbFed.addItems(fedlist)
         self.cmbFed.setCurrentIndex(-1)
+        #QMessageBox.information(self.iface.mainWindow(),"Add Layers",str([basicOps.usrname,basicOps.password,basicOps.hostname,basicOps.dbasename]))
 
     def getText(self):
         msgBox = QtGui.QMessageBox()
         msgBox.setWindowTitle("Main Form")
         msgBox.setText("It is Working...")
         ret = msgBox.exec_()
+    def getCursor(self, usr, hst, pas, db):
+        cur = None
+        try:
+            condb = psycopg2.connect(user = usr, host = hst, password = pas, dbname = db)
+            condb.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
+            cur = condb.cursor()
+        except psycopg2.Error as e:
+            QMessageBox.critical(self.iface.mainWindow(),"Connection Error",str("Unable to connect!\n{0}").format(e))
+        return cur
+
 
     def addLayers(self):
         usr = self.txtPro.text()
@@ -108,9 +121,11 @@ class frmMain_dialog(QDialog, Ui_frmMain):
     def openInitialize(self):
         proname = self.txtPro.text()
         self.close()
+        usr = basicOps.usrname
+        dbase = basicOps.dbasename
         intialize = frmInitialize_dialog(self.iface)
-        intialize.txtPro.setText(utility.basicOps.usrname)
-        intialize.txtPBS.setText(utility.basicOps.dbasename)
+        intialize.txtPro.setText(usr)
+        intialize.txtPBS.setText(dbase)
         intialize.exec_()
 
     def openProcess(self):

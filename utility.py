@@ -63,19 +63,15 @@ class basicOps:
                 subList.append(row[0])
         return subList
 
-    def getFeederList(self, hst, usr, pas, dbase, sub):
+    def getFeederList(self, cur, sub):
         fedList = []
-        try:
-            condb = psycopg2.connect(user = usr, host = hst, password = pas, dbname = dbase)
-        except psycopg2.Error as e:
-            QMessageBox.critical(self.iface.mainWindow(),"Connection Error",str("Unable to connect!\n{0}").format(e))
-        else:
-            condb.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
-            curdb = condb.cursor()
-            fedqrySQL = "select feeder from sysinp.sys_feeder where substation = '%s';" % (sub)
-            curdb.execute(fedqrySQL)
-            rows = curdb.fetchall()
-            for row in rows:
-                fedList.insert(row[0])
+        fedqrySQL = "select feeder from sysinp.sys_feeder where substation = '%s';" % (sub)
+        cur.execute(fedqrySQL)
+        rows = cur.fetchall()
+        i = -1
+        for row in rows:
+            i = i + 1
+            fedList.append(row[0])
+
         return fedList
 
