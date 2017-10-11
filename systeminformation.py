@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-
+#import sip
+#sip.setapi('QString', 2)
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from qgis.core import *
@@ -13,6 +14,7 @@ import csv
 import sys
 import os
 import utility
+from utility import *
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/SystemInformation")
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/MainForm")
@@ -45,7 +47,7 @@ class frmSystemInfo_dialog(QDialog, Ui_frmSysInfo):
         self.cmdUseDatabase.clicked.connect(self.useDb)
         self.txtHost.setText('localhost')
         self.txtUserName.setText('postgres')
-        self.txtPassword.setText('ku050405')
+        self.txtPassword.setText('ku940405')
 
     def onClose(self):
         self.close()
@@ -64,13 +66,8 @@ class frmSystemInfo_dialog(QDialog, Ui_frmSysInfo):
             cur = con.cursor()
             cur.execute("SELECT datname FROM pg_database WHERE datistemplate = false")
             for db in cur.fetchall():
-                db1 = str(db)
-                db2 = db1.strip('()')
-                db3 = db2.strip('u')
-                db4 = db3.strip(',')
-                db5 = db4.strip("''")
                 row = []
-                item = QStandardItem(db5)
+                item = QStandardItem(db[0])
                 row.append(item)
                 self.model.appendRow(row)
             cur.close()
@@ -227,20 +224,30 @@ class frmSystemInfo_dialog(QDialog, Ui_frmSysInfo):
         dbname = self.tableView.model().data(index)
 
         hostname = self.txtHost.text()
-        utility.basicOps.hostname = hostname
+        basicOps.hostname = hostname
         password = self.txtPassword.text()
-        utility.basicOps.password = password
+        basicOps.password = password
         #dbasename = self.txtDatabase.text()
-        utility.basicOps.dbasename = dbname
+        basicOps.dbasename = dbname
 
 
         username = self.txtUserName.text()
         #Global.usrname = username
-        utility.basicOps.usrname = username
-        utility.pbsname = dbname
+        basicOps.usrname = username
+        pbsname = dbname
         self.close()
 
         sysinfo = frmMain_dialog(self.iface)
+        gbops = utility.basicOps()
+
+        sublist = gbops.getSubList(username, hostname, password, dbname)
+        #fedlist = gbops.getFeederList(username, hostname, password, dbname)
+        sysinfo.cmbSub.clear()
+        #sysinfo.cmbFed.clear()
+        sysinfo.cmbSub.addItems(sublist)
+        sysinfo.cmbSub.setCurrentIndex(-1)
+        #self.cmbFed.addItems(fedlist)
+
         sysinfo.txtPro.setText(self.txtUserName.text())
         sysinfo.txtDatabase.setText(dbname)
         sysinfo.exec_()
