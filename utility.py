@@ -15,36 +15,22 @@ class basicOps:
     drvpath = None
     proname = None
 
-    def getSubCode(self):
+    def getSubCode(self, cur, sub):
         subcode = None
-        try:
-            condb = psycopg2.connect(user = usrname, host = hostname, password = password, dbname = dbasename)
-        except psycopg2.Error as e:
-            QMessageBox.critical(self.iface.mainWindow(),"Connection Error",str("Unable to connect!\n{0}").format(e))
-        else:
-            condb.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
-            curdb = condb.cursor()
-            subcodeqrySQL = "select sub_code from sysinp.sys_substation where substation = '%s';" % (sub)
-            curdb.execute(subcodeqrySQL)
-            if curdb.rowcount == 1:
-                row = curdb.fetchone()
-                subcode = row[0]
+        subcodeqrySQL = "select sub_code from sysinp.sys_substation where substation = '%s';" % (sub)
+        cur.execute(subcodeqrySQL)
+        if cur.rowcount == 1:
+            row = cur.fetchone()
+            subcode = row[0]
         return subcode
 
-    def getFedCode(self):
+    def getFedCode(self, cur, sub, fed):
         fedcode = None
-        try:
-            condb = psycopg2.connect(user = usrname, host = hostname, password = password, dbname = dbasename)
-        except psycopg2.Error as e:
-            QMessageBox.critical(self.iface.mainWindow(),"Connection Error",str("Unable to connect!\n{0}").format(e))
-        else:
-            condb.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
-            curdb = condb.cursor()
-            fedcodeqrySQL = "select fed_code from sysinp.sys_feeder where substation = '%s' and feeder = '%s';" % (sub, fed)
-            curdb.execute(fedcodeqrySQL)
-            if curdb.rowcount == 1:
-                row = curdb.fetchone()
-                fedcode = row[0]
+        fedcodeqrySQL = "select fed_code from sysinp.sys_feeder where substation = '%s' and feeder = '%s';" % (sub, fed)
+        cur.execute(fedcodeqrySQL)
+        if cur.rowcount == 1:
+            row = cur.fetchone()
+            fedcode = row[0]
         return fedcode
 
     def getSubList(self, usr, hst, pas, dbase):

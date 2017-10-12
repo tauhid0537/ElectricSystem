@@ -70,6 +70,9 @@
      <property name="toolTip">
       <string>Project Name</string>
      </property>
+     <property name="readOnly">
+      <bool>true</bool>
+     </property>
     </widget>
     <widget class="QLineEdit" name="txtPBS">
      <property name="geometry">
@@ -82,6 +85,9 @@
      </property>
      <property name="toolTip">
       <string>Enter Database Name</string>
+     </property>
+     <property name="readOnly">
+      <bool>true</bool>
      </property>
     </widget>
     <widget class="QLabel" name="label_2">
@@ -366,6 +372,19 @@
    </widget>
   </widget>
  </widget>
+ <tabstops>
+  <tabstop>txtPro</tabstop>
+  <tabstop>txtPBS</tabstop>
+  <tabstop>txtSub</tabstop>
+  <tabstop>txtFed</tabstop>
+  <tabstop>txtSubCode</tabstop>
+  <tabstop>txtFedCode</tabstop>
+  <tabstop>cmdDomain</tabstop>
+  <tabstop>cmdConductor</tabstop>
+  <tabstop>cmdShapefile</tabstop>
+  <tabstop>cmdHelp</tabstop>
+  <tabstop>cmdClose</tabstop>
+ </tabstops>
  <resources>
   <include location="../Resources/FormIcons/resources.qrc"/>
  </resources>

@@ -43,6 +43,7 @@ class frmMain_dialog(QDialog, Ui_frmMain):
         self.cmdFinance.clicked.connect(self.openFinance)
         self.cmdAddlayer.clicked.connect(self.addLayers)
         self.cmdClose.clicked.connect(self.onClose)
+        self.cmdClear.clicked.connect(self.removeAllLayers)
 
     def loadFedcmbBox(self):
 
@@ -62,11 +63,16 @@ class frmMain_dialog(QDialog, Ui_frmMain):
         self.cmbFed.setCurrentIndex(-1)
         #QMessageBox.information(self.iface.mainWindow(),"Add Layers",str([basicOps.usrname,basicOps.password,basicOps.hostname,basicOps.dbasename]))
 
+    def refresh_layers(self):
+        for layer in qgis.utils.iface.mapCanvas().layers():
+            layer.triggerRepaint()
+
     def getText(self):
         msgBox = QtGui.QMessageBox()
         msgBox.setWindowTitle("Main Form")
         msgBox.setText("It is Working...")
         ret = msgBox.exec_()
+
     def getCursor(self, usr, hst, pas, db):
         cur = None
         try:
@@ -77,43 +83,79 @@ class frmMain_dialog(QDialog, Ui_frmMain):
             QMessageBox.critical(self.iface.mainWindow(),"Connection Error",str("Unable to connect!\n{0}").format(e))
         return cur
 
-
-    def addLayers(self):
+    def addSubLayer(self):
         usr = self.txtPro.text()
         dbase = self.txtDatabase.text()
         sub = self.cmbSub.currentText()
         fed = self.cmbFed.currentText()
-        hst = utility.basicOps.hostname
-        paswrd = utility.basicOps.password
-        fedcode = utility.basicOps.getFedCode(sub, fed)
-        subcode = utility.basicOps.getSubCode(sub)
-        subtablename = "esystems." + sub + "_substation"
-        poletablename = "esystems." + sub + "_" + fed + "_pole"
-        linetablename = "esystems." + sub + "_" + fed + "_line"
-        subLayerName = dbase + ": " + sub + "-Substation"
-        poleLayerName = dbase + ": " + sub + "-" + fed + "-Pole"
-        lineLayerName = dbase + ": " + sub + "-" + fed + "-Line"
+        hst = basicOps.hostname
+        paswrd = basicOps.password
+        cur = self.getCursor(usr, hst, paswrd, dbase)
+        bsops = utility.basicOps()
+        fedcode = bsops.getFedCode(cur, sub, fed)
+        subcode = bsops.getSubCode(cur, sub)
+        subLayer =sub + "_substation"
+        subLayerName = dbase + ": " + sub + "-substation"
 
+        uri = QgsDataSourceURI()
+        uri.setConnection(hst,"5432",dbase,usr,paswrd)
+        uri.setDataSource("esystems",subLayer,"geom")
+        sublayer = QgsVectorLayer(uri.uri(), subLayerName, "postgres")
+
+        QgsMapLayerRegistry.instance().addMapLayer(sublayer)
+        self.refresh_layers()
+
+    def addPoleLayer(self):
+        usr = self.txtPro.text()
+        dbase = self.txtDatabase.text()
+        sub = self.cmbSub.currentText()
+        fed = self.cmbFed.currentText()
+        hst = basicOps.hostname
+        paswrd = basicOps.password
+        cur = self.getCursor(usr, hst, paswrd, dbase)
+        bsops = utility.basicOps()
+        fedcode = bsops.getFedCode(cur, sub, fed)
+        subcode = bsops.getSubCode(cur, sub)
+        poletablename = subcode + "_" + fedcode + "_pole"
+        poleLayerName = dbase + ": " + sub + "-" + fed + "-pole"
+        uri = QgsDataSourceURI()
+        uri.setConnection(hst,"5432",dbase,usr,paswrd)
+        uri.setDataSource("esystems",poletablename,"geom")
+        polelayer = QgsVectorLayer(uri.uri(), poleLayerName, "postgres")
+        #QMessageBox.information(self.iface.mainWindow(),"Add Layers",str(hst))
+        QgsMapLayerRegistry.instance().addMapLayer(polelayer)
+        self.refresh_layers()
+
+    def addLineLayer(self):
+        usr = self.txtPro.text()
+        dbase = self.txtDatabase.text()
+        sub = self.cmbSub.currentText()
+        fed = self.cmbFed.currentText()
+        hst = basicOps.hostname
+        paswrd = basicOps.password
+        cur = self.getCursor(usr, hst, paswrd, dbase)
+        bsOps = utility.basicOps()
+        fedcode = bsOps.getFedCode(cur, sub, fed)
+        subcode = bsOps.getSubCode(cur, sub)
+        linetablename = subcode + "_" + fedcode + "_line"
+        lineLayerName = dbase + ": " + sub + "-" + fed + "-line"
+        uri = QgsDataSourceURI()
+        uri.setConnection(hst, "5432", dbase, usr, paswrd)
+        uri.setDataSource("esystems", linetablename, "geom")
+        linelayer = QgsVectorLayer(uri.uri(), lineLayerName, "postgres")
+        QgsMapLayerRegistry.instance().addMapLayer(linelayer)
+        self.refresh_layers()
+
+    def addLayers(self):
         try:
-            subUri = QgsDataSourceURI()
-            subUri.setConnection(hst, "5432", dbase, usr, paswrd)
-            subUri.setDataSource("esystems", subtablename, "geom")
-            sublayer = QgsVectorLayer(subUri.subUri(False), subLayerName, "postgres")
+            self.addLineLayer()
+            self.addPoleLayer()
+            self.addSubLayer()
+        except EnvironmentError as e:
+            QMessageBox.information(self.iface.mainWindow(),"Add Layers","Failed to add Layers!\n{0}".format(e))
 
-            poleUri = QgsDataSourceURI()
-            poleUri.setConnection(hst, "5432", dbase, usr, paswrd)
-            poleUri.setDataSource("esystems", poletablename, "geom")
-            polelayer = QgsVectorLayer(poleUri.poleUri(False), poleLayerName, "postgres")
-
-            lineUri = QgsDataSourceURI()
-            lineUri.setConnection(hst, "5432", dbase, usr, paswrd)
-            lineUri.setDataSource("esystems", linetablename, "geom")
-            linelayer = QgsVectorLayer(lineUri.lineUri(False), lineLayerName, "postgres")
-
-            QgsMapLayerRegistry.instance().addMapLayers([linelayer, polelayer, sublayer])
-        except:
-            QMessageBox.information(self.iface.mainWindow(),"Add Layers","Layers not added")
-        QMessageBox.information(self.iface.mainWindow(),"Add Layers","Layers Added")
+    def removeAllLayers(self):
+        QgsMapLayerRegistry.instance().removeAllMapLayers()
 
     def onClose(self):
         self.close()

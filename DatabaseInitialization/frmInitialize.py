@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'frmInitialize.ui'
+# Form implementation generated from reading ui file 'frminitialize.ui'
 #
 # Created by: PyQt4 UI code generator 4.11.4
 #
@@ -46,9 +46,11 @@ class Ui_frmIntialize(object):
         self.label.setObjectName(_fromUtf8("label"))
         self.txtPro = QtGui.QLineEdit(self.groupBox)
         self.txtPro.setGeometry(QtCore.QRect(110, 28, 140, 20))
+        self.txtPro.setReadOnly(True)
         self.txtPro.setObjectName(_fromUtf8("txtPro"))
         self.txtPBS = QtGui.QLineEdit(self.groupBox)
         self.txtPBS.setGeometry(QtCore.QRect(344, 28, 140, 20))
+        self.txtPBS.setReadOnly(True)
         self.txtPBS.setObjectName(_fromUtf8("txtPBS"))
         self.label_2 = QtGui.QLabel(self.groupBox)
         self.label_2.setGeometry(QtCore.QRect(264, 30, 61, 16))
@@ -127,23 +129,25 @@ class Ui_frmIntialize(object):
         self.cmdConductor.setIcon(icon5)
         self.cmdConductor.setIconSize(QtCore.QSize(32, 32))
         self.cmdConductor.setObjectName(_fromUtf8("cmdConductor"))
-        self.cmdFolder = QtGui.QPushButton(self.groupBox_3)
-        self.cmdFolder.setGeometry(QtCore.QRect(133, 24, 50, 40))
-        self.cmdFolder.setText(_fromUtf8(""))
-        icon6 = QtGui.QIcon()
-        icon6.addPixmap(QtGui.QPixmap(_fromUtf8(":/plugins/ElectricSystems/Resources/FormIcons/folderadd.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.cmdFolder.setIcon(icon6)
-        self.cmdFolder.setIconSize(QtCore.QSize(32, 32))
-        self.cmdFolder.setObjectName(_fromUtf8("cmdFolder"))
         #frmIntialize.setCentralWidget(self.centralwidget)
 
         self.retranslateUi(frmIntialize)
         QtCore.QMetaObject.connectSlotsByName(frmIntialize)
+        frmIntialize.setTabOrder(self.txtPro, self.txtPBS)
+        frmIntialize.setTabOrder(self.txtPBS, self.txtSub)
+        frmIntialize.setTabOrder(self.txtSub, self.txtFed)
+        frmIntialize.setTabOrder(self.txtFed, self.txtSubCode)
+        frmIntialize.setTabOrder(self.txtSubCode, self.txtFedCode)
+        frmIntialize.setTabOrder(self.txtFedCode, self.cmdDomain)
+        frmIntialize.setTabOrder(self.cmdDomain, self.cmdConductor)
+        frmIntialize.setTabOrder(self.cmdConductor, self.cmdShapefile)
+        frmIntialize.setTabOrder(self.cmdShapefile, self.cmdHelp)
+        frmIntialize.setTabOrder(self.cmdHelp, self.cmdClose)
 
     def retranslateUi(self, frmIntialize):
         frmIntialize.setWindowTitle(_translate("frmIntialize", "Database Initialization", None))
         self.groupBox.setTitle(_translate("frmIntialize", "Dataset", None))
-        self.label.setText(_translate("frmIntialize", "Project Name", None))
+        self.label.setText(_translate("frmIntialize", "User Name", None))
         self.txtPro.setToolTip(_translate("frmIntialize", "Project Name", None))
         self.txtPBS.setToolTip(_translate("frmIntialize", "Enter Database Name", None))
         self.label_2.setText(_translate("frmIntialize", "Database", None))
@@ -160,7 +164,6 @@ class Ui_frmIntialize(object):
         self.cmdHelp.setToolTip(_translate("frmIntialize", "Help", None))
         self.cmdDomain.setToolTip(_translate("frmIntialize", "Edit Domains", None))
         self.cmdConductor.setToolTip(_translate("frmIntialize", "Conductor Table", None))
-        self.cmdFolder.setToolTip(_translate("frmIntialize", "Create Folders", None))
 
 import resources
 
@@ -172,4 +175,3 @@ if __name__ == "__main__":
     ui.setupUi(frmIntialize)
     frmIntialize.show()
     sys.exit(app.exec_())
-
