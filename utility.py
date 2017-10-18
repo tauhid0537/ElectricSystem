@@ -61,3 +61,14 @@ class basicOps:
 
         return fedList
 
+    def getLbaseList(self, cur):
+        lbList = []
+        lbqrySQL = "SELECT table_name FROM landbase.tables WHERE table_schema='public';"
+        cur.execute(lbqrySQL)
+        rows = cur.fetchall()
+        i = -1
+        for row in rows:
+            i = i + 1
+            lbList.append(row[0])
+        return lbList
+

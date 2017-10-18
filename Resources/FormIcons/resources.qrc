@@ -1,5 +1,17 @@
 <RCC>
   <qresource prefix="/plugins/ElectricSystems/Resources/FormIcons">
+    <file>breaker.png</file>
+    <file>capacitor.png</file>
+    <file>feeder.png</file>
+    <file>fuse.png</file>
+    <file>node.png</file>
+    <file>recloser.png</file>
+    <file>regulator.png</file>
+    <file>section.png</file>
+    <file>sectionalizer.png</file>
+    <file>substation.png</file>
+    <file>switch.png</file>
+    <file>transformer.png</file>
     <file>database_process.png</file>
     <file>add.png</file>
     <file>createdatabase.png</file>

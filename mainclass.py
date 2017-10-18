@@ -6,6 +6,9 @@ import os
 import sys
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/SystemInformation")
 from systeminformation import *
+#import testLineTool
+import trans_CreateBufferTool
+import testCreateLine
 
 class ElectricSystems:
 
@@ -28,7 +31,17 @@ class ElectricSystems:
         self.frmSystemInfo_action = QAction(icon, u"System Information", self.iface.mainWindow())
         QObject.connect(self.frmSystemInfo_action, SIGNAL("triggered()"), self.open_frmSystemInfo_dialog)
 
+        self.action = QAction("Create Line" , self.iface.mainWindow())
+        self.action.setIcon(QIcon(os.path.dirname(__file__) + "/Resources/FormIcons/formcreate.png"))
+        self.action.setWhatsThis("Create Line")
+        self.action.setStatusTip("Create Line")
+
+        self.action.triggered.connect(self.run)
+
+        self.tool = testCreateLine.lineCreateTool(self.iface)
+
         self.ElectricSystems.addAction(self.frmSystemInfo_action)
+        self.ElectricSystems.addAction(self.action)
 
 		#Toolbar declaration
         self.toolbar = self.iface.addToolBar(u'Electric Systems')
@@ -37,8 +50,17 @@ class ElectricSystems:
             QIcon(os.path.dirname(__file__) + "/Resources/FormIcons/basicsysteminfo.png"),
             u"System Information",
             self.iface.mainWindow())
+
         self.openfrmSystemInfoAction.triggered.connect(self.open_frmSystemInfo_dialog)
         self.toolbar.addAction(self.openfrmSystemInfoAction)
+
+        self.lineTool = QAction(
+            QIcon(os.path.dirname(__file__) + "/Resources/FormIcons/formcreate.png"),
+            u"Create Line",
+            self.iface.mainWindow()
+            )
+        self.lineTool.triggered.connect(self.run)
+        self.toolbar.addAction(self.lineTool)
 
 
     def open_frmSystemInfo_dialog(self):
@@ -46,6 +68,9 @@ class ElectricSystems:
 
 #        sysinfo.getTextFile()
         sysinfo.exec_()
+
+    def run(self):
+        self.iface.mapCanvas().setMapTool(self.tool)
 
     def unload(self):
         if self.ElectricSystems != None:

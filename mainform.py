@@ -7,6 +7,9 @@ import csv
 import sys
 import os
 
+from os import listdir
+from os.path import isfile, join
+
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/MainForm")
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/DatabaseInitialization")
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/ProcessFieldData")
@@ -44,6 +47,8 @@ class frmMain_dialog(QDialog, Ui_frmMain):
         self.cmdAddlayer.clicked.connect(self.addLayers)
         self.cmdClose.clicked.connect(self.onClose)
         self.cmdClear.clicked.connect(self.removeAllLayers)
+        self.cmdGetLb.clicked.connect(self.loadLbase)
+        self.cmdAddLb.clicked.connect(self.addLbase)
 
     def loadFedcmbBox(self):
 
@@ -82,6 +87,50 @@ class frmMain_dialog(QDialog, Ui_frmMain):
         except psycopg2.Error as e:
             QMessageBox.critical(self.iface.mainWindow(),"Connection Error",str("Unable to connect!\n{0}").format(e))
         return cur
+
+    def loadLbase(self):
+        self.cmbLayers.clear()
+        lblist = []
+        usr = self.txtPro.text()
+        dbase = self.txtDatabase.text()
+        hst = basicOps.hostname
+        paswrd = basicOps.password
+        cur = self.getCursor(usr, hst, paswrd, dbase)
+        cur.execute("""SELECT tablename FROM pg_catalog.pg_tables WHERE schemaname = 'landbase'""")
+        rows = cur.fetchall()
+        for row in rows:
+            lblist.append(row[0])
+        self.cmbLayers.addItems(lblist)
+        self.cmbLayers.setCurrentIndex(-1)
+
+        slddir = os.path.dirname(__file__) + "/Resources/SLD"
+        slds=os.listdir(slddir)
+        onlyslds=[x.split('.')[0] for x in slds]
+        #onlyfiles = [f for f in listdir(slddir) if isfile(join(slddir, f))]
+
+        self.cmbLegend.clear()
+        self.cmbLegend.addItems(onlyslds)
+        self.cmbLegend.setCurrentIndex(-1)
+
+    def addLbase(self):
+        usr = self.txtPro.text()
+        dbase = self.txtDatabase.text()
+        hst = basicOps.hostname
+        paswrd = basicOps.password
+        cur = self.getCursor(usr, hst, paswrd, dbase)
+        lname = self.cmbLayers.currentText()
+        legname = self.cmbLegend.currentText()
+
+        uri = QgsDataSourceURI()
+        uri.setConnection(hst,"5432",dbase,usr,paswrd)
+        uri.setDataSource("landbase",lname,"geom")
+        llayer = QgsVectorLayer(uri.uri(), lname, "postgres")
+        sld = os.path.dirname(__file__) + "/Resources/SLD/" + legname + ".sld"
+
+        llayer.loadSldStyle(sld)
+        QgsMapLayerRegistry.instance().addMapLayer(llayer)
+        #layer.triggerRepaint()
+        self.refresh_layers()
 
     def addSubLayer(self):
         usr = self.txtPro.text()
