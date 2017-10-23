@@ -112,6 +112,7 @@ class frmInitialize_dialog(QDialog, Ui_frmIntialize):
             if row1[0] is None:
                 createFedPoleSQL = "create table esystems."+poleName + """(objectid integer PRIMARY KEY not null DEFAULT nextval('esystems.""" + poleName + """_id_seq'::regclass),
                     substation character varying(30) COLLATE pg_catalog."default",
+                    feeder character varying(30) COLLATE pg_catalog."default",
                     gps_no character varying(15) COLLATE pg_catalog."default",
                     fed_on_pole integer,
                     pole_number character varying(75) COLLATE pg_catalog."default",

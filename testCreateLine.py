@@ -121,9 +121,6 @@ class lineCreateTool(QgsMapTool):
 
         if event.button() == Qt.LeftButton:
             startingPoint = QPoint(x, y)
-            #if event.modifiers() == Qt.ShiftModifier:
-             #   xform = QgsCoordinateTransform(crsSrc, crsWGS)
-             #   startingPoint = xform.transform(QgsPoint(startingPoint.x(),startingPoint.y()))
 
             snapper = QgsMapCanvasSnapper(self.canvas)
             (retval,result) = snapper.snapToCurrentLayer (startingPoint, QgsSnapper.SnapToVertex)
@@ -138,7 +135,9 @@ class lineCreateTool(QgsMapTool):
             if event.modifiers() == Qt.ShiftModifier:
                 xform = QgsCoordinateTransform(crsSrc, crsWGS)
                 point = xform.transform(QgsPoint(point.x(),point.y()))
+
             QApplication.restoreOverrideCursor()
+
             self.points.append(point)
             self.setRubberBandPoints(self.points)
         else:

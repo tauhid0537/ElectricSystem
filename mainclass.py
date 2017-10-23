@@ -9,6 +9,8 @@ from systeminformation import *
 #import testLineTool
 import trans_CreateBufferTool
 import testCreateLine
+import addTransformer
+import testMapTool
 
 class ElectricSystems:
 
@@ -36,9 +38,16 @@ class ElectricSystems:
         self.action.setWhatsThis("Create Line")
         self.action.setStatusTip("Create Line")
 
+        self.testAction = QAction("Test Tool" , self.iface.mainWindow())
+        self.testAction.setIcon(QIcon(os.path.dirname(__file__) + "/Resources/FormIcons/formcreate.png"))
+        self.testAction.setWhatsThis("Test Tool")
+        self.testAction.setStatusTip("Test Tool")
+
         self.action.triggered.connect(self.run)
+        self.testAction.triggered.connect(self.runTool)
 
         self.tool = testCreateLine.lineCreateTool(self.iface)
+        self.testTool = testMapTool.testTool(self.iface)
 
         self.ElectricSystems.addAction(self.frmSystemInfo_action)
         self.ElectricSystems.addAction(self.action)
@@ -62,6 +71,14 @@ class ElectricSystems:
         self.lineTool.triggered.connect(self.run)
         self.toolbar.addAction(self.lineTool)
 
+        self.testingTool = QAction(
+            QIcon(os.path.dirname(__file__) + "/Resources/FormIcons/formcreate.png"),
+            u"Test Tool",
+            self.iface.mainWindow()
+            )
+        self.testingTool.triggered.connect(self.runTool)
+        self.toolbar.addAction(self.testingTool)
+
 
     def open_frmSystemInfo_dialog(self):
         sysinfo = frmSystemInfo_dialog(self.iface)
@@ -71,6 +88,9 @@ class ElectricSystems:
 
     def run(self):
         self.iface.mapCanvas().setMapTool(self.tool)
+
+    def runTool(self):
+        self.iface.mapCanvas().setMapTool(self.testTool)
 
     def unload(self):
         if self.ElectricSystems != None:

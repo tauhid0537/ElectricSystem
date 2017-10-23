@@ -14,6 +14,8 @@ class basicOps:
     dbasename = None
     drvpath = None
     proname = None
+    substation = None
+    feeder = None
 
     def getSubCode(self, cur, sub):
         subcode = None
@@ -71,4 +73,25 @@ class basicOps:
             i = i + 1
             lbList.append(row[0])
         return lbList
+
+class extensionProject:
+    ProjectNumber = None
+    ProjectName = None
+    HouseholdSource = None
+    LineType = None
+    LineVoltage = None
+    PrimaryConductor = None
+    SecondaryConductor = None
+    PhaseConfiguration = None
+    BufferDistance = 0
+    MinimumTransformerkVA = 0
+    MaximumTransformerkVA = 0
+    SecondaryLength = 0
+    HouseholdType = None
+    AnalysisYear = 0
+    MidAnalysisYear = 0
+    InterestYear = 0
+    EquipmentType = 0
+    EquipmentSize = 0
+
 

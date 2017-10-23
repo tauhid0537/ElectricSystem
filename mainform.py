@@ -196,6 +196,8 @@ class frmMain_dialog(QDialog, Ui_frmMain):
         self.refresh_layers()
 
     def addLayers(self):
+        basicOps.substation = self.cmbSub.currentText()
+        basicOps.feeder = self.cmbFed.currentText()
         try:
             self.addLineLayer()
             self.addPoleLayer()
