@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'frmAddTransformer.ui'
 #
-# Created: Mon Oct 23 15:37:02 2017
+# Created: Tue Oct 24 11:52:32 2017
 #      by: PyQt4 UI code generator 4.10.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -27,19 +27,26 @@ class Ui_frmAddTransformer(object):
     def setupUi(self, frmAddTransformer):
         frmAddTransformer.setObjectName(_fromUtf8("frmAddTransformer"))
         frmAddTransformer.resize(378, 467)
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/plugins/ElectricSystems/Resources/FormIcons/AddTransformer.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        frmAddTransformer.setWindowIcon(icon)
         self.centralwidget = QtGui.QWidget(frmAddTransformer)
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
         self.txtPro = QtGui.QLineEdit(self.centralwidget)
         self.txtPro.setGeometry(QtCore.QRect(130, 30, 201, 20))
+        self.txtPro.setReadOnly(True)
         self.txtPro.setObjectName(_fromUtf8("txtPro"))
         self.txtDatabase = QtGui.QLineEdit(self.centralwidget)
         self.txtDatabase.setGeometry(QtCore.QRect(130, 60, 201, 20))
+        self.txtDatabase.setReadOnly(True)
         self.txtDatabase.setObjectName(_fromUtf8("txtDatabase"))
         self.txtSub = QtGui.QLineEdit(self.centralwidget)
         self.txtSub.setGeometry(QtCore.QRect(130, 90, 201, 20))
+        self.txtSub.setReadOnly(True)
         self.txtSub.setObjectName(_fromUtf8("txtSub"))
         self.txtFed = QtGui.QLineEdit(self.centralwidget)
         self.txtFed.setGeometry(QtCore.QRect(130, 120, 201, 20))
+        self.txtFed.setReadOnly(True)
         self.txtFed.setObjectName(_fromUtf8("txtFed"))
         self.label = QtGui.QLabel(self.centralwidget)
         self.label.setGeometry(QtCore.QRect(30, 30, 61, 16))
@@ -55,6 +62,7 @@ class Ui_frmAddTransformer(object):
         self.label_4.setObjectName(_fromUtf8("label_4"))
         self.txtProNum = QtGui.QLineEdit(self.centralwidget)
         self.txtProNum.setGeometry(QtCore.QRect(220, 180, 113, 20))
+        self.txtProNum.setReadOnly(True)
         self.txtProNum.setObjectName(_fromUtf8("txtProNum"))
         self.label_5 = QtGui.QLabel(self.centralwidget)
         self.label_5.setGeometry(QtCore.QRect(30, 180, 81, 16))
@@ -80,25 +88,25 @@ class Ui_frmAddTransformer(object):
         self.cmdOK = QtGui.QPushButton(self.centralwidget)
         self.cmdOK.setGeometry(QtCore.QRect(150, 350, 50, 40))
         self.cmdOK.setText(_fromUtf8(""))
-        icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/plugins/ElectricSystems/Resources/FormIcons/formaccept.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.cmdOK.setIcon(icon)
+        icon1 = QtGui.QIcon()
+        icon1.addPixmap(QtGui.QPixmap(_fromUtf8(":/plugins/ElectricSystems/Resources/FormIcons/formaccept.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.cmdOK.setIcon(icon1)
         self.cmdOK.setIconSize(QtCore.QSize(32, 32))
         self.cmdOK.setObjectName(_fromUtf8("cmdOK"))
         self.cmdHelp = QtGui.QPushButton(self.centralwidget)
         self.cmdHelp.setGeometry(QtCore.QRect(220, 350, 50, 40))
         self.cmdHelp.setText(_fromUtf8(""))
-        icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap(_fromUtf8(":/plugins/ElectricSystems/Resources/FormIcons/basichelp.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.cmdHelp.setIcon(icon1)
+        icon2 = QtGui.QIcon()
+        icon2.addPixmap(QtGui.QPixmap(_fromUtf8(":/plugins/ElectricSystems/Resources/FormIcons/basichelp.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.cmdHelp.setIcon(icon2)
         self.cmdHelp.setIconSize(QtCore.QSize(32, 32))
         self.cmdHelp.setObjectName(_fromUtf8("cmdHelp"))
         self.cmdClose = QtGui.QPushButton(self.centralwidget)
         self.cmdClose.setGeometry(QtCore.QRect(290, 350, 50, 40))
         self.cmdClose.setText(_fromUtf8(""))
-        icon2 = QtGui.QIcon()
-        icon2.addPixmap(QtGui.QPixmap(_fromUtf8(":/plugins/ElectricSystems/Resources/FormIcons/basicexit.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.cmdClose.setIcon(icon2)
+        icon3 = QtGui.QIcon()
+        icon3.addPixmap(QtGui.QPixmap(_fromUtf8(":/plugins/ElectricSystems/Resources/FormIcons/basicexit.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.cmdClose.setIcon(icon3)
         self.cmdClose.setIconSize(QtCore.QSize(32, 32))
         self.cmdClose.setObjectName(_fromUtf8("cmdClose"))
         self.frame_2 = QtGui.QFrame(self.centralwidget)
@@ -116,12 +124,12 @@ class Ui_frmAddTransformer(object):
         self.groupBox_3 = QtGui.QGroupBox(self.centralwidget)
         self.groupBox_3.setGeometry(QtCore.QRect(20, 320, 341, 91))
         self.groupBox_3.setTitle(_fromUtf8(""))
-        self.groupBox_3.setObjectName(_fromUtf8("groupBox_3"))
-        """#frmAddTransformer.setCentralWidget(self.centralwidget)
+        """self.groupBox_3.setObjectName(_fromUtf8("groupBox_3"))
+        frmAddTransformer.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(frmAddTransformer)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 378, 21))
         self.menubar.setObjectName(_fromUtf8("menubar"))
-        #frmAddTransformer.setMenuBar(self.menubar)
+        frmAddTransformer.setMenuBar(self.menubar)
         self.statusbar = QtGui.QStatusBar(frmAddTransformer)
         self.statusbar.setObjectName(_fromUtf8("statusbar"))
         frmAddTransformer.setStatusBar(self.statusbar)"""
@@ -143,13 +151,3 @@ class Ui_frmAddTransformer(object):
         self.groupBox_2.setTitle(_translate("frmAddTransformer", "Project Parameter", None))
 
 import resources
-
-if __name__ == "__main__":
-    import sys
-    app = QtGui.QApplication(sys.argv)
-    frmAddTransformer = QtGui.QMainWindow()
-    ui = Ui_frmAddTransformer()
-    ui.setupUi(frmAddTransformer)
-    frmAddTransformer.show()
-    sys.exit(app.exec_())
-

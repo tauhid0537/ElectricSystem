@@ -73,6 +73,14 @@ class basicOps:
             i = i + 1
             lbList.append(row[0])
         return lbList
+    def checkLayer(self, layerName):
+        check = False
+        layers = qgis.utils.iface.mapCanvas().layers()
+        for layer in layers:
+            if layer.name() == layerName:
+                check = True
+        return check
+
 
 class extensionProject:
     ProjectNumber = None

@@ -34,12 +34,12 @@ class ElectricSystems:
         QObject.connect(self.frmSystemInfo_action, SIGNAL("triggered()"), self.open_frmSystemInfo_dialog)
 
         self.action = QAction("Create Line" , self.iface.mainWindow())
-        self.action.setIcon(QIcon(os.path.dirname(__file__) + "/Resources/FormIcons/formcreate.png"))
+        self.action.setIcon(QIcon(os.path.dirname(__file__) + "/Resources/FormIcons/AddLine.png"))
         self.action.setWhatsThis("Create Line")
         self.action.setStatusTip("Create Line")
 
         self.testAction = QAction("Test Tool" , self.iface.mainWindow())
-        self.testAction.setIcon(QIcon(os.path.dirname(__file__) + "/Resources/FormIcons/formcreate.png"))
+        self.testAction.setIcon(QIcon(os.path.dirname(__file__) + "/Resources/FormIcons/AddTransformer.png"))
         self.testAction.setWhatsThis("Test Tool")
         self.testAction.setStatusTip("Test Tool")
 
@@ -64,7 +64,7 @@ class ElectricSystems:
         self.toolbar.addAction(self.openfrmSystemInfoAction)
 
         self.lineTool = QAction(
-            QIcon(os.path.dirname(__file__) + "/Resources/FormIcons/formcreate.png"),
+            QIcon(os.path.dirname(__file__) + "/Resources/FormIcons/AddLine.png"),
             u"Create Line",
             self.iface.mainWindow()
             )
@@ -72,7 +72,7 @@ class ElectricSystems:
         self.toolbar.addAction(self.lineTool)
 
         self.testingTool = QAction(
-            QIcon(os.path.dirname(__file__) + "/Resources/FormIcons/formcreate.png"),
+            QIcon(os.path.dirname(__file__) + "/Resources/FormIcons/AddTransformer.png"),
             u"Test Tool",
             self.iface.mainWindow()
             )

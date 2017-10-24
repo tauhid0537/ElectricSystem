@@ -104,5 +104,8 @@
     <file>valsubatr.png</file>
     <file>valsubloc.png</file>
     <file>valtopology.png</file>
+    <file>AddEquipment.png</file>
+    <file>AddLine.png</file>
+    <file>AddTransformer.png</file>
   </qresource>
 </RCC>

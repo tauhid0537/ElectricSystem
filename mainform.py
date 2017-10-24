@@ -145,6 +145,8 @@ class frmMain_dialog(QDialog, Ui_frmMain):
         subcode = bsops.getSubCode(cur, sub)
         subLayer =sub + "_substation"
         subLayerName = dbase + ": " + sub + "-substation"
+        layers = qgis.utils.iface.mapCanvas().layers()
+        foundlayer = False
 
         uri = QgsDataSourceURI()
         uri.setConnection(hst,"5432",dbase,usr,paswrd)
@@ -167,6 +169,9 @@ class frmMain_dialog(QDialog, Ui_frmMain):
         subcode = bsops.getSubCode(cur, sub)
         poletablename = subcode + "_" + fedcode + "_pole"
         poleLayerName = dbase + ": " + sub + "-" + fed + "-pole"
+        layers = qgis.utils.iface.mapCanvas().layers()
+        foundlayer = False
+
         uri = QgsDataSourceURI()
         uri.setConnection(hst,"5432",dbase,usr,paswrd)
         uri.setDataSource("esystems",poletablename,"geom")
@@ -188,6 +193,9 @@ class frmMain_dialog(QDialog, Ui_frmMain):
         subcode = bsOps.getSubCode(cur, sub)
         linetablename = subcode + "_" + fedcode + "_line"
         lineLayerName = dbase + ": " + sub + "-" + fed + "-line"
+        layers = qgis.utils.iface.mapCanvas().layers()
+        foundlayer = False
+
         uri = QgsDataSourceURI()
         uri.setConnection(hst, "5432", dbase, usr, paswrd)
         uri.setDataSource("esystems", linetablename, "geom")
@@ -196,12 +204,41 @@ class frmMain_dialog(QDialog, Ui_frmMain):
         self.refresh_layers()
 
     def addLayers(self):
+        usr = self.txtPro.text()
+        dbase = self.txtDatabase.text()
+        sub = self.cmbSub.currentText()
+        fed = self.cmbFed.currentText()
+        hst = basicOps.hostname
+        paswrd = basicOps.password
         basicOps.substation = self.cmbSub.currentText()
         basicOps.feeder = self.cmbFed.currentText()
+        subLayerName = dbase + ": " + sub + "-substation"
+        lineLayerName = dbase + ": " + sub + "-" + fed + "-line"
+        poleLayerName = dbase + ": " + sub + "-" + fed + "-pole"
+        line = False
+        pole = False
+        subs = False
+        layers = qgis.utils.iface.mapCanvas().layers()
+        for layer in layers:
+            if layer.name() == subLayerName:
+                subs = True
+            if layer.name() == poleLayerName:
+                pole = True
+            if layer.name() == lineLayerName:
+                line = True
         try:
-            self.addLineLayer()
-            self.addPoleLayer()
-            self.addSubLayer()
+            if not line:
+                self.addLineLayer()
+            else:
+                QMessageBox.information(self.iface.mainWindow(),"Add Layers","{0} layer already exists!".format(lineLayerName))
+            if not pole:
+                self.addPoleLayer()
+            else:
+                QMessageBox.information(self.iface.mainWindow(),"Add Layers","{0} layer already exists!".format(poleLayerName))
+            if not subs:
+                self.addSubLayer()
+            else:
+                QMessageBox.information(self.iface.mainWindow(),"Add Layers","{0} layer already exists!".format(subLayerName))
         except EnvironmentError as e:
             QMessageBox.information(self.iface.mainWindow(),"Add Layers","Failed to add Layers!\n{0}".format(e))
 

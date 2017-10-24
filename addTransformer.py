@@ -24,13 +24,11 @@ from frmAddTransformer import *
 class frmAddTransformer_dialog(QDialog, Ui_frmAddTransformer):
 
     def __init__(self, iface):
-        QDialog.__init__(self)
+        QtGui.QMainWindow.__init__(self)
         self.iface = iface
         self.setupUi(self)
         self.cmdClose.clicked.connect(self.onClose)
         self.cmdOK.clicked.connect(self.onOK)
-
-
 
     def onClose(self):
         self.close()
@@ -40,4 +38,7 @@ class frmAddTransformer_dialog(QDialog, Ui_frmAddTransformer):
         fed = self.txtFed.text()
         proNum = self.txtProNum.text()
         extensionProject.ProjectNumber = self.txtProNum.text()
+        extensionProject.BufferDistance = float(self.txtBuffDist.Text())
+        extensionProject.MinimumTransformerkVA = float(self.txtMinTrn.Text())
+        extensionProject.MaximumTransformerkVA = float(self.txtMaxTrn.Text())
         self.close()

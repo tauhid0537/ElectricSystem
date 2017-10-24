@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>Add Transformer</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="../Resources/FormIcons/resources.qrc">
+    <normaloff>:/plugins/ElectricSystems/Resources/FormIcons/AddTransformer.png</normaloff>:/plugins/ElectricSystems/Resources/FormIcons/AddTransformer.png</iconset>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QLineEdit" name="txtPro">
     <property name="geometry">
@@ -22,6 +26,9 @@
       <width>201</width>
       <height>20</height>
      </rect>
+    </property>
+    <property name="readOnly">
+     <bool>true</bool>
     </property>
    </widget>
    <widget class="QLineEdit" name="txtDatabase">
@@ -33,6 +40,9 @@
       <height>20</height>
      </rect>
     </property>
+    <property name="readOnly">
+     <bool>true</bool>
+    </property>
    </widget>
    <widget class="QLineEdit" name="txtSub">
     <property name="geometry">
@@ -43,6 +53,9 @@
       <height>20</height>
      </rect>
     </property>
+    <property name="readOnly">
+     <bool>true</bool>
+    </property>
    </widget>
    <widget class="QLineEdit" name="txtFed">
     <property name="geometry">
@@ -52,6 +65,9 @@
       <width>201</width>
       <height>20</height>
      </rect>
+    </property>
+    <property name="readOnly">
+     <bool>true</bool>
     </property>
    </widget>
    <widget class="QLabel" name="label">
@@ -114,6 +130,9 @@
       <width>113</width>
       <height>20</height>
      </rect>
+    </property>
+    <property name="readOnly">
+     <bool>true</bool>
     </property>
    </widget>
    <widget class="QLabel" name="label_5">
