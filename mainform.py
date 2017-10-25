@@ -180,6 +180,52 @@ class frmMain_dialog(QDialog, Ui_frmMain):
         QgsMapLayerRegistry.instance().addMapLayer(polelayer)
         self.refresh_layers()
 
+    def addProLayer(self, typ):
+        usr = self.txtPro.text()
+        dbase = self.txtDatabase.text()
+        sub = self.cmbSub.currentText()
+        fed = self.cmbFed.currentText()
+        hst = basicOps.hostname
+        paswrd = basicOps.password
+        cur = self.getCursor(usr, hst, paswrd, dbase)
+        bsops = utility.basicOps()
+        fedcode = bsops.getFedCode(cur, sub, fed)
+        subcode = bsops.getSubCode(cur, sub)
+        if typ == "pole":
+            poletablename = subcode + "_" + fedcode + "_pole_project_1"
+            poleLayerName = dbase + ": " + sub + "-" + fed + "-pole-project-1"
+            extensionProject.PoleTableName = poletablename
+        elif typ == "line":
+            poletablename = subcode + "_" + fedcode + "_line_project_1"
+            poleLayerName = dbase + ": " + sub + "-" + fed + "-line-project-1"
+            extensionProject.LineTableName = poletablename
+        elif typ == "buffer":
+            poletablename = subcode + "_" + fedcode + "_buffer_project_1"
+            poleLayerName = dbase + ": " + sub + "-" + fed + "-buffer-project-1"
+            extensionProject.BufferTableName = poletablename
+        elif typ == "structure":
+            poletablename = subcode + "_" + fedcode + "_structure_project_1"
+            poleLayerName = dbase + ": " + sub + "-" + fed + "-structure-project-1"
+            extensionProject.HHSourceTableName = poletablename
+        elif typ == "village":
+            poletablename = subcode + "_" + fedcode + "_village_project_1"
+            poleLayerName = dbase + ": " + sub + "-" + fed + "-village-project-1"
+            extensionProject.HHSourceTableName = poletablename
+        elif typ == "settlement":
+            poletablename = subcode + "_" + fedcode + "_settlement_project_1"
+            poleLayerName = dbase + ": " + sub + "-" + fed + "-settlement-project-1"
+            extensionProject.HHSourceTableName = poletablename
+        layers = qgis.utils.iface.mapCanvas().layers()
+        foundlayer = False
+
+        uri = QgsDataSourceURI()
+        uri.setConnection(hst,"5432",dbase,usr,paswrd)
+        uri.setDataSource("exprojects",poletablename,"geom")
+        polelayer = QgsVectorLayer(uri.uri(), poleLayerName, "postgres")
+        #QMessageBox.information(self.iface.mainWindow(),"Add Layers",str(hst))
+        QgsMapLayerRegistry.instance().addMapLayer(polelayer)
+        self.refresh_layers()
+
     def addLineLayer(self):
         usr = self.txtPro.text()
         dbase = self.txtDatabase.text()
@@ -212,6 +258,7 @@ class frmMain_dialog(QDialog, Ui_frmMain):
         paswrd = basicOps.password
         basicOps.substation = self.cmbSub.currentText()
         basicOps.feeder = self.cmbFed.currentText()
+        basicOps.dbasename = dbase
         subLayerName = dbase + ": " + sub + "-substation"
         lineLayerName = dbase + ": " + sub + "-" + fed + "-line"
         poleLayerName = dbase + ": " + sub + "-" + fed + "-pole"
@@ -227,6 +274,10 @@ class frmMain_dialog(QDialog, Ui_frmMain):
             if layer.name() == lineLayerName:
                 line = True
         try:
+            self.addProLayer("pole")
+            self.addProLayer("line")
+            self.addProLayer("buffer")
+            self.addProLayer("structure")
             if not line:
                 self.addLineLayer()
             else:
@@ -277,4 +328,7 @@ class frmMain_dialog(QDialog, Ui_frmMain):
         self.close()
         validate = frmFinance_dialog(self.iface)
         validate.txtPro.setText(proname)
+        validate.txtPBS.setText(basicOps.dbasename)
+        validate.txtSub.setText(basicOps.substation)
+        validate.txtFed.setText(basicOps.feeder)
         validate.exec_()

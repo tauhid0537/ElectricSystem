@@ -83,9 +83,9 @@ class basicOps:
 
 
 class extensionProject:
-    ProjectNumber = None
+    ProjectNumber = "1"
     ProjectName = None
-    HouseholdSource = None
+    HouseholdSource = "Structure"
     LineType = None
     LineVoltage = None
     PrimaryConductor = None
@@ -101,5 +101,9 @@ class extensionProject:
     InterestYear = 0
     EquipmentType = 0
     EquipmentSize = 0
+    PoleTableName = None
+    LineTableName = None
+    BufferTableName = None
+    HHSourceTableName = None
 
 
