@@ -1,6 +1,7 @@
 import sys
 import os
 from qgis.core import *
+import qgis
 
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 from psycopg2 import connect
@@ -86,11 +87,11 @@ class extensionProject:
     ProjectNumber = "1"
     ProjectName = None
     HouseholdSource = "Structure"
-    LineType = None
-    LineVoltage = None
-    PrimaryConductor = None
+    LineType = "Primary"
+    LineVoltage = 11000
+    PrimaryConductor = "#3 ACSR 6/1"
     SecondaryConductor = None
-    PhaseConfiguration = None
+    PhaseConfiguration = "R-Y-B"
     BufferDistance = 0
     MinimumTransformerkVA = 0
     MaximumTransformerkVA = 0

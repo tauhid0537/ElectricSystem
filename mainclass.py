@@ -6,11 +6,11 @@ import os
 import sys
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/SystemInformation")
 from systeminformation import *
-#import testLineTool
-import trans_CreateBufferTool
+
 import testCreateLine
 import addTransformer
-import testMapTool
+import projectTranformerTool
+import projectLineTool
 
 class ElectricSystems:
 
@@ -33,21 +33,21 @@ class ElectricSystems:
         self.frmSystemInfo_action = QAction(icon, u"System Information", self.iface.mainWindow())
         QObject.connect(self.frmSystemInfo_action, SIGNAL("triggered()"), self.open_frmSystemInfo_dialog)
 
-        self.action = QAction("Create Line" , self.iface.mainWindow())
+        self.action = QAction("Project Line Tool" , self.iface.mainWindow())
         self.action.setIcon(QIcon(os.path.dirname(__file__) + "/Resources/FormIcons/AddLine.png"))
-        self.action.setWhatsThis("Create Line")
-        self.action.setStatusTip("Create Line")
+        self.action.setWhatsThis("Project Line Tool")
+        self.action.setStatusTip("Project Line Tool")
 
-        self.testAction = QAction("Test Tool" , self.iface.mainWindow())
+        self.testAction = QAction("Transformer Tool" , self.iface.mainWindow())
         self.testAction.setIcon(QIcon(os.path.dirname(__file__) + "/Resources/FormIcons/AddTransformer.png"))
-        self.testAction.setWhatsThis("Test Tool")
-        self.testAction.setStatusTip("Test Tool")
+        self.testAction.setWhatsThis("Project Transformer Tool")
+        self.testAction.setStatusTip("Project Transformer Tool")
 
         self.action.triggered.connect(self.run)
-        self.testAction.triggered.connect(self.runTool)
+        self.testAction.triggered.connect(self.runTransTool)
 
-        self.tool = testCreateLine.lineCreateTool(self.iface)
-        self.testTool = testMapTool.testTool(self.iface)
+        self.tool = projectLineTool.prjLineTool(self.iface)
+        self.transTool = projectTranformerTool.transformerTool(self.iface)
 
         self.ElectricSystems.addAction(self.frmSystemInfo_action)
         self.ElectricSystems.addAction(self.action)
@@ -65,19 +65,19 @@ class ElectricSystems:
 
         self.lineTool = QAction(
             QIcon(os.path.dirname(__file__) + "/Resources/FormIcons/AddLine.png"),
-            u"Create Line",
+            u"Project Line Tool",
             self.iface.mainWindow()
             )
         self.lineTool.triggered.connect(self.run)
         self.toolbar.addAction(self.lineTool)
 
-        self.testingTool = QAction(
+        self.trnTool = QAction(
             QIcon(os.path.dirname(__file__) + "/Resources/FormIcons/AddTransformer.png"),
-            u"Test Tool",
+            u"Project Transformer Tool",
             self.iface.mainWindow()
             )
-        self.testingTool.triggered.connect(self.runTool)
-        self.toolbar.addAction(self.testingTool)
+        self.trnTool.triggered.connect(self.runTransTool)
+        self.toolbar.addAction(self.trnTool)
 
 
     def open_frmSystemInfo_dialog(self):
@@ -89,8 +89,8 @@ class ElectricSystems:
     def run(self):
         self.iface.mapCanvas().setMapTool(self.tool)
 
-    def runTool(self):
-        self.iface.mapCanvas().setMapTool(self.testTool)
+    def runTransTool(self):
+        self.iface.mapCanvas().setMapTool(self.transTool)
 
     def unload(self):
         if self.ElectricSystems != None:

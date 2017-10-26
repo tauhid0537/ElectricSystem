@@ -196,7 +196,7 @@ class frmMain_dialog(QDialog, Ui_frmMain):
             poleLayerName = dbase + ": " + sub + "-" + fed + "-pole-project-1"
             extensionProject.PoleTableName = poletablename
         elif typ == "line":
-            poletablename = subcode + "_" + fedcode + "_line_project_1"
+            poletablename = subcode + "_" + fedcode + "_pole_project_1"
             poleLayerName = dbase + ": " + sub + "-" + fed + "-line-project-1"
             extensionProject.LineTableName = poletablename
         elif typ == "buffer":

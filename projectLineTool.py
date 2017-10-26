@@ -5,12 +5,24 @@ from qgis.core import *
 from qgis.gui import *
 import qgis
 
-#import resources_rc
 import os
 import sys
+import csv
+from os import listdir
+from os.path import isfile, join
+import math
 
-class lineCreateTool(QgsMapTool):
+from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
+from psycopg2 import connect
+import psycopg2
 
+sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/Resources/FormIcons")
+sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/ToolForms")
+
+import utility
+from utility import *
+
+class prjLineTool(QgsMapTool):
     def __init__(self, iface):
         QgsMapTool.__init__(self, iface.mapCanvas())
         self.canvas = iface.mapCanvas()
@@ -19,6 +31,7 @@ class lineCreateTool(QgsMapTool):
         self.rb.setWidth(1)
         self.point = None
         self.points = []
+        self.xy = []
         self.cursor = QCursor(QPixmap(["16 16 3 1",
                                           "      c None",
                                           ".     c #FF0000",
@@ -41,9 +54,19 @@ class lineCreateTool(QgsMapTool):
                                           "    ++.....+    ",
                                           "      ++.++     ",
                                           "       +.+      "]))
-
     def activate(self):
         self.canvas.setCursor(self.cursor)
+
+        self.usr = basicOps.usrname
+        self.dbase = basicOps.dbasename
+        self.sub = basicOps.substation
+        self.fed = basicOps.feeder
+        self.hst = basicOps.hostname
+        self.pas = basicOps.password
+
+        self.lineLayerName = self.dbase + ": " + self.sub + "-" + self.fed + "-line"
+        self.poleLayerName = self.dbase + ": " + self.sub + "-" + self.fed + "-pole"
+        self.linProName = self.dbase + ": " + self.sub + "-" + self.fed + "-line-project-" + extensionProject.ProjectNumber
 
     def setRubberBandPoints(self,points):
         self.resetRubberBand()
@@ -53,6 +76,7 @@ class lineCreateTool(QgsMapTool):
 
     def resetPoints(self):
         self.points = []
+        self.xy = []
 
     def resetRubberBand(self):
         self.rb.reset(True)
@@ -60,27 +84,6 @@ class lineCreateTool(QgsMapTool):
     def refresh_layers(self):
         for layer in qgis.utils.iface.mapCanvas().layers():
             layer.triggerRepaint()
-
-    def createLine(self):
-        canvas = qgis.utils.iface.mapCanvas()
-
-        layers = canvas.layers()
-        v = len(layers)
-        lineLayer = None
-
-        for layer in layers:
-            if layer.name() == "All_feeder_Line_RIR_new":
-                lineLayer = layer
-                lineLayerpath = lineLayer.dataProvider().dataSourceUri()
-                lineLayerpath = lineLayerpath [:lineLayerpath.rfind('|')]
-
-        lineLayerCaps = lineLayer.dataProvider().capabilities()
-        if lineLayerCaps & QgsVectorDataProvider.AddFeatures:
-            lineFeat = QgsFeature(lineLayer.pendingFields())
-            lineFeat.setAttributes(['Freetown', 'Test Line1','Overhead'])
-            lineFeat.setGeometry(QgsGeometry.fromPolyline(self.points))
-            (res, outFeats) = lineLayer.dataProvider().addFeatures([lineFeat])
-        self.iface.mapCanvas().refresh()
 
     def canvasMoveEvent(self,event):
         x = event.pos().x()
@@ -105,7 +108,35 @@ class lineCreateTool(QgsMapTool):
         points = list( self.points )
         points.append( point )
         #points = self.interpolate ( points )
-        self.setRubberBandPoints(points )
+        self.setRubberBandPoints(points)
+
+    def createLine(self, xy):
+        canvas = qgis.utils.iface.mapCanvas()
+        condb = psycopg2.connect(user = self.usr, host = self.hst, password = self.pas, dbname = self.dbase)
+        condb.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
+        cur = condb.cursor()
+        self.bsOps = utility.basicOps()
+        fedcode = self.bsOps.getFedCode(cur, self.sub, self.fed)
+        subcode = self.bsOps.getSubCode(cur, self.sub)
+
+        sql = "select last_value from exprojects.del_d2b_line_project_"+ extensionProject.ProjectNumber +"_seq"
+        cur.execute(sql)
+        rows = cur.fetchall()
+        newNumber = 0
+        for row in rows:
+            lstNumber = row[0]
+            newNumber = lstNumber + 1
+        lineID = subcode + "-" + fedcode + "-pro-" + extensionProject.ProjectNumber + "-" + str(newNumber)
+        linetablename = "exprojects." +subcode + "_" + fedcode + "_line_project_"+extensionProject.ProjectNumber
+        myXY = ','.join(map(str, xy))
+
+        sql2 = """INSERT INTO """ + linetablename + """ (substation, feeder, section_id, line_voltage,line_type, phase, con_size_1, con_size_2, con_size_3, geom)
+        VALUES('"""+self.sub+"""','""" + self.fed + """','"""+lineID+"""',"""+str(extensionProject.LineVoltage)+""",'"""+extensionProject.LineType+"""','"""+extensionProject.PhaseConfiguration+"""',
+        '"""+extensionProject.PrimaryConductor+"""','"""+extensionProject.PrimaryConductor+"""','"""+extensionProject.PrimaryConductor+"""',ST_GeomFromText('LINESTRING("""+myXY+""")',3857));"""
+        cur.execute(sql2)
+        condb.commit()
+
+        self.refresh_layers()
 
     def canvasPressEvent(self, event):
         crsSrc = self.canvas.mapRenderer().destinationCrs()
@@ -139,10 +170,12 @@ class lineCreateTool(QgsMapTool):
             QApplication.restoreOverrideCursor()
 
             self.points.append(point)
+            xy = str(point.x()) + " " + str(point.y())
+            self.xy.append(xy)
             self.setRubberBandPoints(self.points)
         else:
             if len(self.points) >= 2:
-                self.createLine()
+                self.createLine(self.xy)
             self.resetPoints()
             self.resetRubberBand()
             self.canvas.refresh()
