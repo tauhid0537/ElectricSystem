@@ -128,7 +128,7 @@ class Ui_frmProcessData(object):
         self.label_5.setText(_translate("frmProcessData", "Select Group", None))
         self.label_6.setText(_translate("frmProcessData", "Date of Survey", None))
         self.cmdHelp.setToolTip(_translate("frmProcessData", "Help", None))
-        self.cmdGetData.setToolTip(_translate("frmProcessData", "Clear Map", None))
+        self.cmdGetData.setToolTip(_translate("frmProcessData", "Get Data", None))
         self.cmdClose.setToolTip(_translate("frmProcessData", "Close", None))
 
 import resources

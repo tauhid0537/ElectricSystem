@@ -17,6 +17,7 @@ class basicOps:
     proname = None
     substation = None
     feeder = None
+    sqlitedb = None
 
     def getSubCode(self, cur, sub):
         subcode = None

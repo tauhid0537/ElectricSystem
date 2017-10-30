@@ -2,6 +2,7 @@ from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from qgis.core import *
 
+
 import csv
 import sys
 import os
@@ -32,10 +33,17 @@ class frmProcessFieldData_dialog(QDialog, Ui_frmProcessData):
     def onClose(self):
         self.close()
 
+    def selectSQLliteFile(self):
+        fname = QFileDialog.getOpenFileName(self, 'Open file',
+         'c:\\',"SQLite Database files (*.sqlite)")
+        return fname
+
     def openGPSDataForm(self):
-        proname = self.txtPro.text()
+        file_path = self.selectSQLliteFile()
+        QMessageBox.information(self.iface.mainWindow(),"Test",str(file_path))
+        """proname = self.txtPro.text()
         self.close()
         gpsForm = frmGPSData_dialog(self.iface)
         gpsForm.txtPro.setText(proname)
-        gpsForm.exec_()
+        gpsForm.exec_()"""
 

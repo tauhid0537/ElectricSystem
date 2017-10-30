@@ -276,7 +276,7 @@
       </rect>
      </property>
      <property name="toolTip">
-      <string>Clear Map</string>
+      <string>Get Data</string>
      </property>
      <property name="text">
       <string/>

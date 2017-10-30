@@ -9,6 +9,7 @@ import ogr
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 from psycopg2 import connect
 import psycopg2
+import sqlite3
 
 import csv
 import sys
@@ -47,7 +48,7 @@ class frmSystemInfo_dialog(QDialog, Ui_frmSysInfo):
         self.cmdUseDatabase.clicked.connect(self.useDb)
         self.txtHost.setText('localhost')
         self.txtUserName.setText('postgres')
-        self.txtPassword.setText('ku940405')
+        self.txtPassword.setText('postgres')
 
     def onClose(self):
         self.close()

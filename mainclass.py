@@ -7,7 +7,6 @@ import sys
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/SystemInformation")
 from systeminformation import *
 
-import testCreateLine
 import addTransformer
 import projectTranformerTool
 import projectLineTool

@@ -310,10 +310,25 @@ class frmMain_dialog(QDialog, Ui_frmMain):
         intialize.exec_()
 
     def openProcess(self):
-        proname = self.txtPro.text()
+        usr = self.txtPro.text()
+        dbase = self.txtDatabase.text()
+        sub = self.cmbSub.currentText()
+        fed = self.cmbFed.currentText()
+        hst = basicOps.hostname
+        paswrd = basicOps.password
+
+        basicOps.substation = sub
+        basicOps.feeder = fed
+        basicOps.dbasename = dbase
+
         self.close()
         intialize = frmProcessFieldData_dialog(self.iface)
-        intialize.txtPro.setText(proname)
+        intialize.txtPro.setText(usr)
+        intialize.txtPBS.setText(dbase)
+        intialize.txtSub.setText(sub)
+        intialize.txtFed.setText(fed)
+
+
         intialize.exec_()
 
     def openValidate(self):
