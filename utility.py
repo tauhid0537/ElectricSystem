@@ -2,6 +2,7 @@ import sys
 import os
 from qgis.core import *
 import qgis
+import math
 
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 from psycopg2 import connect

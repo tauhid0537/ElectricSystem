@@ -2,6 +2,7 @@ from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from qgis.core import *
 
+import sqlite3
 
 import csv
 import sys
@@ -53,9 +54,25 @@ class frmProcessFieldData_dialog(QDialog, Ui_frmProcessData):
          'c:\\',"SQLite Database files (*.sqlite)")
         return fname
 
+    def sqliteCursor(self,db):
+        con = sqlite3.connect(db)
+        c= con.cursor()
+        return c
+
+    def getTableRowName(self, db, table):
+        c= self.sqliteCursor(db)
+        c.execute("PRAGMA table_info(" + table + ")")
+        rows = c.fetchall()
+        text = []
+        for row in rows:
+            text.append(row[1])
+        finaltext = ",".join(text)
+        return finaltext
+
     def openGPSDataForm(self):
         file_path = self.selectSQLliteFile()
         basicOps.sqlitedb = file_path
+
         proname = self.txtPro.text()
         self.close()
         gpsForm = frmGPSData_dialog(self.iface)

@@ -1,0 +1,10 @@
+{
+  "login": [
+    {
+      "host": "localhost", 
+      "password": "postgres", 
+      "user": "postgres", 
+      "database": "tangail"
+    }
+  ]
+}

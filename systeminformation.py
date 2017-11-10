@@ -14,6 +14,9 @@ import sqlite3
 import csv
 import sys
 import os
+import json
+import contextlib
+
 import utility
 from utility import *
 
@@ -113,6 +116,15 @@ class frmSystemInfo_dialog(QDialog, Ui_frmSysInfo):
             curdb.execute('CREATE SEQUENCE sysinp.conductor_table_id_seq;')
             curdb.execute('CREATE SEQUENCE sysinp.phase_con_id_seq;')
             curdb.execute('CREATE SEQUENCE sysinp.domain_id_seq;')
+            curdb.execute('CREATE SEQUENCE sysinp.cashflowpara_id_seq;')
+            curdb.execute('CREATE SEQUENCE sysinp.finaddrev_id_seq;')
+            curdb.execute('CREATE SEQUENCE sysinp.fin_construction_cost_id_seq;')
+            curdb.execute('CREATE SEQUENCE sysinp.fincontar_id_seq;')
+            curdb.execute('CREATE SEQUENCE sysinp.findistloss_id_seq;')
+            curdb.execute('CREATE SEQUENCE sysinp.finexpense_id_seq;')
+            curdb.execute('CREATE SEQUENCE sysinp.finhh_id_seq;')
+            curdb.execute('CREATE SEQUENCE sysinp.finsub_id_seq;')
+            curdb.execute('CREATE SEQUENCE exprojects.seq;')
             createsubtab = """CREATE TABLE sysinp.sys_substation
             (id integer PRIMARY KEY not null DEFAULT nextval('sysinp.sys_substation_id_seq'::regclass),
             substation character varying(30) COLLATE pg_catalog."default",
@@ -184,6 +196,77 @@ class frmSystemInfo_dialog(QDialog, Ui_frmSysInfo):
             descrp character varying(100) COLLATE pg_catalog."default");"""
             curdb.execute(createdomtab)
 
+            cashflowparatab = """CREATE TABLE IF NOT EXISTS sysinp.fin_cashflow_parameters (
+            objectid integer PRIMARY KEY not null DEFAULT nextval('sysinp.cashflowpara_id_seq'),
+            category varchar(100), unit varchar(30), value double precision);"""
+            curdb.execute(cashflowparatab)
+
+            finaddrevtab = """CREATE TABLE IF NOT EXISTS sysinp.fin_additional_revenue (
+            id integer PRIMARY KEY not null DEFAULT nextval('sysinp.finaddrev_id_seq'),
+            category varchar(50), unit varchar(50), value double precision);"""
+            curdb.execute(finaddrevtab)
+
+            finconcosttab ="""CREATE TABLE IF NOT EXISTS sysinp.fin_construction_cost (
+            id integer PRIMARY KEY not null DEFAULT nextval('sysinp.fin_construction_cost_id_seq'),
+            item varchar(50), type varchar(50), category varchar(50), category_alias varchar(100),
+            voltage double precision, size varchar(30), rate double precision, unit varchar(30));"""
+            curdb.execute(finconcosttab)
+
+            fincontartab = """CREATE TABLE IF NOT EXISTS sysinp.fin_consumer_tariff (
+            objectid BIGINT PRIMARY KEY DEFAULT nextval('sysinp.fincontar_id_seq'),
+            consumer varchar(50), ratio double precision, ini_penetration double precision,
+            mid_penetration double precision, fin_penetration double precision, ini_consumption double precision,
+            mid_consumption_gr double precision, fin_consumption_gr double precision, con_charge_sub double precision,
+            con_charge_nor double precision, fixed_charge double precision, energy_charge double precision);"""
+            curdb.execute(fincontartab)
+
+            findistlosstab = """CREATE TABLE IF NOT EXISTS sysinp.fin_distribution_loss (
+            id integer PRIMARY KEY not null DEFAULT nextval('sysinp.findistloss_id_seq'),
+            region varchar(12), technical double precision, collection double precision);"""
+            curdb.execute(findistlosstab)
+
+            finexpensetab = """CREATE TABLE IF NOT EXISTS sysinp.fin_expense (
+            id integer PRIMARY KEY DEFAULT nextval('sysinp.finexpense_id_seq'),
+            category varchar(50), unit varchar(50), value double precision);"""
+            curdb.execute(finexpensetab)
+
+            finhhtab = """CREATE TABLE IF NOT EXISTS sysinp.fin_households (
+            id integer PRIMARY KEY not null DEFAULT nextval('sysinp.finhh_id_seq'),
+            item varchar(50), percentage double precision);"""
+            curdb.execute(finhhtab)
+
+            finsubsidytab = """CREATE TABLE IF NOT EXISTS sysinp.fin_subsidy(
+            id integer PRIMARY KEY not null DEFAULT nextval('sysinp.finsub_id_seq'),
+            type varchar(50), unit varchar(50), value double precision);"""
+            curdb.execute(finsubsidytab)
+
+            finexpprotab = """CREATE TABLE IF NOT EXISTS exprojects.fout_expansion_projects(
+            id integer PRIMARY KEY not null DEFAULT nextval('exprojects.seq'),
+            substation varchar(30), feeder varchar(30), project_number varchar(50), project_name varchar(250),
+            household_source varchar(30), line_type varchar(30), line_voltage double precision, household_type varchar(30));"""
+            curdb.execute(finexpprotab)
+
+            finoutconcosttab = """CREATE TABLE IF NOT EXISTS exprojects.fout_construction_cost(
+            id integer PRIMARY KEY not null DEFAULT nextval('exprojects.seq'),
+            separator varchar(50), item varchar(100), type varchar(100), details varchar(250),
+            quantity double precision, quantity_unit varchar(10), amount double precision, amount_unit varchar(30));"""
+            curdb.execute(finoutconcosttab)
+
+            finconsfintab = """CREATE TABLE IF NOT EXISTS exprojects.fout_consumer_finance(
+            id integer PRIMARY KEY not null DEFAULT nextval('exprojects.seq'),
+            item varchar(100), unit varchar(50), year0 double precision, year1 double precision,
+            year2 double precision, year3 double precision, year4 double precision, year5 double precision,
+            year6 double precision, year7 double precision, year8 double precision, year9 double precision,
+            year10 double precision);"""
+            curdb.execute(finconsfintab)
+
+            finprosummtab = """CREATE TABLE IF NOT EXISTS exprojects.fout_project_summery(
+            objectid BIGINT PRIMARY KEY DEFAULT nextval('exprojects.seq'),
+            item varchar(100), unit varchar(50), year1 double precision, year2 double precision,
+            year3 double precision, year4 double precision, year5 double precision, year6 double precision,
+            year7 double precision, year8 double precision, year9 double precision, year10 double precision);"""
+            curdb.execute(finprosummtab)
+
             fname = os.path.dirname(__file__) + "/Resources/Domains/Domains.txt"
 
             with open(fname, 'r') as f:
@@ -219,6 +302,30 @@ class frmSystemInfo_dialog(QDialog, Ui_frmSysInfo):
 
             QMessageBox.information(self.iface.mainWindow(),"Create Database","Database Created Successfully")
 
+    def writeText(self):
+        index = self.tableView.selectedIndexes()[0]
+        dbname = self.tableView.model().data(index)
+        hostname = self.txtHost.text()
+        password = self.txtPassword.text()
+        username = self.txtUserName.text()
+        data = {}
+        data['login'] = []
+        data['login'].append({
+        'host': hostname,
+        'user': username,
+        'password': password,
+        'database': dbname
+        })
+        fname = os.path.dirname(os.path.abspath(__file__)) + "/Resources/FormIcons/login.json"
+        if os.path.exists(fname):
+            os.remove(fname)
+            with open(fname, 'w') as outfile:
+                json.dump(data, outfile, indent = 2)
+                outfile.close()
+        else:
+            with open(fname, 'w') as outfile:
+                json.dump(data, outfile, indent= 2)
+                outfile.close()
 
     def useDb(self):
         index = self.tableView.selectedIndexes()[0]
@@ -228,28 +335,21 @@ class frmSystemInfo_dialog(QDialog, Ui_frmSysInfo):
         basicOps.hostname = hostname
         password = self.txtPassword.text()
         basicOps.password = password
-        #dbasename = self.txtDatabase.text()
         basicOps.dbasename = dbname
-
-
         username = self.txtUserName.text()
-        #Global.usrname = username
         basicOps.usrname = username
         pbsname = dbname
+        self.writeText()
         self.close()
 
         sysinfo = frmMain_dialog(self.iface)
         gbops = utility.basicOps()
 
         sublist = gbops.getSubList(username, hostname, password, dbname)
-        #fedlist = gbops.getFeederList(username, hostname, password, dbname)
         sysinfo.cmbSub.clear()
-        #sysinfo.cmbFed.clear()
         sysinfo.cmbSub.addItems(sublist)
         sysinfo.cmbSub.setCurrentIndex(-1)
-        #self.cmbFed.addItems(fedlist)
 
         sysinfo.txtPro.setText(self.txtUserName.text())
         sysinfo.txtDatabase.setText(dbname)
         sysinfo.exec_()
-

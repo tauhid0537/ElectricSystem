@@ -5,6 +5,7 @@ from qgis.core import *
 import csv
 import sys
 import os
+import json
 
 import ogr
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
@@ -31,6 +32,11 @@ class frmInitialize_dialog(QDialog, Ui_frmIntialize):
         self.iface = iface
         self.setupUi(self)
 
+        self.usr = basicOps.usrname
+        self.dbase = basicOps.dbasename
+        self.hst = basicOps.hostname
+        self.paswrd = basicOps.password
+
         #self.cmdFolder.clicked.connect(self.createFolder)
         self.txtSub.textChanged.connect(self.subTextChanged)
         self.txtFed.textChanged.connect(self.fedTextChanged)
@@ -51,6 +57,7 @@ class frmInitialize_dialog(QDialog, Ui_frmIntialize):
 
     def createSpatialTables(self):
         sub = self.txtSub.text()
+
         fed = self.txtFed.text()
         pbs = self.txtPBS.text()
         subcode = self.txtSubCode.text()
@@ -62,15 +69,11 @@ class frmInitialize_dialog(QDialog, Ui_frmIntialize):
         subTableSQL = "select to_regclass('esystems."+subName+"');"
         fedpoleSQL = "select to_regclass('esystems."+poleName+"');"
         fedlineSQL = "select to_regclass('esystems."+lineName+"');"
-        usr = basicOps.usrname
-        hst = basicOps.hostname
-        paswrd = basicOps.password
-        db = basicOps.dbasename
 
         try:
-            condb = psycopg2.connect(user = usr, host = hst, password = paswrd, dbname = db)
+            condb = psycopg2.connect(user = self.usr, host = self.hst, password = self.paswrd, dbname = self.dbase)
         except psycopg2.Error as e:
-            QMessageBox.critical(self.iface.mainWindow(),"Connection Error",str("Unable to connect!\n{0}").format(e))
+            QMessageBox.critical(self.iface.mainWindow(),"Connection Error",str("Unable to connect!\n %s" %(e)))
         else:
             condb.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
             curdb = condb.cursor()
@@ -163,7 +166,7 @@ class frmInitialize_dialog(QDialog, Ui_frmIntialize):
                     substation character varying(30) COLLATE pg_catalog."default",
                     feeder character varying(30) COLLATE pg_catalog."default",
                     line_align character varying(20) COLLATE pg_catalog."default",
-                    line_vlotage integer,
+                    line_voltage integer,
                     line_type character varying(30) COLLATE pg_catalog."default",
                     section_id character varying(30) COLLATE pg_catalog."default",
                     phase character varying(5) COLLATE pg_catalog."default",

@@ -8,7 +8,7 @@ import os
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/FinancialAnalysis")
 from frmFinance import *
-from inputtable import *
+from fininputtable import *
 
 #sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/Resources/FormIcons")
 #import resources

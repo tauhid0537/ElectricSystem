@@ -4,8 +4,9 @@ from qgis.core import *
 
 import os
 import sys
-sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/SystemInformation")
+#sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/SystemInformation")
 from systeminformation import *
+
 
 import addTransformer
 import projectTranformerTool

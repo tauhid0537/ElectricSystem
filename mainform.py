@@ -6,6 +6,7 @@ import qgis
 import csv
 import sys
 import os
+import json
 
 from os import listdir
 from os.path import isfile, join
@@ -37,7 +38,11 @@ class frmMain_dialog(QDialog, Ui_frmMain):
         QDialog.__init__(self)
         self.iface = iface
         self.setupUi(self)
-        #self.setStyle(QtGui.QStyleFactory.create("GTK+"))
+
+        self.usr = basicOps.usrname
+        self.dbase = basicOps.dbasename
+        self.hst = basicOps.hostname
+        self.paswrd = basicOps.password
 
         self.cmbSub.currentIndexChanged.connect(self.loadFedcmbBox)
         self.cmdCreate.clicked.connect(self.openInitialize)
@@ -51,22 +56,13 @@ class frmMain_dialog(QDialog, Ui_frmMain):
         self.cmdAddLb.clicked.connect(self.addLbase)
 
     def loadFedcmbBox(self):
-
-        usr = basicOps.usrname
-        hst = basicOps.hostname
-        paswrd = basicOps.password
-        dbase = basicOps.dbasename
-
-        #QMessageBox.information(self.iface.mainWindow(),"Add Layers",str([usr,paswrd,hst,dbase]))
-        curdb = self.getCursor(usr, hst, paswrd, dbase)
+        curdb = self.getCursor(self.usr, self.hst, self.paswrd, self.dbase)
         sub = self.cmbSub.currentText()
         bsOps = utility.basicOps()
         fedlist = bsOps.getFeederList(curdb, sub)
         self.cmbFed.clear()
-        #sysinfo.cmbFed.clear()
         self.cmbFed.addItems(fedlist)
         self.cmbFed.setCurrentIndex(-1)
-        #QMessageBox.information(self.iface.mainWindow(),"Add Layers",str([basicOps.usrname,basicOps.password,basicOps.hostname,basicOps.dbasename]))
 
     def refresh_layers(self):
         for layer in qgis.utils.iface.mapCanvas().layers():
@@ -91,11 +87,7 @@ class frmMain_dialog(QDialog, Ui_frmMain):
     def loadLbase(self):
         self.cmbLayers.clear()
         lblist = []
-        usr = self.txtPro.text()
-        dbase = self.txtDatabase.text()
-        hst = basicOps.hostname
-        paswrd = basicOps.password
-        cur = self.getCursor(usr, hst, paswrd, dbase)
+        cur = self.getCursor(self.usr, self.hst, self.paswrd, self.dbase)
         cur.execute("""SELECT tablename FROM pg_catalog.pg_tables WHERE schemaname = 'landbase'""")
         rows = cur.fetchall()
         for row in rows:
@@ -106,50 +98,41 @@ class frmMain_dialog(QDialog, Ui_frmMain):
         slddir = os.path.dirname(__file__) + "/Resources/SLD"
         slds=os.listdir(slddir)
         onlyslds=[x.split('.')[0] for x in slds]
-        #onlyfiles = [f for f in listdir(slddir) if isfile(join(slddir, f))]
 
         self.cmbLegend.clear()
         self.cmbLegend.addItems(onlyslds)
         self.cmbLegend.setCurrentIndex(-1)
 
     def addLbase(self):
-        usr = self.txtPro.text()
-        dbase = self.txtDatabase.text()
-        hst = basicOps.hostname
-        paswrd = basicOps.password
-        cur = self.getCursor(usr, hst, paswrd, dbase)
         lname = self.cmbLayers.currentText()
         legname = self.cmbLegend.currentText()
 
         uri = QgsDataSourceURI()
-        uri.setConnection(hst,"5432",dbase,usr,paswrd)
+        uri.setConnection(self.hst,"5432",self.dbase,self.usr,self.paswrd)
         uri.setDataSource("landbase",lname,"geom")
         llayer = QgsVectorLayer(uri.uri(), lname, "postgres")
         sld = os.path.dirname(__file__) + "/Resources/SLD/" + legname + ".sld"
 
         llayer.loadSldStyle(sld)
         QgsMapLayerRegistry.instance().addMapLayer(llayer)
-        #layer.triggerRepaint()
         self.refresh_layers()
 
     def addSubLayer(self):
-        usr = self.txtPro.text()
-        dbase = self.txtDatabase.text()
+
         sub = self.cmbSub.currentText()
         fed = self.cmbFed.currentText()
-        hst = basicOps.hostname
-        paswrd = basicOps.password
-        cur = self.getCursor(usr, hst, paswrd, dbase)
+
+        cur = self.getCursor(self.usr, self.hst, self.paswrd, self.dbase)
         bsops = utility.basicOps()
         fedcode = bsops.getFedCode(cur, sub, fed)
         subcode = bsops.getSubCode(cur, sub)
         subLayer =sub + "_substation"
-        subLayerName = dbase + ": " + sub + "-substation"
+        subLayerName = self.dbase + ": " + sub + "-substation"
         layers = qgis.utils.iface.mapCanvas().layers()
         foundlayer = False
 
         uri = QgsDataSourceURI()
-        uri.setConnection(hst,"5432",dbase,usr,paswrd)
+        uri.setConnection(self.hst,"5432",self.dbase,self.usr,self.paswrd)
         uri.setDataSource("esystems",subLayer,"geom")
         sublayer = QgsVectorLayer(uri.uri(), subLayerName, "postgres")
 
@@ -157,111 +140,98 @@ class frmMain_dialog(QDialog, Ui_frmMain):
         self.refresh_layers()
 
     def addPoleLayer(self):
-        usr = self.txtPro.text()
-        dbase = self.txtDatabase.text()
         sub = self.cmbSub.currentText()
         fed = self.cmbFed.currentText()
-        hst = basicOps.hostname
-        paswrd = basicOps.password
-        cur = self.getCursor(usr, hst, paswrd, dbase)
+
+        cur = self.getCursor(self.usr, self.hst, self.paswrd, self.dbase)
         bsops = utility.basicOps()
         fedcode = bsops.getFedCode(cur, sub, fed)
         subcode = bsops.getSubCode(cur, sub)
         poletablename = subcode + "_" + fedcode + "_pole"
-        poleLayerName = dbase + ": " + sub + "-" + fed + "-pole"
+        poleLayerName = self.dbase + ": " + sub + "-" + fed + "-pole"
         layers = qgis.utils.iface.mapCanvas().layers()
         foundlayer = False
 
         uri = QgsDataSourceURI()
-        uri.setConnection(hst,"5432",dbase,usr,paswrd)
+        uri.setConnection(self.hst,"5432",self.dbase,self.usr,self.paswrd)
         uri.setDataSource("esystems",poletablename,"geom")
         polelayer = QgsVectorLayer(uri.uri(), poleLayerName, "postgres")
-        #QMessageBox.information(self.iface.mainWindow(),"Add Layers",str(hst))
         QgsMapLayerRegistry.instance().addMapLayer(polelayer)
         self.refresh_layers()
 
     def addProLayer(self, typ):
-        usr = self.txtPro.text()
-        dbase = self.txtDatabase.text()
         sub = self.cmbSub.currentText()
         fed = self.cmbFed.currentText()
-        hst = basicOps.hostname
-        paswrd = basicOps.password
-        cur = self.getCursor(usr, hst, paswrd, dbase)
+
+        cur = self.getCursor(self.usr, self.hst, self.paswrd, self.dbase)
         bsops = utility.basicOps()
         fedcode = bsops.getFedCode(cur, sub, fed)
         subcode = bsops.getSubCode(cur, sub)
         if typ == "pole":
             poletablename = subcode + "_" + fedcode + "_pole_project_1"
-            poleLayerName = dbase + ": " + sub + "-" + fed + "-pole-project-1"
+            poleLayerName = self.dbase + ": " + sub + "-" + fed + "-pole-project-1"
             extensionProject.PoleTableName = poletablename
         elif typ == "line":
             poletablename = subcode + "_" + fedcode + "_pole_project_1"
-            poleLayerName = dbase + ": " + sub + "-" + fed + "-line-project-1"
+            poleLayerName = self.dbase + ": " + sub + "-" + fed + "-line-project-1"
             extensionProject.LineTableName = poletablename
         elif typ == "buffer":
             poletablename = subcode + "_" + fedcode + "_buffer_project_1"
-            poleLayerName = dbase + ": " + sub + "-" + fed + "-buffer-project-1"
+            poleLayerName = self.dbase + ": " + sub + "-" + fed + "-buffer-project-1"
             extensionProject.BufferTableName = poletablename
         elif typ == "structure":
             poletablename = subcode + "_" + fedcode + "_structure_project_1"
-            poleLayerName = dbase + ": " + sub + "-" + fed + "-structure-project-1"
+            poleLayerName = self.dbase + ": " + sub + "-" + fed + "-structure-project-1"
             extensionProject.HHSourceTableName = poletablename
         elif typ == "village":
             poletablename = subcode + "_" + fedcode + "_village_project_1"
-            poleLayerName = dbase + ": " + sub + "-" + fed + "-village-project-1"
+            poleLayerName = self.dbase + ": " + sub + "-" + fed + "-village-project-1"
             extensionProject.HHSourceTableName = poletablename
         elif typ == "settlement":
             poletablename = subcode + "_" + fedcode + "_settlement_project_1"
-            poleLayerName = dbase + ": " + sub + "-" + fed + "-settlement-project-1"
+            poleLayerName = self.dbase + ": " + sub + "-" + fed + "-settlement-project-1"
             extensionProject.HHSourceTableName = poletablename
         layers = qgis.utils.iface.mapCanvas().layers()
         foundlayer = False
 
         uri = QgsDataSourceURI()
-        uri.setConnection(hst,"5432",dbase,usr,paswrd)
+        uri.setConnection(self.hst, "5432", self.dbase, self.usr, self.paswrd)
         uri.setDataSource("exprojects",poletablename,"geom")
         polelayer = QgsVectorLayer(uri.uri(), poleLayerName, "postgres")
-        #QMessageBox.information(self.iface.mainWindow(),"Add Layers",str(hst))
         QgsMapLayerRegistry.instance().addMapLayer(polelayer)
         self.refresh_layers()
 
     def addLineLayer(self):
-        usr = self.txtPro.text()
-        dbase = self.txtDatabase.text()
         sub = self.cmbSub.currentText()
         fed = self.cmbFed.currentText()
-        hst = basicOps.hostname
-        paswrd = basicOps.password
-        cur = self.getCursor(usr, hst, paswrd, dbase)
+
+        cur = self.getCursor(self.usr, self.hst, self.paswrd, self.dbase)
         bsOps = utility.basicOps()
         fedcode = bsOps.getFedCode(cur, sub, fed)
         subcode = bsOps.getSubCode(cur, sub)
         linetablename = subcode + "_" + fedcode + "_line"
-        lineLayerName = dbase + ": " + sub + "-" + fed + "-line"
+        lineLayerName = self.dbase + ": " + sub + "-" + fed + "-line"
         layers = qgis.utils.iface.mapCanvas().layers()
         foundlayer = False
 
         uri = QgsDataSourceURI()
-        uri.setConnection(hst, "5432", dbase, usr, paswrd)
+        uri.setConnection(self.hst, "5432", self.dbase, self.usr, self.paswrd)
         uri.setDataSource("esystems", linetablename, "geom")
         linelayer = QgsVectorLayer(uri.uri(), lineLayerName, "postgres")
         QgsMapLayerRegistry.instance().addMapLayer(linelayer)
         self.refresh_layers()
 
     def addLayers(self):
-        usr = self.txtPro.text()
-        dbase = self.txtDatabase.text()
+
         sub = self.cmbSub.currentText()
         fed = self.cmbFed.currentText()
-        hst = basicOps.hostname
-        paswrd = basicOps.password
+
         basicOps.substation = self.cmbSub.currentText()
         basicOps.feeder = self.cmbFed.currentText()
-        basicOps.dbasename = dbase
-        subLayerName = dbase + ": " + sub + "-substation"
-        lineLayerName = dbase + ": " + sub + "-" + fed + "-line"
-        poleLayerName = dbase + ": " + sub + "-" + fed + "-pole"
+        #basicOps.dbasename = dbase
+        subLayerName = self.dbase + ": " + sub + "-substation"
+        lineLayerName = self.dbase + ": " + sub + "-" + fed + "-line"
+        poleLayerName = self.dbase + ": " + sub + "-" + fed + "-pole"
         line = False
         pole = False
         subs = False
@@ -274,10 +244,10 @@ class frmMain_dialog(QDialog, Ui_frmMain):
             if layer.name() == lineLayerName:
                 line = True
         try:
-            self.addProLayer("pole")
-            self.addProLayer("line")
-            self.addProLayer("buffer")
-            self.addProLayer("structure")
+            #self.addProLayer("pole")
+            #self.addProLayer("line")
+            #self.addProLayer("buffer")
+            #self.addProLayer("structure")
             if not line:
                 self.addLineLayer()
             else:
@@ -300,50 +270,87 @@ class frmMain_dialog(QDialog, Ui_frmMain):
         self.close()
 
     def openInitialize(self):
-        proname = self.txtPro.text()
+        sub = self.cmbSub.currentText()
+        fed = self.cmbFed.currentText()
+
         self.close()
-        usr = basicOps.usrname
-        dbase = basicOps.dbasename
+
         intialize = frmInitialize_dialog(self.iface)
-        intialize.txtPro.setText(usr)
-        intialize.txtPBS.setText(dbase)
+        intialize.txtPro.setText(self.usr)
+        intialize.txtPBS.setText(self.dbase)
         intialize.exec_()
 
     def openProcess(self):
-        usr = self.txtPro.text()
-        dbase = self.txtDatabase.text()
         sub = self.cmbSub.currentText()
-        fed = self.cmbFed.currentText()
-        hst = basicOps.hostname
-        paswrd = basicOps.password
-
         basicOps.substation = sub
+        fed = self.cmbFed.currentText()
         basicOps.feeder = fed
-        basicOps.dbasename = dbase
 
-        self.close()
-        intialize = frmProcessFieldData_dialog(self.iface)
-        intialize.txtPro.setText(usr)
-        intialize.txtPBS.setText(dbase)
-        intialize.txtSub.setText(sub)
-        intialize.txtFed.setText(fed)
-
-
-        intialize.exec_()
+        subLayerName = self.dbase + ": " + sub + "-substation"
+        lineLayerName = self.dbase + ": " + sub + "-" + fed + "-line"
+        poleLayerName = self.dbase + ": " + sub + "-" + fed + "-pole"
+        line = False
+        pole = False
+        subs = False
+        layers = qgis.utils.iface.mapCanvas().layers()
+        for layer in layers:
+            if layer.name() == subLayerName:
+                subs = True
+            if layer.name() == poleLayerName:
+                pole = True
+            if layer.name() == lineLayerName:
+                line = True
+        if subs and pole and line:
+            self.close()
+            intialize = frmProcessFieldData_dialog(self.iface)
+            intialize.txtPro.setText(self.usr)
+            intialize.txtPBS.setText(self.dbase)
+            intialize.txtSub.setText(basicOps.substation)
+            intialize.txtFed.setText(basicOps.feeder)
+            intialize.exec_()
+        else:
+            QMessageBox.information(self.iface.mainWindow(),"Open Data Processing Form","Layers not added, Please add Layers then try again!")
 
     def openValidate(self):
         proname = self.txtPro.text()
-        self.close()
-        validate = frmValidate_dialog(self.iface)
-        validate.txtPro.setText(proname)
-        validate.exec_()
+        sub = self.cmbSub.currentText()
+        basicOps.substation = sub
+        fed = self.cmbFed.currentText()
+        basicOps.feeder = fed
+        subLayerName = self.dbase + ": " + sub + "-substation"
+        lineLayerName = self.dbase + ": " + sub + "-" + fed + "-line"
+        poleLayerName = self.dbase + ": " + sub + "-" + fed + "-pole"
+        line = False
+        pole = False
+        subs = False
+        layers = qgis.utils.iface.mapCanvas().layers()
+        for layer in layers:
+            if layer.name() == subLayerName:
+                subs = True
+            if layer.name() == poleLayerName:
+                pole = True
+            if layer.name() == lineLayerName:
+                line = True
+        if subs and pole and line:
+            self.close()
+            validate = frmValidate_dialog(self.iface)
+            validate.txtPro.setText(proname)
+            validate.txtPBS.setText(basicOps.dbasename)
+            validate.txtSub.setText(sub)
+            validate.txtFed.setText(fed)
+            validate.exec_()
+        else:
+            QMessageBox.information(self.iface.mainWindow(),"Open Validation Form","Layers not added, Please add Layers then try again!")
 
     def openFinance(self):
         proname = self.txtPro.text()
+        sub = self.cmbSub.currentText()
+        fed = self.cmbFed.currentText()
+
         self.close()
         validate = frmFinance_dialog(self.iface)
         validate.txtPro.setText(proname)
-        validate.txtPBS.setText(basicOps.dbasename)
-        validate.txtSub.setText(basicOps.substation)
-        validate.txtFed.setText(basicOps.feeder)
+        validate.txtPBS.setText(self.dbase)
+        validate.txtSub.setText(sub)
+        validate.txtFed.setText(sub)
         validate.exec_()
