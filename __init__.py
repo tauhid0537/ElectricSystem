@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """
 /***************************************************************************
- MultiForm
-                                 A QGIS plugin
- Test Plugin for multiple menu and forms
+ ElectricSystems
+                                 A QGIS plugin to develop, process, validate
+ and Analyze Electricity Network data
                              -------------------
         begin                : 2017-01-01
         copyright            : (C) 2017 by Tauhidul Islam
@@ -19,7 +19,6 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
- This script initializes the plugin, making it known to QGIS.
 """
 
 
