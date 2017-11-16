@@ -493,7 +493,7 @@ class frmValidate_dialog(QDialog, Ui_frmValidate):
         subcode = bsops.getSubCode(cur, self.sub)
         linetable = 'esystems.' + subcode + '_' + fedcode + '_line'
         poletable = 'esystems.' + subcode + '_' + fedcode + '_pole'
-        htmlfilepath = os.path.dirname(__file__) + "/ValidationResults/" + self.sub +"_attribute_validation.html"
+        htmlfilepath = os.path.dirname(__file__) + "/ValidationResults/" + self.sub +"_sub_attribute_validation.html"
         htmlfirst = """<html>
         <meta http-equiv='X-UA-Compatible' content='IE=edge' />
         <style type='text/css'>
@@ -579,7 +579,7 @@ class frmValidate_dialog(QDialog, Ui_frmValidate):
         subcode = bsops.getSubCode(cur, self.sub)
         linetable = 'esystems.' + subcode + '_' + fedcode + '_line'
         poletable = 'esystems.' + subcode + '_' + fedcode + '_pole'
-        htmlfilepath = os.path.dirname(__file__) + "/ValidationResults/" + self.sub +"_attribute_validation.html"
+        htmlfilepath = os.path.dirname(__file__) + "/ValidationResults/" + self.sub +"_line_attribute_validation.html"
         htmlfirst = """<html>
         <meta http-equiv='X-UA-Compatible' content='IE=edge' />
         <style type='text/css'>
@@ -786,7 +786,7 @@ class frmValidate_dialog(QDialog, Ui_frmValidate):
         subcode = bsops.getSubCode(cur, self.sub)
         linetable = 'esystems.' + subcode + '_' + fedcode + '_line'
         poletable = 'esystems.' + subcode + '_' + fedcode + '_pole'
-        htmlfilepath = os.path.dirname(__file__) + "/ValidationResults/" + self.sub +"_attribute_validation.html"
+        htmlfilepath = os.path.dirname(__file__) + "/ValidationResults/" + self.sub +"_pole_attribute_validation.html"
         htmlfirst = """<html>
         <meta http-equiv='X-UA-Compatible' content='IE=edge' />
         <style type='text/css'>
@@ -843,7 +843,7 @@ class frmValidate_dialog(QDialog, Ui_frmValidate):
                 if row[7] is None:
                     htmlfile.write("<p style='color:red;'>ERROR : No Pole Phase</p><br/>")
                 if row[8] == 0:
-                    htmlfile.write("No Feeder Height<br/>")
+                    htmlfile.write("No Pole Height<br/>")
                 if row[9] is None:
                     htmlfile.write("No Pole Class<br/>")
                 if row[10] is None:

@@ -32,6 +32,9 @@ class frmGPSData_dialog(QDialog, Ui_frmGPSData):
         self.hst = basicOps.hostname
         self.dbase = basicOps.dbasename
         self.pas = basicOps.password
+        self.linegps = []
+        self.lineinsertsql = []
+        self.d = None
 
         self.tabs = QtGui.QTabWidget(self)
         self.tabs = self.tabWidget
@@ -131,10 +134,16 @@ class frmGPSData_dialog(QDialog, Ui_frmGPSData):
 
     def getPoleData(self):
 
-        polesql ="""select '%s' as Substation, '%s' as Feeder, latitude, longitude, GPS_No, Feeders_on_Pole,
-        Pole_Number, Pole_Use, Pole_Phase, Pole_Height, Pole_Class, Pole_Structure, Pole_Fitting, Pole_Guy, Pole_GuyType, Pole_GuyAg, Pole_Status, Equip_Type,
-        Ref_Pole, Equip_ID, Equip_Unit, Equip_Mount, Equip_Size, Equip_Phase, Equip_Status, Equip_Use, Trans_Ref, rs_con, sc_con, lc_con, si_con, li_con, pb_con,
-        ag_con, st_con, Location, Data_Source,Remarks FROM vw_Pole_Data""" %(basicOps.substation, basicOps.feeder)
+        polesql ="""select '%s' as Substation, '%s' as Feeder, latitude, longitude,
+                    CASE
+                    WHEN length(GPS_No) = 1 THEN '00'||GPS_No
+                    WHEN length(GPS_No) = 2 THEN '0'||GPS_No
+                    ELSE GPS_No
+                    END GPS_No,
+                    Feeders_on_Pole,
+                    Pole_Number, Pole_Use, Pole_Phase, Pole_Height, Pole_Class, Pole_Structure, Pole_Fitting, Pole_Guy, Pole_GuyType, Pole_GuyAg, Pole_Status, Equip_Type,
+                    Ref_Pole, Equip_ID, Equip_Unit, Equip_Mount, Equip_Size, Equip_Phase, Equip_Status, Equip_Use, Trans_Ref, rs_con, sc_con, lc_con, si_con, li_con, pb_con,
+                    ag_con, st_con, Location, Data_Source,Remarks FROM vw_Pole_Data""" %(basicOps.substation, basicOps.feeder)
 
         db = basicOps.sqlitedb
         cur = self.sqliteCursor(db)
@@ -239,7 +248,7 @@ class frmGPSData_dialog(QDialog, Ui_frmGPSData):
                 else:
                     data[row].append("0")
             finalRow = ",".join(data[row])
-            insertsql = """insert into line_table(S_E, Substation, Feeder, longitude, latitude, Line_Alignment, Line_Voltage,
+            insertsql = """insert into line_table(S_E, Substation, Feeder, latitude, longitude, Line_Alignment, Line_Voltage,
             Line_Type, Section_ID, Phase, Trans_Code, Sec_Con, Trans_Ref, Con_Size_1, Con_Size_2, Con_Size_3, Con_Size_N,
             Line_Status, Data_Source, Remarks) values("""+ finalRow+ """)"""
             try:
@@ -315,7 +324,11 @@ class frmGPSData_dialog(QDialog, Ui_frmGPSData):
             cur.execute(poleinsertsql)
 
         condb.commit()
-        self.addPoleLayer()
+        self.refresh_layers()
+
+    def resetval(self):
+        self.linegps = []
+        self.d = None
 
     def saveLineTopgsql(self):
         condb = psycopg2.connect(user = self.usr, host = self.hst, password = self.pas, dbname = self.dbase)
@@ -334,41 +347,49 @@ class frmGPSData_dialog(QDialog, Ui_frmGPSData):
         """
         sqliteCur.execute(csql)
         sqliteRows = sqliteCur.fetchall()
-        linegps = []
-        lineinsertsql = []
-        d = None
+        createLine = False
         i = 0
-        #dic = {}
-        while(i < len(sqliteRows)):
-        #for srow in sqliteRows:
-            x =self.convertEPSG436ToEPSG3857(float(sqliteRows[i][4]), float(sqliteRows[i][3]))
-            if sqliteRows[i][0] == 'S':
-                if len(linegps) > 1:
-                    xy = ",".join(linegps)
+        for sqliteRow in sqliteRows:
+            i = i +1
+            x =self.convertEPSG436ToEPSG3857(sqliteRow[4], sqliteRow[3])
+            if sqliteRow[0].strip() == 'S':
+                if len(self.linegps) == 0:
+                    self.d = "'" + self.getString(sqliteRow[1]) + "','" + self.getString(sqliteRow[2]) + "','" + self.getString(sqliteRow[5]) + "','" + self.getString(sqliteRow[6]) + "','" + self.getString(sqliteRow[7]) + "','" + self.getString(sqliteRow[8]) +"""'
+                        ,'"""+ self.getString(sqliteRow[9]) + "','" + self.getString(sqliteRow[10]) + "','" + self.getString(sqliteRow[11]) + "','" + self.getString(sqliteRow[12]) + "'," + self.getString(sqliteRow[13]) + "," + self.getString(sqliteRow[14]) + """
+                        ,""" + self.getString(sqliteRow[15]) + "," + self.getString(sqliteRow[16]) + ",'" + self.getString(sqliteRow[17]) + """'
+                        ,'"""+ self.getString(sqliteRow[18]) + "','" + self.getString(sqliteRow[19]) + "'"
+                    self.linegps.append(str(x[0]) + " " + str(x[1]))
+                elif len(self.linegps) > 1:
+                    xy = ",".join(self.linegps)
                     insertsql = """INSERT INTO esystems.""" + linetablename + """(
                     substation, feeder, line_align, line_voltage, line_type,
                     section_id, phase, trans_code, sec_con, trans_ref, con_size_1,
                     con_size_2, con_size_3, con_size_n, line_status, data_source,
-                    remarks, geom) VALUES( """ + d + """,ST_GeomFromText('LINESTRING(""" + xy + """)',3857));"""
-                    lineinsertsql.append(insertsql)
-                    #QMessageBox.information(self.iface.mainWindow(),"Process Line", lineinsertsql+"\n" +str(len(linegps)))
-                    #cur.execute(lineinsertsql)
-                    linegps = []
-                    d = None
-                else:
-                    linegps.append(str(x[0]) + " " + str(x[1]))
-                    d = "'" + self.getString(sqliteRows[i][1]) + "','" + self.getString(sqliteRows[i][2]) + "','" + self.getString(sqliteRows[i][5]) + "','" + self.getString(sqliteRows[i][6]) + "','" + self.getString(sqliteRows[i][7]) + "','" + self.getString(sqliteRows[i][8]) +"""'
-                    ,'"""+ self.getString(sqliteRows[i][9]) + "','" + self.getString(sqliteRows[i][10]) + "','" + self.getString(sqliteRows[i][11]) + "','" + self.getString(sqliteRows[i][12]) + "'," + self.getString(sqliteRows[i][13]) + "," + self.getString(sqliteRows[i][14]) + """
-                    ,""" + self.getString(sqliteRows[i][15]) + "," + self.getString(sqliteRows[i][16]) + ",'" + self.getString(sqliteRows[i][17]) + """'
-                    ,'"""+ self.getString(sqliteRows[i][18]) + "','" + self.getString(sqliteRows[i][19]) + "'"
+                    remarks, geom) VALUES( """ + self.d + """,ST_GeomFromText('LINESTRING(""" + xy + """)',3857));"""
+                    self.lineinsertsql.append(insertsql)
+                    self.resetval()
+
+                    self.d = "'" + self.getString(sqliteRow[1]) + "','" + self.getString(sqliteRow[2]) + "','" + self.getString(sqliteRow[5]) + "','" + self.getString(sqliteRow[6]) + "','" + self.getString(sqliteRow[7]) + "','" + self.getString(sqliteRow[8]) +"""'
+                        ,'"""+ self.getString(sqliteRow[9]) + "','" + self.getString(sqliteRow[10]) + "','" + self.getString(sqliteRow[11]) + "','" + self.getString(sqliteRow[12]) + "'," + self.getString(sqliteRow[13]) + "," + self.getString(sqliteRow[14]) + """
+                        ,""" + self.getString(sqliteRow[15]) + "," + self.getString(sqliteRow[16]) + ",'" + self.getString(sqliteRow[17]) + """'
+                        ,'"""+ self.getString(sqliteRow[18]) + "','" + self.getString(sqliteRow[19]) + "'"
+                    self.linegps.append(str(x[0]) + " " + str(x[1]))
             else:
-                linegps.append(str(x[0]) + " " + str(x[1]))
-            QMessageBox.information(self.iface.mainWindow(),"Process Line", str(i)+","+ str(sqliteRows[i][0]))
-            i += 1
-            #QMessageBox.information(self.iface.mainWindow(),"Process Line", str(i))
-            QMessageBox.information(self.iface.mainWindow(),"Process Line", str(len(lineinsertsql)))
-        #condb.commit()
-        #self.addLineLayer()
+                self.linegps.append(str(x[0]) + " " + str(x[1]))
+                if i == len(sqliteRows):
+                    xy = ",".join(self.linegps)
+                    insertsql = """INSERT INTO esystems.""" + linetablename + """(
+                    substation, feeder, line_align, line_voltage, line_type,
+                    section_id, phase, trans_code, sec_con, trans_ref, con_size_1,
+                    con_size_2, con_size_3, con_size_n, line_status, data_source,
+                    remarks, geom) VALUES( """ + self.d + """,ST_GeomFromText('LINESTRING(""" + xy + """)',3857));"""
+                    self.lineinsertsql.append(insertsql)
+        k = 0
+        for sql in self.lineinsertsql:
+            k = k + 1
+            cur.execute(sql)
+        condb.commit()
+        self.refresh_layers()
 
     def addPoleLayer(self):
         sub = basicOps.substation
@@ -422,6 +443,3 @@ class frmGPSData_dialog(QDialog, Ui_frmGPSData):
 
     def onClose(self):
         self.close()
-
-
-
