@@ -1,6 +1,7 @@
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from qgis.core import *
+import qgis
 
 import csv
 import sys
@@ -32,6 +33,9 @@ class frmGPSData_dialog(QDialog, Ui_frmGPSData):
         self.hst = basicOps.hostname
         self.dbase = basicOps.dbasename
         self.pas = basicOps.password
+        self.subLayerName = self.dbase + ": " + sub + "-substation"
+        self.lineLayerName = self.dbase + ": " + sub + "-" + fed + "-line"
+        self.poleLayerName = self.dbase + ": " + sub + "-" + fed + "-pole"
         self.linegps = []
         self.lineinsertsql = []
         self.d = None
@@ -287,6 +291,12 @@ class frmGPSData_dialog(QDialog, Ui_frmGPSData):
         except psycopg2.Error as e:
             QMessageBox.critical(self.iface.mainWindow(),"Connection Error",str("Unable to connect!\n{0}").format(e))
         return cur
+    def zoomToLayer(self, layername):
+        canvas = qgis.utils.iface.mapCanvas()
+        layers = qgis.utils.iface.mapCanvas().layers()
+        for layer in layers:
+            if layer.name() == layername:
+                canvas.setExtent(layer.extent())
 
     def savePoleTopgsql(self):
         condb = psycopg2.connect(user = self.usr, host = self.hst, password = self.pas, dbname = self.dbase)
@@ -325,6 +335,7 @@ class frmGPSData_dialog(QDialog, Ui_frmGPSData):
 
         condb.commit()
         self.refresh_layers()
+        self.zoomToLayer(self.lineLayerName)
 
     def resetval(self):
         self.linegps = []

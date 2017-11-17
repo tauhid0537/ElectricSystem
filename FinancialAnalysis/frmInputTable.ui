@@ -330,8 +330,17 @@
       <height>32</height>
      </size>
     </property>
+    <property name="uniformRowHeights">
+     <bool>true</bool>
+    </property>
     <property name="itemsExpandable">
-     <bool>false</bool>
+     <bool>true</bool>
+    </property>
+    <property name="animated">
+     <bool>true</bool>
+    </property>
+    <property name="headerHidden">
+     <bool>true</bool>
     </property>
    </widget>
    <widget class="QTableView" name="tableView">

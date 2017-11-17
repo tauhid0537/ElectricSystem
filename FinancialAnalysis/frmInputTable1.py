@@ -2,8 +2,7 @@
 
 # Form implementation generated from reading ui file 'frmInputTable.ui'
 #
-# Created: Fri Nov 17 16:05:01 2017
-#      by: PyQt4 UI code generator 4.10.2
+# Created by: PyQt4 UI code generator 4.11.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -127,11 +126,7 @@ class Ui_frmInputTable(object):
         self.treeView.setFrameShape(QtGui.QFrame.StyledPanel)
         self.treeView.setFrameShadow(QtGui.QFrame.Plain)
         self.treeView.setLineWidth(1)
-        self.treeView.setIconSize(QtCore.QSize(32, 32))
-        self.treeView.setUniformRowHeights(True)
-        self.treeView.setItemsExpandable(True)
-        self.treeView.setAnimated(True)
-        self.treeView.setHeaderHidden(True)
+        self.treeView.setItemsExpandable(False)
         self.treeView.setObjectName(_fromUtf8("treeView"))
         self.tableView = QtGui.QTableView(self.centralwidget)
         self.tableView.setGeometry(QtCore.QRect(250, 107, 681, 410))
@@ -148,8 +143,8 @@ class Ui_frmInputTable(object):
         self.label_2.setText(_translate("frmInputTable", "Database", None))
         self.label_3.setText(_translate("frmInputTable", "Substation", None))
         self.label_4.setText(_translate("frmInputTable", "Feeder", None))
-        self.cmdEdit.setToolTip(_translate("frmInputTable", "Edit Table", None))
-        self.cmdSave.setToolTip(_translate("frmInputTable", "Save Table", None))
+        self.cmdEdit.setToolTip(_translate("frmInputTable", "Save", None))
+        self.cmdSave.setToolTip(_translate("frmInputTable", "Create Fetaure", None))
         self.cmdHelp.setToolTip(_translate("frmInputTable", "Help", None))
         self.cmdClose.setToolTip(_translate("frmInputTable", "Close", None))
 

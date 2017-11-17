@@ -34,8 +34,12 @@ class frmFinance_dialog(QDialog, Ui_frmFinance):
 
     def openInputTable(self):
         proname = self.txtPro.text()
+
         self.close()
         gpsForm = frmInputTable_dialog(self.iface)
         gpsForm.txtPro.setText(proname)
+        gpsForm.txtPBS.setText(basicOps.dbasename)
+        gpsForm.txtSub.setText(basicOps.substation)
+        gpsForm.txtFed.setText(basicOps.feeder)
         gpsForm.exec_()
 
