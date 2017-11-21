@@ -214,10 +214,10 @@ class frmSystemInfo_dialog(QDialog, Ui_frmSysInfo):
 
             fincontartab = """CREATE TABLE IF NOT EXISTS sysinp.fin_consumer_tariff (
             objectid BIGINT PRIMARY KEY DEFAULT nextval('sysinp.fincontar_id_seq'),
-            consumer varchar(50), ratio double precision, ini_penetration double precision,
-            mid_penetration double precision, fin_penetration double precision, ini_consumption double precision,
-            mid_consumption_gr double precision, fin_consumption_gr double precision, con_charge_sub double precision,
-            con_charge_nor double precision, fixed_charge double precision, energy_charge double precision);"""
+            consumer varchar(50), ini_penetration double precision,
+            mid_penetration double precision, fin_penetration double precision, mid_consumer_gr double precision, fin_consumer_gr double precision,
+            ini_consumption double precision, mid_consumption_gr double precision, fin_consumption_gr double precision, connnect_charge double precision,
+            fixed_charge double precision, energy_charge double precision, ratio double precision);"""
             curdb.execute(fincontartab)
 
             findistlosstab = """CREATE TABLE IF NOT EXISTS sysinp.fin_distribution_loss (
@@ -261,11 +261,79 @@ class frmSystemInfo_dialog(QDialog, Ui_frmSysInfo):
             curdb.execute(finconsfintab)
 
             finprosummtab = """CREATE TABLE IF NOT EXISTS exprojects.fout_project_summery(
-            objectid BIGINT PRIMARY KEY DEFAULT nextval('exprojects.seq'),
+            objectid integer PRIMARY KEY DEFAULT nextval('exprojects.seq'),
             item varchar(100), unit varchar(50), year1 double precision, year2 double precision,
             year3 double precision, year4 double precision, year5 double precision, year6 double precision,
             year7 double precision, year8 double precision, year9 double precision, year10 double precision);"""
             curdb.execute(finprosummtab)
+            curdb.execute('''INSERT INTO sysinp.fin_additional_revenue(category, unit, value) VALUES ('Non Electric Revenue', 'Percentage of Total Revenue', 12);''')
+            curdb.execute('''INSERT INTO sysinp.fin_cashflow_parameters(category, unit, value) VALUES ('Analysis Term', 'Year', 10);''')
+            curdb.execute('''INSERT INTO sysinp.fin_cashflow_parameters(category, unit, value) VALUES ('Analysis Term', 'Year', 10);''')
+            curdb.execute('''INSERT INTO sysinp.fin_cashflow_parameters(category, unit, value) VALUES ('Analysis Mid Term', 'Year', 5);''')
+            curdb.execute('''INSERT INTO sysinp.fin_cashflow_parameters(category, unit, value) VALUES ('Analysis Payment Year', 'Year', 5);''')
+            curdb.execute('''INSERT INTO sysinp.fin_cashflow_parameters(category, unit, value) VALUES ('DDiscount Rate', 'Percentage', 10);''')
+            curdb.execute('''INSERT INTO sysinp.fin_construction_cost(item,type,category,voltage,size,rate,unit) VALUES ('Electric Line','Primary Distribution','Three Phase',33000,'200 mm ACSR',31258,'USD Per kM');''')
+            curdb.execute('''INSERT INTO sysinp.fin_construction_cost(item,type,category,voltage,size,rate,unit) VALUES ('Electric Line','Primary Distribution','Three Phase',33000,'150 mm ACSR',27597,'USD Per kM');''')
+            curdb.execute('''INSERT INTO sysinp.fin_construction_cost(item,type,category,voltage,size,rate,unit) VALUES ('Electric Line','Primary Distribution','Three Phase',33000,'100 mm ACSR',23936,'USD Per kM');''')
+            curdb.execute('''INSERT INTO sysinp.fin_construction_cost(item,type,category,voltage,size,rate,unit) VALUES ('Electric Line','Primary Distribution','Three Phase',33000,'50 mm ACSR',20275,'USD Per kM');''')
+            curdb.execute('''INSERT INTO sysinp.fin_construction_cost(item,type,category,voltage,size,rate,unit) VALUES ('Electric Line','Primary Distribution','Three Phase',11000,'100 mm ACSR',20927,'USD Per kM');''')
+            curdb.execute('''INSERT INTO sysinp.fin_construction_cost(item,type,category,voltage,size,rate,unit) VALUES ('Electric Line','Primary Distribution','Three Phase',11000,'50 mm ACSR',17266,'USD Per kM');''')
+            curdb.execute('''INSERT INTO sysinp.fin_construction_cost(item,type,category,voltage,size,rate,unit) VALUES ('Electric Line','Secondary Distribution','Three Phase',400,'100 mm AAC',16625,'USD Per kM');''')
+            curdb.execute('''INSERT INTO sysinp.fin_construction_cost(item,type,category,voltage,size,rate,unit) VALUES ('Electric Line','Secondary Distribution','Three Phase',400,'50 mm AAC',13578,'USD Per kM');''')
+            curdb.execute('''INSERT INTO sysinp.fin_construction_cost(item,type,category,voltage,size,rate,unit) VALUES ('Electric Line','Secondary Distribution','Three Phase',240,NULL,248,'USD Per Consumer');''')
+            curdb.execute('''INSERT INTO sysinp.fin_construction_cost(item,type,category,voltage,size,rate,unit) VALUES ('Equipment','Transformer','Three Phase',33000,'315',20366,'USD Per Unit');''')
+            curdb.execute('''INSERT INTO sysinp.fin_construction_cost(item,type,category,voltage,size,rate,unit) VALUES ('Equipment','Transformer','Three Phase',33000,'200',16989,'USD Per Unit');''')
+            curdb.execute('''INSERT INTO sysinp.fin_construction_cost(item,type,category,voltage,size,rate,unit) VALUES ('Equipment','Transformer','Three Phase',33000,'100',11955,'USD Per Unit');''')
+            curdb.execute('''INSERT INTO sysinp.fin_construction_cost(item,type,category,voltage,size,rate,unit) VALUES ('Equipment','Transformer','Three Phase',33000,'50',10692,'USD Per Unit');''')
+            curdb.execute('''INSERT INTO sysinp.fin_construction_cost(item,type,category,voltage,size,rate,unit) VALUES ('Equipment','Transformer','Three Phase',33000,'25',10556,'USD Per Unit');''')
+            curdb.execute('''INSERT INTO sysinp.fin_construction_cost(item,type,category,voltage,size,rate,unit) VALUES ('Equipment','Transformer','Three Phase',11000,'315',19714,'USD Per Unit');''')
+            curdb.execute('''INSERT INTO sysinp.fin_construction_cost(item,type,category,voltage,size,rate,unit) VALUES ('Equipment','Transformer','Three Phase',11000,'200',14646,'USD Per Unit');''')
+            curdb.execute('''INSERT INTO sysinp.fin_construction_cost(item,type,category,voltage,size,rate,unit) VALUES ('Equipment','Transformer','Three Phase',11000,'100',10186,'USD Per Unit');''')
+            curdb.execute('''INSERT INTO sysinp.fin_construction_cost(item,type,category,voltage,size,rate,unit) VALUES ('Equipment','Transformer','Three Phase',11000,'50',8176,'USD Per Unit');''')
+            curdb.execute('''INSERT INTO sysinp.fin_construction_cost(item,type,category,voltage,size,rate,unit) VALUES ('Equipment','Transformer','Three Phase',11000,'25',7573,'USD Per Unit');''')
+            curdb.execute('''INSERT INTO sysinp.fin_construction_cost(item,type,category,category_alias,voltage,rate,unit) VALUES ('Consumer','Service Drop','RS_Con','Residential',0,255,'USD Per Consumer');''')
+            curdb.execute('''INSERT INTO sysinp.fin_construction_cost(item,type,category,category_alias,voltage,rate,unit) VALUES ('Consumer','Service Drop','SC_Con','Small Commercial',0,255,'USD Per Consumer');''')
+            curdb.execute('''INSERT INTO sysinp.fin_construction_cost(item,type,category,category_alias,voltage,rate,unit) VALUES ('Consumer','Service Drop','LC_Con','Large Commercial',0,0,'USD Per Consumer');''')
+            curdb.execute('''INSERT INTO sysinp.fin_construction_cost(item,type,category,category_alias,voltage,rate,unit) VALUES ('Consumer','Service Drop','SI_Con','Small Industrial',0,512,'USD Per Consumer');''')
+            curdb.execute('''INSERT INTO sysinp.fin_construction_cost(item,type,category,category_alias,voltage,rate,unit) VALUES ('Consumer','Service Drop','LI_Con','Large Industrial',0,0,'USD Per Consumer');''')
+            curdb.execute('''INSERT INTO sysinp.fin_construction_cost(item,type,category,category_alias,voltage,rate,unit) VALUES ('Consumer','Service Drop','PB_Con','Public Building',0,0,'USD Per Consumer');''')
+            curdb.execute('''INSERT INTO sysinp.fin_construction_cost(item,type,category,category_alias,voltage,rate,unit) VALUES ('Consumer','Service Drop','AG_Con','Agricultural',0,0,'USD Per Consumer');''')
+            curdb.execute('''INSERT INTO sysinp.fin_construction_cost(item,type,category,category_alias,voltage,rate,unit) VALUES ('Consumer','Service Drop','ST_Con','Street Light',0,0,'USD Per Consumer');''')
+            curdb.execute('''INSERT INTO sysinp.fin_construction_cost(item,type,category,category_alias,voltage,size,rate,unit) VALUES ('Equipment','Breaker','Three Phase','BRK',11000,'250Amps',20366,'USD Per Unit');''')
+            curdb.execute('''INSERT INTO sysinp.fin_construction_cost(item,type,category,category_alias,voltage,size,rate,unit) VALUES ('Equipment','Capacitor','Three Phase','CAP',11000,'320 kVAR',21300,'USD Per Unit');''')
+            curdb.execute('''INSERT INTO sysinp.fin_construction_cost(item,type,category,category_alias,voltage,size,rate,unit) VALUES ('Equipment','Fuse','Three Phase','FUS',11000,'300 Amps',25300,'USD Per Unit');''')
+            curdb.execute('''INSERT INTO sysinp.fin_construction_cost(item,type,category,category_alias,voltage,size,rate,unit) VALUES ('Equipment','Recloser','Three Phase','REC',11000,'400 Amps',12500,'USD Per Unit');''')
+            curdb.execute('''INSERT INTO sysinp.fin_construction_cost(item,type,category,category_alias,voltage,size,rate,unit) VALUES ('Equipment','Sectionalizer','Three Phase','SEC',11000,'250 Amps',32500,'USD Per Unit');''')
+            curdb.execute('''INSERT INTO sysinp.fin_construction_cost(item,type,category,category_alias,voltage,size,rate,unit) VALUES ('Equipment','Switch','Three Phase','SWC',11000,'360 Amps',12500,'USD Per Unit');''')
+            curdb.execute('''INSERT INTO sysinp.fin_construction_cost(item,type,category,category_alias,voltage,size,rate,unit) VALUES ('Equipment','Regulator','Three Phase','REG',11000,'400 kVA',45200,'USD Per Unit');''')
+            curdb.execute('''INSERT INTO sysinp.fin_construction_cost(item,type,category,category_alias,voltage,size,rate,unit) VALUES ('Equipment','Step Up Transformer','Three Phase','SUT',11000,'2000 kVA',36200,'USD Per Unit');''')
+            curdb.execute('''INSERT INTO sysinp.fin_construction_cost(item,type,category,category_alias,voltage,size,rate,unit) VALUES ('Equipment','Step Down Transformer','Three Phase','SDT',11000,'1000 kVA',24500,'USD Per Unit');''')
+            curdb.execute('''INSERT INTO sysinp.fin_consumer_tariff(consumer,ini_penetration,mid_penetration,fin_penetration,mid_consumer_gr,fin_consumer_gr,ini_consumption,mid_consumption_gr,fin_consumption_gr,connnect_charge,fixed_charge,energy_charge,ratio) VALUES ('RS_Con',40,60,80,12.5,7.7,50,5,3,99.28,3.29,0.056,84.1);''')
+            curdb.execute('''INSERT INTO sysinp.fin_consumer_tariff(consumer,ini_penetration,mid_penetration,fin_penetration,mid_consumer_gr,fin_consumer_gr,ini_consumption,mid_consumption_gr,fin_consumption_gr,connnect_charge,fixed_charge,energy_charge,ratio) VALUES ('SC_Con',40,60,80,12.5,7.7,160,5,3,99.28,5.26,0.17,8);''')
+            curdb.execute('''INSERT INTO sysinp.fin_consumer_tariff(consumer,ini_penetration,mid_penetration,fin_penetration,mid_consumer_gr,fin_consumer_gr,ini_consumption,mid_consumption_gr,fin_consumption_gr,connnect_charge,fixed_charge,energy_charge,ratio) VALUES ('LC_Con',40,60,80,12.5,7.7,400,5,3,250.24,15.25,0.18,0.15);''')
+            curdb.execute('''INSERT INTO sysinp.fin_consumer_tariff(consumer,ini_penetration,mid_penetration,fin_penetration,mid_consumer_gr,fin_consumer_gr,ini_consumption,mid_consumption_gr,fin_consumption_gr,connnect_charge,fixed_charge,energy_charge,ratio) VALUES ('SI_Con',40,60,80,12.5,7.7,150,5,3,125.56,10.25,0.17,3);''')
+            curdb.execute('''INSERT INTO sysinp.fin_consumer_tariff(consumer,ini_penetration,mid_penetration,fin_penetration,mid_consumer_gr,fin_consumer_gr,ini_consumption,mid_consumption_gr,fin_consumption_gr,connnect_charge,fixed_charge,energy_charge,ratio) VALUES ('LI_Con',40,60,80,12.5,7.7,800,5,3,625.35,92.75,0.15,0.15);''')
+            curdb.execute('''INSERT INTO sysinp.fin_consumer_tariff(consumer,ini_penetration,mid_penetration,fin_penetration,mid_consumer_gr,fin_consumer_gr,ini_consumption,mid_consumption_gr,fin_consumption_gr,connnect_charge,fixed_charge,energy_charge,ratio) VALUES ('PB_Con',40,60,80,12.5,7.7,120,5,3,99.28,3.29,0.068,0.5);''')
+            curdb.execute('''INSERT INTO sysinp.fin_consumer_tariff(consumer,ini_penetration,mid_penetration,fin_penetration,mid_consumer_gr,fin_consumer_gr,ini_consumption,mid_consumption_gr,fin_consumption_gr,connnect_charge,fixed_charge,energy_charge,ratio) VALUES ('AG_Con',40,60,80,12.5,7.7,150,5,3,125.56,10.25,0.088,3.1);''')
+            curdb.execute('''INSERT INTO sysinp.fin_consumer_tariff(consumer,ini_penetration,mid_penetration,fin_penetration,mid_consumer_gr,fin_consumer_gr,ini_consumption,mid_consumption_gr,fin_consumption_gr,connnect_charge,fixed_charge,energy_charge,ratio) VALUES ('ST_Con',40,60,80,12.5,7.7,80,5,3,99.28,3.29,0.056,1);''')
+            curdb.execute('''INSERT INTO sysinp.fin_distribution_loss(region, technical, collection) VALUES ('Urban', 8, 100);''')
+            curdb.execute('''INSERT INTO sysinp.fin_distribution_loss(region, technical, collection) VALUES ('Rural', 8, 100);''')
+            curdb.execute('''INSERT INTO sysinp.fin_expense(category,unit,value) VALUES ('Power Cost','Per kWH',0.134178250865);''')
+            curdb.execute('''INSERT INTO sysinp.fin_expense(category,unit,value) VALUES ('O & M','Per Consumer',75.0616502515);''')
+            curdb.execute('''INSERT INTO sysinp.fin_expense(category,unit,value) VALUES ('A & G','Per Consumer',70);''')
+            curdb.execute('''INSERT INTO sysinp.fin_expense(category,unit,value) VALUES ('Commercial','Per Consumer',20);''')
+            curdb.execute('''INSERT INTO sysinp.fin_expense(category,unit,value) VALUES ('Depreciation','Percentage of Construction Cost',3.0838987);''')
+            curdb.execute('''INSERT INTO sysinp.fin_expense(category,unit,value) VALUES ('Interest','Percentage of Construction Cost',3);''')
+            curdb.execute('''INSERT INTO sysinp.fin_expense(category,unit,value) VALUES ('VAT','Percentage of Power Cost',2);''')
+            curdb.execute('''INSERT INTO sysinp.fin_subsidy(type,unit,value) VALUES ('Capital Subsidy','Percentage',50);''')
+            curdb.execute('''INSERT INTO sysinp.fin_subsidy(type,unit,value) VALUES ('Operational Subsidy-First Year','Percentage',0);''')
+            curdb.execute('''INSERT INTO sysinp.fin_subsidy(type,unit,value) VALUES ('Operational Subsidy-Upto Mid Year','Percentage',0);''')
+            curdb.execute('''INSERT INTO sysinp.fin_subsidy(type,unit,value) VALUES ('Operational Subsidy-Upto Final Year','Percentage',0);''')
+            curdb.execute('''INSERT INTO sysinp.fin_subsidy(type,unit,value) VALUES ('Service Drop Subsidy','Year',5);''')
+            curdb.execute('''INSERT INTO sysinp.fin_households(item,percentage) VALUES ('Household Ratio',88.2);''')
+            curdb.execute('''INSERT INTO sysinp.fin_households(item,percentage) VALUES ('Household Growth',11.8);''')
+            curdb.execute('''INSERT INTO sysinp.fin_households(item,percentage) VALUES ('Potential Household',100);''')
+
 
             fname = os.path.dirname(__file__) + "/Resources/Domains/Domains.txt"
 

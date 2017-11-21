@@ -6,6 +6,7 @@ import csv
 import sys
 import os
 import qgis
+import numbers
 
 from datetime import datetime
 
@@ -37,6 +38,11 @@ class frmInputTable_dialog(QDialog, Ui_frmInputTable):
         self.paswrd = basicOps.password
         self.sub = basicOps.substation
         self.fed = basicOps.feeder
+        self.tablename = None
+
+        self.tblView = self.tableView
+        self.tblModel = QtGui.QStandardItemModel(self)
+        self.tblView.setModel(self.tblModel)
 
         model = QStandardItemModel()
         self.treeView.setModel(model)
@@ -90,15 +96,141 @@ class frmInputTable_dialog(QDialog, Ui_frmInputTable):
         mainNode.appendRow([subNode8])
         model.appendRow(mainNode)
 
-        self.cmdEdit.clicked.connect(self.getText)
+        #self.cmdEdit.clicked.connect(self.getText)
+        self.cmdSave.clicked.connect(self.savedata)
         self.cmdClose.clicked.connect(self.onClose)
-        self.treeView.clicked.connect(self.getProcess)
+        self.treeView.clicked.connect(self.showTable)
 
-    def getText(self):
-        msgBox = QtGui.QMessageBox()
-        msgBox.setWindowTitle("Main Form")
-        msgBox.setText("It is Working...")
-        ret = msgBox.exec_()
+    def getConnection(self):
+        condb = psycopg2.connect(user = self.usr, host = self.hst, password = self.paswrd, dbname = self.dbase)
+        condb.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
+        return condb
+
+    def getcursor(self):
+        con = self.getConnection()
+        cur = con.cursor()
+        return cur
+
+    def splitTable(self, tbllayername):
+        name = tbllayername.split('.')
+        if name is True:
+            return name[0], name[1]
+
+    def showTable(self):
+        index = self.treeView.selectedIndexes()[0]
+        item = index.model().itemFromIndex(index).text()
+
+        if item == 'Cash Flow Parameters':
+            self.getTable('fin_cashflow_parameters')
+        elif item == 'Construction Cost':
+            self.getTable('fin_construction_cost')
+        elif item == 'Consumer and Tarrif':
+            self.getTable('fin_consumer_tariff')
+        elif item == 'Additional Revenue':
+            self.getTable('fin_additional_revenue')
+        elif item == 'Distribution Loss':
+            self.getTable('fin_distribution_loss')
+        elif item == 'Expense':
+            self.getTable('fin_expense')
+        elif item == 'Household Growth':
+            self.getTable('fin_households')
+        elif item == 'Subsidy':
+            self.getTable('fin_subsidy')
+
+    def getTable(self, tablename):
+        self.tblModel.clear()
+        sql = "select * from sysinp.%s" %tablename
+
+        tabledb = self.getTableinfo(tablename)
+        self.tblModel.setHorizontalHeaderLabels(tabledb.split(","))
+        cur = self.getcursor()
+        cur.execute(sql)
+        rows = cur.fetchall()
+        for t, row in enumerate(rows):
+            for y, col in enumerate(row):
+                txt = str(col)
+                item = QStandardItem(txt)
+                self.tblModel.setItem(t,y,item)
+
+        self.tblView.setModel(self.tblModel)
+
+    def getModelData(self, model):
+        modelData = []
+        data = []
+        text = None
+        for row in range(model.rowCount()):
+            data.append([])
+            for col in range(model.columnCount()):
+                index = model.index(row, col)
+                d = model.data(index)
+                if d != None:
+                    num = self.is_number(d)
+                    if not num:
+                        data[row].append("'" + str(d) + "'")
+                    else:
+                        data[row].append(str(d))
+                else:
+                    data[row].append("''")
+            finalRow = ",".join(data[row])
+            modelData.append(finalRow)
+        return modelData
+
+    def is_number(self, s):
+        try:
+            float(s) # for int, long, float and complex
+        except ValueError:
+            return False
+
+        return True
+
+    def inserttabledata(self, tablename, model):
+
+        modelData = self.getModelData(model)
+        fieldnames = self.getTableinfo(tablename)
+        QMessageBox.information(self.iface.mainWindow(),"Input Table",fieldnames)
+        conn = self.getConnection()
+        cur = conn.cursor()
+        delsql = 'delete from sysinp.' + tablename
+        cur.execute(delsql)
+        for data in modelData:
+            insert_sql = 'insert into sysinp.' + tablename + ' (' + fieldnames + ') VALUES (' + data + ')'
+            QMessageBox.information(self.iface.mainWindow(),"Input Table",insert_sql)
+            cur.execute(insert_sql)
+        conn.commit()
+
+    def savedata(self):
+
+        index = self.treeView.selectedIndexes()[0]
+        item = index.model().itemFromIndex(index).text()
+
+        if item == 'Cash Flow Parameters':
+            self.inserttabledata('fin_cashflow_parameters', self.tblModel)
+        elif item == 'Construction Cost':
+            self.inserttabledata('fin_construction_cost', self.tblModel)
+        elif item == 'Consumer and Tarrif':
+            self.inserttabledata('fin_consumer_tariff', self.tblModel)
+        elif item == 'Additional Revenue':
+            self.inserttabledata('fin_additional_revenue', self.tblModel)
+        elif item == 'Distribution Loss':
+            self.inserttabledata('fin_distribution_loss', self.tblModel)
+        elif item == 'Expense':
+            self.inserttabledata('fin_expense', self.tblModel)
+        elif item == 'Household Growth':
+            self.inserttabledata('fin_households', self.tblModel)
+        elif item == 'Subsidy':
+            self.inserttabledata('fin_subsidy', self.tblModel)
+
+    def getTableinfo(self, tablename):
+
+        sql = "select column_name from information_schema.columns where table_name ='%s'" %tablename
+        cur = self.getcursor()
+        cur.execute(sql)
+        rows = cur.fetchall()
+        text = []
+        for row in rows:
+            text.append(row[0])
+        finaltext = ",".join(text)
+        return finaltext
 
     def getProcess(self):
         index = self.treeView.selectedIndexes()[0]
@@ -111,6 +243,3 @@ class frmInputTable_dialog(QDialog, Ui_frmInputTable):
 
     def onClose(self):
         self.close()
-
-
-
