@@ -86,14 +86,14 @@ class basicOps:
 
 
 class extensionProject:
-    ProjectNumber = "1"
+    ProjectNumber = None
     ProjectName = None
-    HouseholdSource = "Structure"
-    LineType = "Primary"
-    LineVoltage = 11000
-    PrimaryConductor = "#3 ACSR 6/1"
+    HouseholdSource = None
+    LineType = None
+    LineVoltage = 0
+    PrimaryConductor = None
     SecondaryConductor = None
-    PhaseConfiguration = "R-Y-B"
+    PhaseConfiguration = None
     BufferDistance = 0
     MinimumTransformerkVA = 0
     MaximumTransformerkVA = 0

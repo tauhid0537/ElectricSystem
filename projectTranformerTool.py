@@ -60,7 +60,7 @@ class transformerTool(QgsMapTool):
         self.sub = basicOps.substation
         self.fed = basicOps.feeder
         self.hst = basicOps.hostname
-        self.pas = basicOps.password
+        self.paswrd = basicOps.password
         self.lineLayerName = self.dbase + ": " + self.sub + "-" + self.fed + "-line"
         self.poleLayerName = self.dbase + ": " + self.sub + "-" + self.fed + "-pole"
         self.setLayerName = "settlement"
@@ -70,7 +70,7 @@ class transformerTool(QgsMapTool):
 
         self.setProName = self.dbase + ": " + self.sub + "-" + self.fed + "-settlement-project-" + extensionProject.ProjectNumber
         self.strProName = self.dbase + ": " + self.sub + "-" + self.fed + "-structure-project-" + extensionProject.ProjectNumber
-        self.cenProName = self.dbase + ": " + self.sub + "-" + self.fed + "-loadcenter-project-" + extensionProject.ProjectNumber
+        self.cenProName = self.dbase + ": " + self.sub + "-" + self.fed + "-village-project-" + extensionProject.ProjectNumber
         self.trnProName = self.dbase + ": " + self.sub + "-" + self.fed + "-pole-project-" + extensionProject.ProjectNumber
         self.linProName = self.dbase + ": " + self.sub + "-" + self.fed + "-line-project-" + extensionProject.ProjectNumber
 
@@ -79,8 +79,8 @@ class transformerTool(QgsMapTool):
         transForm.txtDatabase.setText(basicOps.dbasename)
         transForm.txtSub.setText(basicOps.substation)
         transForm.txtFed.setText(basicOps.feeder)
-        transForm.txtProNum.setText('1')
-        transForm.txtMinTrn.setText('20')
+        transForm.txtProNum.setText(extensionProject.ProjectNumber)
+        transForm.txtMinTrn.setText('0')
         transForm.txtMaxTrn.setText('500')
 
         transForm.exec_()
@@ -107,21 +107,21 @@ class transformerTool(QgsMapTool):
         strselwhrClause = "Item = '" + "Equipment" + "' AND Type = '" + "Transformer" + "' AND Voltage = " + extensionProject.LineVoltage
         tableName = "exprojects.FinInConstructionCost"
         sql = "select min(size), max(size) from " + tableName + "where " + strselwhrClause + ";"
-        cur = self.getCursor(self.usr, self.hst, self.pas, self.dbase)
+        cur = self.getcursor()
         cur.execute(sql)
         row = cur.fetchOne()
         minSize = row[0]
         maxSize = row[1]
         return minSize, maxSize
 
-    def getCursor(self, usr, hst, pas, db):
-        cur = None
-        try:
-            condb = psycopg2.connect(user = usr, host = hst, password = pas, dbname = db)
-            condb.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
-            cur = condb.cursor()
-        except psycopg2.Error as e:
-            QMessageBox.critical(self.iface.mainWindow(),"Connection Error",str("Unable to connect!\n{0}").format(e))
+    def getConnection(self):
+        condb = psycopg2.connect(user = self.usr, host = self.hst, password = self.paswrd, dbname = self.dbase)
+        condb.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
+        return condb
+
+    def getcursor(self):
+        con = self.getConnection()
+        cur = con.cursor()
         return cur
 
     def checkAllLayers(self, householdSource):
@@ -174,7 +174,7 @@ class transformerTool(QgsMapTool):
         return projectNumber
 
     def transformerOnStructure(self, x, y, dist):
-        cur = self.getCursor(self.usr, self.hst, self.pas, self.dbase)
+        cur = self.getcursor()
         totalHH = 0
         totalStr = 0
         sql2 = """with qr1 as(
@@ -188,25 +188,43 @@ class transformerTool(QgsMapTool):
         return totalHH
 
     def getConsumerkVA(self, totalHH):
-        totalConsumer = totalHH * 0.7
-        kVA = 0
-        rs = totalConsumer * 0.55
-        sc = totalConsumer * 0.15
-        lc = totalConsumer * 0.05
-        li = totalConsumer * 0.05
-        si = totalConsumer * 0.03
-        pb = totalConsumer * 0.07
-        ag = totalConsumer * 0.02
-        st = totalConsumer * 0.08
+        hhsql = "select percentage from sysinp.fin_households where item = 'Potential Household'"
+        cur = self.getcursor()
+        cur.execute(hhsql)
+        row = cur.fetchone()
+        totalConsumer = totalHH * row[0]
 
-        rsCon = 30
-        scCon = 100
-        lcCon = 1000
-        siCon = 500
-        liCon = 2000
-        pbCon = 1500
-        agCon = 800
-        stCon = 600
+        kVA = 0
+
+        sql = "select consumer, ratio, ini_consumption from sysinp.fin_consumer_tariff"
+        cur.execute(sql)
+        rows = cur.fetchall()
+        rs, sc, lc, li, si, pb, ag, st, rsCon, scCon, lcCon, siCon, liCon, pbCon, agCon, stCon = None
+        for row in rows:
+            if row[0] == 'RS_Con':
+                rs = totalConsumer * row[1]
+                rsCon = row[2]
+            elif row[0] == 'SC_Con':
+                sc = totalConsumer * row[1]
+                scCon = row[2]
+            elif row[0] == 'LC_Con':
+                lc = totalConsumer * row[1]
+                lcCon = row[2]
+            elif row[0] == 'LI_Con':
+                li = totalConsumer * row[1]
+                liCon = row[2]
+            elif row[0] == 'SI_Con':
+                si = totalConsumer * row[1]
+                siCon = row[2]
+            elif row[0] == 'PB_Con':
+                pb = totalConsumer * row[1]
+                pbCon = row[2]
+            elif row[0] == 'AG_Con':
+                ag = totalConsumer * row[1]
+                agCon = row[2]
+            elif row[0] == 'ST_Con':
+                st = totalConsumer * row[1]
+                stCon = row[2]
 
         avgCon = ((rs * rsCon) + (sc * scCon) + (lc * lcCon) + (si * siCon) + (li * liCon) + (pb * pbCon) + (ag * agCon) + (st * stCon))/totalConsumer
         kW = self.powerDemand(totalConsumer, avgCon)

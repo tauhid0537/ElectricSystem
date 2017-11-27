@@ -187,14 +187,12 @@ class frmInputTable_dialog(QDialog, Ui_frmInputTable):
 
         modelData = self.getModelData(model)
         fieldnames = self.getTableinfo(tablename)
-        QMessageBox.information(self.iface.mainWindow(),"Input Table",fieldnames)
         conn = self.getConnection()
         cur = conn.cursor()
         delsql = 'delete from sysinp.' + tablename
         cur.execute(delsql)
         for data in modelData:
             insert_sql = 'insert into sysinp.' + tablename + ' (' + fieldnames + ') VALUES (' + data + ')'
-            QMessageBox.information(self.iface.mainWindow(),"Input Table",insert_sql)
             cur.execute(insert_sql)
         conn.commit()
 
