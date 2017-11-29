@@ -68,6 +68,59 @@ class prjLineTool(QgsMapTool):
         self.poleLayerName = self.dbase + ": " + self.sub + "-" + self.fed + "-pole"
         self.linProName = self.dbase + ": " + self.sub + "-" + self.fed + "-line-project-" + extensionProject.ProjectNumber
 
+        vol = str(extensionProject.LineVoltage)
+        splitVol = vol.split(".")
+        volt = splitVol[0]
+
+        sql = "select sysphase from sysinp.phase_con"
+        sql2 = "select size from sysinp.fin_construction_cost where item = 'Electric Line' and type = '"+extensionProject.LineType+ "' and voltage = '" + volt + "'"
+        cur = self.getcursor()
+        cur.execute(sql)
+        row = cur.fetchone()
+        phase = row[0]
+
+        cur.execute(sql2)
+        sizes = cur.fetchall()
+        lsizes = []
+        for size in sizes:
+            lsizes.append(size)
+
+
+        lineForm = frmAddLine_dialog(self.iface)
+        lineForm.txtPro.setText(basicOps.usrname)
+        lineForm.txtPro.setDisabled()
+        lineForm.txtDatabase.setText(basicOps.dbasename)
+        lineForm.txtDatabase.setDisabled()
+        lineForm.txtSub.setText(basicOps.substation)
+        lineForm.txtSub.setDisabled()
+        lineForm.txtFed.setText(basicOps.feeder)
+        lineForm.txtFed.setDisabled()
+        lineForm.txtProNum.setText(extensionProject.ProjectNumber)
+        lineForm.txtProNum.setDisabled()
+        lineForm.cmbConPhase.clear()
+        lineForm.cmbConSize.clear()
+        if phase == "RYB":
+            lineForm.cmbConPhase.addItem('R')
+            lineForm.cmbConPhase.addItem('Y')
+            lineForm.cmbConPhase.addItem('B')
+            lineForm.cmbConPhase.addItem('R-Y')
+            lineForm.cmbConPhase.addItem('Y-B')
+            lineForm.cmbConPhase.addItem('B-R')
+            lineForm.cmbConPhase.addItem('R-Y-B')
+        elif phase == "ABC":
+            lineForm.cmbConPhase.addItem('A')
+            lineForm.cmbConPhase.addItem('B')
+            lineForm.cmbConPhase.addItem('C')
+            lineForm.cmbConPhase.addItem('A-B')
+            lineForm.cmbConPhase.addItem('B-C')
+            lineForm.cmbConPhase.addItem('C-A')
+            lineForm.cmbConPhase.addItem('A-B-C')
+        for lsize in lsizes:
+            lineForm.cmbConSize.additem(lsize)
+        lineForm.exec_()
+
+
+
     def setRubberBandPoints(self,points):
         self.resetRubberBand()
         for point in points:
@@ -84,6 +137,16 @@ class prjLineTool(QgsMapTool):
     def refresh_layers(self):
         for layer in qgis.utils.iface.mapCanvas().layers():
             layer.triggerRepaint()
+
+    def getConnection(self):
+        condb = psycopg2.connect(user = self.usr, host = self.hst, password = self.paswrd, dbname = self.dbase)
+        condb.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
+        return condb
+
+    def getcursor(self):
+        con = self.getConnection()
+        cur = con.cursor()
+        return cur
 
     def canvasMoveEvent(self,event):
         x = event.pos().x()
@@ -119,7 +182,7 @@ class prjLineTool(QgsMapTool):
         fedcode = self.bsOps.getFedCode(cur, self.sub, self.fed)
         subcode = self.bsOps.getSubCode(cur, self.sub)
 
-        sql = "select last_value from exprojects.del_d2b_line_project_"+ extensionProject.ProjectNumber +"_seq"
+        sql = "select last_value from exprojects."+ extensionProject.LineTableName +"_seq"
         cur.execute(sql)
         rows = cur.fetchall()
         newNumber = 0
@@ -127,7 +190,7 @@ class prjLineTool(QgsMapTool):
             lstNumber = row[0]
             newNumber = lstNumber + 1
         lineID = subcode + "-" + fedcode + "-pro-" + extensionProject.ProjectNumber + "-" + str(newNumber)
-        linetablename = "exprojects." +subcode + "_" + fedcode + "_line_project_"+extensionProject.ProjectNumber
+        linetablename = "exprojects." + extensionProject.LineTableName
         myXY = ','.join(map(str, xy))
 
         sql2 = """INSERT INTO """ + linetablename + """ (substation, feeder, section_id, line_voltage,line_type, phase, con_size_1, con_size_2, con_size_3, geom)

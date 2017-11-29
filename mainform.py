@@ -106,15 +106,17 @@ class frmMain_dialog(QDialog, Ui_frmMain):
     def addLbase(self):
         lname = self.cmbLayers.currentText()
         legname = self.cmbLegend.currentText()
+        lblayer = self.dbase + ": " + lname
 
         uri = QgsDataSourceURI()
         uri.setConnection(self.hst,"5432",self.dbase,self.usr,self.paswrd)
         uri.setDataSource("landbase",lname,"geom")
-        llayer = QgsVectorLayer(uri.uri(), lname, "postgres")
+        llayer = QgsVectorLayer(uri.uri(), lblayer, "postgres")
         sld = os.path.dirname(__file__) + "/Resources/SLD/" + legname + ".sld"
 
         llayer.loadSldStyle(sld)
         QgsMapLayerRegistry.instance().addMapLayer(llayer)
+        extensionProject.lbTablename = 'landbase.' + lname
         self.refresh_layers()
 
     def addSubLayer(self):

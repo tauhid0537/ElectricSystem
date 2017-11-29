@@ -231,15 +231,15 @@ class frmFinance_dialog(QDialog, Ui_frmFinance):
         extensionProject.PoleTableName = self.poletablename
 
         if self.proPopSource == 'structure':
-            self.structuretablename = subcode + '_' + fedcode + '_' + self.proPopSource + '_structure_project_' + pro
-            self.structurelayername = self.dbase + ": " + sub + "-" + fed + "-buffer-project-" + pro
+            self.structuretablename = subcode + '_' + fedcode + '_' + self.proPopSource + '_project_' + pro
+            self.structurelayername = self.dbase + ": " + sub + "-" + fed + "-structure-project-" + pro
             extensionProject.HHSourceTableName = self.structuretablename
         elif self.proPopSource == 'village':
-            self.structuretablename = subcode + '_' + fedcode + '_' + self.proPopSource + '_village_project_' + pro
+            self.structuretablename = subcode + '_' + fedcode + '_' + self.proPopSource + '_project_' + pro
             self.structurelayername = self.dbase + ": " + sub + "-" + fed + "-village-project-" + pro
             extensionProject.HHSourceTableName = self.structuretablename
         elif self.proPopSource == 'settlement':
-            self.structuretablename = subcode + '_' + fedcode + '_' + self.proPopSource + '_settlement_project_' + pro
+            self.structuretablename = subcode + '_' + fedcode + '_' + self.proPopSource + '_project_' + pro
             self.structurelayername = self.dbase + ": " + sub + "-" + fed + "-settlement-project-" + pro
             extensionProject.HHSourceTableName = self.structuretablename
 
@@ -395,11 +395,11 @@ class frmFinance_dialog(QDialog, Ui_frmFinance):
         self.linetablename = subcode + '_' + fedcode + '_line_project_' + pro
         self.poletablename = subcode + '_' + fedcode + '_pole_project_' + pro
         if self.proPopSource == 'structure':
-            self.structuretablename = subcode + '_' + fedcode + '_' + self.proPopSource + '_structure_project_' + pro
+            self.structuretablename = subcode + '_' + fedcode + '_' + self.proPopSource + '_project_' + pro
         elif self.proPopSource == 'village':
-            self.structuretablename = subcode + '_' + fedcode + '_' + self.proPopSource + '_village_project_' + pro
+            self.structuretablename = subcode + '_' + fedcode + '_' + self.proPopSource + '_project_' + pro
         elif self.proPopSource == 'settlement':
-            self.structuretablename = subcode + '_' + fedcode + '_' + self.proPopSource + '_settlement_project_' + pro
+            self.structuretablename = subcode + '_' + fedcode + '_' + self.proPopSource + '_project_' + pro
 
         cur.execute(sql)
         self.deleteProjectTables(sub, fed, pro)
@@ -434,7 +434,8 @@ class frmFinance_dialog(QDialog, Ui_frmFinance):
         extensionProject.LineType = linetype
 
         linevol = self.tableView.model().data(linevolIdx)
-        extensionProject.LineVoltage = int(linevol)
+        splittxt = linevol.split('.')
+        extensionProject.LineVoltage = int(splittxt[0])
 
         hhtype = self.tableView.model().data(hhtypeIdx)
         extensionProject.HHSourceType = hhtype
@@ -459,15 +460,15 @@ class frmFinance_dialog(QDialog, Ui_frmFinance):
         extensionProject.BufferTableName = self.bufftablename
 
         if self.proPopSource == 'structure':
-            self.structuretablename = subcode + '_' + fedcode + '_' + self.proPopSource + '_structure_project_' + pro
-            self.structurelayername = self.dbase + ": " + sub + "-" + fed + "-buffer-project-" + pro
+            self.structuretablename = subcode + '_' + fedcode + '_' + self.proPopSource + '_project_' + pro
+            self.structurelayername = self.dbase + ": " + sub + "-" + fed + "-structure-project-" + pro
             extensionProject.HHSourceTableName = self.structuretablename
         elif self.proPopSource == 'village':
-            self.structuretablename = subcode + '_' + fedcode + '_' + self.proPopSource + '_village_project_' + pro
+            self.structuretablename = subcode + '_' + fedcode + '_' + self.proPopSource + '_project_' + pro
             self.structurelayername = self.dbase + ": " + sub + "-" + fed + "-village-project-" + pro
             extensionProject.HHSourceTableName = self.structuretablename
         elif self.proPopSource == 'settlement':
-            self.structuretablename = subcode + '_' + fedcode + '_' + self.proPopSource + '_settlement_project_' + pro
+            self.structuretablename = subcode + '_' + fedcode + '_' + self.proPopSource + '_project_' + pro
             self.structurelayername = self.dbase + ": " + sub + "-" + fed + "-settlement-project-" + pro
             extensionProject.HHSourceTableName = self.structuretablename
 

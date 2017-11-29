@@ -108,5 +108,7 @@ class extensionProject:
     LineTableName = None
     BufferTableName = None
     HHSourceTableName = None
+    lbTablename = None
+
 
 

@@ -63,7 +63,7 @@ class transformerTool(QgsMapTool):
         self.paswrd = basicOps.password
         self.lineLayerName = self.dbase + ": " + self.sub + "-" + self.fed + "-line"
         self.poleLayerName = self.dbase + ": " + self.sub + "-" + self.fed + "-pole"
-        self.setLayerName = "settlement"
+        self.setLayerName = self.dbase + ": settlement"
         self.strLayerName = self.dbase + ": structure"
         self.villayerName = self.dbase + ": village"
         self.lodlayerName = self.dbase + ": loadCenter"
@@ -76,25 +76,28 @@ class transformerTool(QgsMapTool):
 
         transForm = frmAddTransformer_dialog(self.iface)
         transForm.txtPro.setText(basicOps.usrname)
+        transForm.txtPro.setDisabled()
         transForm.txtDatabase.setText(basicOps.dbasename)
+        transForm.txtDatabase.setDisabled()
         transForm.txtSub.setText(basicOps.substation)
+        transForm.txtSub.setDisabled()
         transForm.txtFed.setText(basicOps.feeder)
+        transForm.txtFed.setDisabled()
         transForm.txtProNum.setText(extensionProject.ProjectNumber)
-        transForm.txtMinTrn.setText('0')
-        transForm.txtMaxTrn.setText('500')
+        transForm.txtProNum.setDisabled()
+        trnSize = self.transformerMinMaxSize()
+
+        transForm.txtMinTrn.setText(str(trnSize[0]))
+        transForm.txtMaxTrn.setText(str(trnSize[1]))
 
         transForm.exec_()
-
-    def deactivate(self):
-        QgsMapTool.deactivate(self)
-        self.emit(SIGNAL("deactivated()"))
 
 
     def reset(self,  emitSignal = False):
         pass
 
     def powerDemand(self, consumer, consumption):
-        pd = consumer *(1 - 0.4 * consumer + 0.4 * pow((pow(consumer, 2) + 40), 0.5) * (0.0059256 * pow(consumption, 0.885)))
+        pd = consumer *(1 - (0.4 * consumer) + 0.4 * pow((pow(consumer, 2) + 40), 0.5)) * (0.0059256 * pow(consumption, 0.885))
         return pd
 
     def refresh_layers(self):
@@ -104,15 +107,32 @@ class transformerTool(QgsMapTool):
     def transformerMinMaxSize(self):
         minSize = 0
         maxSize = 0
-        strselwhrClause = "Item = '" + "Equipment" + "' AND Type = '" + "Transformer" + "' AND Voltage = " + extensionProject.LineVoltage
-        tableName = "exprojects.FinInConstructionCost"
-        sql = "select min(size), max(size) from " + tableName + "where " + strselwhrClause + ";"
+        vol = str(extensionProject.LineVoltage)
+        splitVol = vol.split(".")
+        volt = splitVol[0]
+        strselwhrClause = "item = 'Equipment' AND type = 'Transformer' AND voltage = '" + volt + "'"
+        tableName = "sysinp.fin_construction_cost"
+        sql = """with qr1 as(select CAST((COALESCE(size,'0')) AS INTEGER) size  from  """ + tableName + """ where """ + strselwhrClause + """) select min(size), max(size) from qr1"""
         cur = self.getcursor()
         cur.execute(sql)
-        row = cur.fetchOne()
+        row = cur.fetchone()
         minSize = row[0]
         maxSize = row[1]
         return minSize, maxSize
+
+    def getTrnsformerSizeList(self):
+        trnlist = []
+        vol = str(extensionProject.LineVoltage)
+        splitVol = vol.split(".")
+        volt = splitVol[0]
+        strselwhrClause = "item = 'Equipment' AND type = 'Transformer' AND voltage = '" + volt + "'"
+        sql = "select CAST((COALESCE(size,'0')) AS INTEGER) size  from  sysinp.fin_construction_cost where " + strselwhrClause
+        cur = self.getcursor()
+        cur.execute(sql)
+        rows = cur.fetchall()
+        for row in rows:
+            trnlist.append(row[0])
+        return trnlist
 
     def getConnection(self):
         condb = psycopg2.connect(user = self.usr, host = self.hst, password = self.paswrd, dbname = self.dbase)
@@ -128,7 +148,7 @@ class transformerTool(QgsMapTool):
         message = None
         check = False
         bsOps = utility.basicOps()
-        if householdSource == "Settlement":
+        if householdSource == "settlement":
             if (bsOps.checkLayer(self.lineLayerName) == True and
             bsOps.checkLayer(self.poleLayerName) == True and
             bsOps.checkLayer(self.setLayerName) == True and
@@ -138,7 +158,7 @@ class transformerTool(QgsMapTool):
                 check = True
             else:
                 message = "The Following Layers Must Exist in the Map:\n\nFeeder Line\r\nFeeder Pole\r\nSettlement\r\nProject Line\r\nProject Pole\r\nProject Settlement"
-        elif householdSource == "Structure":
+        elif householdSource == "structure":
             if (bsOps.checkLayer(self.lineLayerName) == True and
             bsOps.checkLayer(self.poleLayerName) == True and
             bsOps.checkLayer(self.strLayerName) == True and
@@ -149,7 +169,7 @@ class transformerTool(QgsMapTool):
                 message = None
             else:
                 message = "The Following Layers Must Exist in the Map:\n\nFeeder Line\r\nFeeder Pole\r\nStructure\r\nProject Line\r\nProject Pole\r\nProject Structure"
-        elif householdSource == "Village":
+        elif householdSource == "village":
             if (bsOps.checkLayer(self.lineLayerName) == True and
             bsOps.checkLayer(self.poleLayerName) == True and
             bsOps.checkLayer(self.villayerName) == True and
@@ -179,12 +199,15 @@ class transformerTool(QgsMapTool):
         totalStr = 0
         sql2 = """with qr1 as(
         select ST_Buffer(ST_GeomFromText('POINT(""" + x + ' ' + y + """)',3857),"""+ str(dist) + """) geom)
-        select count(*) from landbase.structure a inner join qr1 b on ST_Within(a.geom, b.geom)"""
+        select count(*) from """+ extensionProject.lbTablename +""" a inner join qr1 b on ST_Within(a.geom, b.geom)"""
         cur.execute(sql2)
         rows2 = cur.fetchall()
         for row2 in rows2:
             totalStr = totalStr + row2[0]
-        totalHH = round((totalStr * 0.8), 0)
+        hhdensql = "select percentage from sysinp.fin_households where item = 'Household Ratio'"
+        cur.execute(hhdensql)
+        row = cur.fetchone()
+        totalHH = round((totalStr * (row[0]/100)), 0)
         return totalHH
 
     def getConsumerkVA(self, totalHH):
@@ -192,42 +215,59 @@ class transformerTool(QgsMapTool):
         cur = self.getcursor()
         cur.execute(hhsql)
         row = cur.fetchone()
-        totalConsumer = totalHH * row[0]
-
-        kVA = 0
+        totalConsumer = totalHH * (row[0]/100)
 
         sql = "select consumer, ratio, ini_consumption from sysinp.fin_consumer_tariff"
         cur.execute(sql)
         rows = cur.fetchall()
-        rs, sc, lc, li, si, pb, ag, st, rsCon, scCon, lcCon, siCon, liCon, pbCon, agCon, stCon = None
+
+        kVA = 0
+        rs = 0
+        sc = 0
+        lc = 0
+        li = 0
+        si = 0
+        pb = 0
+        ag = 0
+        st = 0
+        rsCon = 0
+        scCon = 0
+        lcCon = 0
+        siCon = 0
+        liCon = 0
+        pbCon = 0
+        agCon = 0
+        stCon = 0
+
         for row in rows:
             if row[0] == 'RS_Con':
-                rs = totalConsumer * row[1]
-                rsCon = row[2]
+                rs = rs + round(totalConsumer * (row[1])/100)
+                rsCon =  rsCon + row[2]
             elif row[0] == 'SC_Con':
-                sc = totalConsumer * row[1]
-                scCon = row[2]
+                sc = sc + round(totalConsumer * (row[1])/100)
+                scCon = scCon + row[2]
             elif row[0] == 'LC_Con':
-                lc = totalConsumer * row[1]
-                lcCon = row[2]
+                lc = lc + round(totalConsumer * (row[1])/100)
+                lcCon = lcCon + row[2]
             elif row[0] == 'LI_Con':
-                li = totalConsumer * row[1]
-                liCon = row[2]
+                li = li + round(totalConsumer * (row[1])/100)
+                liCon = liCon + row[2]
             elif row[0] == 'SI_Con':
-                si = totalConsumer * row[1]
-                siCon = row[2]
+                si = si + round(totalConsumer * (row[1])/100)
+                siCon = siCon + row[2]
             elif row[0] == 'PB_Con':
-                pb = totalConsumer * row[1]
-                pbCon = row[2]
+                pb = pb + round(totalConsumer * (row[1])/100)
+                pbCon = pbCon + row[2]
             elif row[0] == 'AG_Con':
-                ag = totalConsumer * row[1]
-                agCon = row[2]
+                ag = ag + round(totalConsumer * (row[1])/100)
+                agCon = agCon + row[2]
             elif row[0] == 'ST_Con':
-                st = totalConsumer * row[1]
-                stCon = row[2]
+                st = st + round(totalConsumer * (row[1])/100)
+                stCon = stCon + row[2]
 
         avgCon = ((rs * rsCon) + (sc * scCon) + (lc * lcCon) + (si * siCon) + (li * liCon) + (pb * pbCon) + (ag * agCon) + (st * stCon))/totalConsumer
         kW = self.powerDemand(totalConsumer, avgCon)
+        QMessageBox.information(self.iface.mainWindow(),"Test Tool","kW is: " + str(kW))
         kVA = kW/0.9
 
         return rs, sc, lc, si, li, pb, ag, st, kVA
@@ -248,7 +288,7 @@ class transformerTool(QgsMapTool):
         #msg = checkLayers[1]
 
         #if msg is not None:
-         #   QMessageBox.information(self.iface.mainWindow(),"Test Tool", msg)
+        #    QMessageBox.information(self.iface.mainWindow(),"Test Tool", msg)
         crsSrc = self.canvas.mapRenderer().destinationCrs()
         crsWGS = QgsCoordinateReferenceSystem(4326)
 
@@ -266,11 +306,10 @@ class transformerTool(QgsMapTool):
         xx = str(point.x())
         yy = str(point.y())
 
-        condb = psycopg2.connect(user = self.usr, host = self.hst, password = self.pas, dbname = self.dbase)
-        condb.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
-        cur = condb.cursor()
+        conn = self.getConnection()
+        cur = conn.cursor()
 
-        sql = "select last_value from exprojects.del_d2b_pole_project_"+ extensionProject.ProjectNumber +"_seq"
+        sql = "select last_value from exprojects."+ extensionProject.PoleTableName +"_seq"
         cur.execute(sql)
         rows = cur.fetchall()
         newNumber = 0
@@ -279,7 +318,9 @@ class transformerTool(QgsMapTool):
             newNumber = lstNumber + 1
         transID = "pro-" + str(extensionProject.ProjectNumber) + "-trn-" + str(newNumber)
         poleID = "del-d2b-pro-" + str(extensionProject.ProjectNumber) + "-pole-" + str(newNumber)
+
         totalHousehold = self.transformerOnStructure(xx, yy, extensionProject.BufferDistance)
+        #QMessageBox.information(self.iface.mainWindow(),"Test Tool","Total Household for connection: " + str(totalHousehold))
 
         gConkVA = self.getConsumerkVA(totalHousehold)
         rs = gConkVA[0]
@@ -295,57 +336,71 @@ class transformerTool(QgsMapTool):
 
         if kVA < extensionProject.MinimumTransformerkVA:
             QMessageBox.information(self.iface.mainWindow(),"Test Tool","Proposed Transformer size {0} kVA is less than ".format(str(kVA))+ str(extensionProject.MinimumTransformerkVA) + " kVA\n\nPlease increase buffer size and try again")
-            self.deactivate()
         elif kVA > extensionProject.MaximumTransformerkVA:
             QMessageBox.information(self.iface.mainWindow(),"Test Tool","Proposed Transformer size {0} kVA is greater than ".format(str(kVA))+ str(extensionProject.MaximumTransformerkVA) + " kVA\n\nPlease decrease buffer size and try again")
-            self.deactivate()
-
-        bsops = utility.basicOps()
-        fedcode = bsops.getFedCode(cur, self.sub, self.fed)
-        subcode = bsops.getSubCode(cur, self.sub)
-        poletablename = "exprojects." +subcode + "_" + fedcode + "_pole_project_"+extensionProject.ProjectNumber
-        poleWhereClause = "equip_id = '" + transID + "'"
-
-        sql3 = """INSERT INTO """ + poletablename + """ (substation, feeder, pole_use, pole_phase, equip_type, equip_id, equip_phase, equip_size, rs_con, sc_con, lc_con,
-        si_con, li_con, pb_con, ag_con, st_con, geom)
-        VALUES('"""+self.sub+ """','""" + self.fed + """',
-        'Primary','R-Y-B','Transformer','"""+transID +"""','R-Y-B',"""+ str(kVA) + ""","""+ str(rs) + """,""" + str(sc) + """
-        ,""" + str(lc) + ""","""+ str(si)+""","""+str(li)+""","""+str(pb)+""","""+str(ag)+""","""+str(st)+""",ST_GeomFromText('POINT(""" + xx + ' ' + yy + """)',3857));"""
-        cur.execute(sql3)
-        condb.commit()
-
-        buffTableName = "exprojects." + subcode + "_" + fedcode + "_buffer_project_" + extensionProject.ProjectNumber
-        checksql = 'select * from ' + buffTableName
-        cur.execute(checksql)
-        whereClause = "equip_id = '"+transID + "'"
-
-        if cur.rowcount == 0:
-            sql4 ="""INSERT INTO """ +buffTableName + """(buff_dist, equip_id, geom)
-            select """ + str(extensionProject.BufferDistance) + """ as buff_dist, a.equip_id, ST_Buffer(a.geom, """ + str(extensionProject.BufferDistance) + """)
-            from """+ poletablename + """ a
-            where a.""" + whereClause + """;"""
-            cur.execute(sql4)
-            condb.commit()
         else:
-            sql3 = """INSERT INTO """ +buffTableName + """(buff_dist, project_no, geom)
-            with qr1 as(
-            select ST_Union(a.geom) as geom from """ + buffTableName + """ a inner join """ + poletablename + """ b on
-            ST_Intersects(ST_Buffer(b.geom, """ + str(extensionProject.BufferDistance) + """),a.geom) where b.""" + whereClause+ """)
-            select """ + str(extensionProject.BufferDistance) + """ as buff_dist, a.equip_id,
-            ST_Difference(ST_Buffer(a.geom,""" + str(extensionProject.BufferDistance) + """),b.geom) as diff_geom
-            from """+ poletablename + """ a left join qr1 b on ST_Intersects(ST_Buffer(a.geom,""" + str(extensionProject.BufferDistance) + """),b.geom)
-            where a.""" + whereClause + """;"""
-            cur.execute(sql3)
-            condb.commit()
+            bsops = utility.basicOps()
+            fedcode = bsops.getFedCode(cur, self.sub, self.fed)
+            subcode = bsops.getSubCode(cur, self.sub)
+            poletablename = "exprojects." + extensionProject.PoleTableName
 
-        structuretablename = "exprojects." + subcode + "_" + fedcode + "_structure_project_" + extensionProject.ProjectNumber
-        lbStructureTableName = "landbase.structure"
+            trnSize = self.transformerMinMaxSize()
+            minTrn = trnSize[0]
+            maxSize = trnSize[1]
+            searchkVA = kVA
+            currentkVA = minTrn
+            currentDiff = abs(currentkVA - searchkVA)
+            trnlist = self.getTrnsformerSizeList()
 
-        sql5 = """INSERT INTO """ + structuretablename + """(household, structure, geom)
-        select a.structure, a.household, a.geom
-        from """ + lbStructureTableName + """ a left join """ + buffTableName + """ b on ST_Within(a.geom, b.geom)
-        where b.equip_id = '""" + transID + "';"
-        cur.execute(sql5)
-        condb.commit()
+            for t in trnlist:
+                diff = abs(t - searchkVA)
+                if diff < currentDiff:
+                    currentDiff = diff
+                    currentkVA = t
 
-        self.refresh_layers()
+            if currentkVA >= minTrn:
+                sql3 = """INSERT INTO """ + poletablename + """ (substation, feeder, pole_use, pole_phase, equip_type, equip_id, equip_phase, equip_size, rs_con, sc_con, lc_con,
+                si_con, li_con, pb_con, ag_con, st_con, geom)
+                VALUES('"""+self.sub+ """','""" + self.fed + """',
+                'Primary','R-Y-B','Transformer','"""+transID +"""','R-Y-B',"""+ str(round(currentkVA,0)) + ""","""+ str(rs) + """,""" + str(sc) + """
+                ,""" + str(lc) + ""","""+ str(si)+""","""+str(li)+""","""+str(pb)+""","""+str(ag)+""","""+str(st)+""",ST_GeomFromText('POINT(""" + xx + ' ' + yy + """)',3857));"""
+                cur.execute(sql3)
+                conn.commit()
+
+            buffTableName = "exprojects." + extensionProject.BufferTableName
+            checksql = 'select * from ' + buffTableName
+            cur.execute(checksql)
+            whereClause = "equip_id = '"+transID + "'"
+            buff = str(extensionProject.BufferDistance)
+            splitbuff = buff.split(".")
+            bufferdist = splitbuff[0]
+
+            if cur.rowcount == 0:
+                sql4 ="""INSERT INTO """ +buffTableName + """(project_no,buff_dist, equip_id, geom)
+                select '""" + str(extensionProject.ProjectNumber) + """' as project_no, '""" + bufferdist + """' as buff_dist, '""" + transID + """' as equip_id, ST_Buffer(geom, """ + str(extensionProject.BufferDistance) + """) as geom
+                from """+ poletablename + """ where """ + whereClause + ";"
+                cur.execute(sql4)
+                conn.commit()
+            else:
+                sql3 = """INSERT INTO """ + buffTableName + """( project_no, buff_dist, equip_id, geom)
+                with qr1 as(
+                select ST_Union(a.geom) as geom from """ + buffTableName + """ a inner join """ + poletablename + """ b on
+                ST_Intersects(ST_Buffer(b.geom, """ + str(extensionProject.BufferDistance) + """),a.geom) where b.""" + whereClause+ """)
+                select '""" + str(extensionProject.ProjectNumber) + """' as project_no, '""" + bufferdist + """' as buff_dist, a.equip_id,
+                ST_Difference(ST_Buffer(a.geom,""" + str(extensionProject.BufferDistance) + """),b.geom) as diff_geom
+                from """+ poletablename + """ a left join qr1 b on ST_Intersects(ST_Buffer(a.geom,""" + str(extensionProject.BufferDistance) + """),b.geom)
+                where a.""" + whereClause + """;"""
+                cur.execute(sql3)
+                conn.commit()
+
+            structuretablename = "exprojects." + extensionProject.HHSourceTableName
+            lbStructureTableName = extensionProject.lbTablename
+
+            sql5 = """INSERT INTO """ + structuretablename + """(household, structure, geom)
+            select a.structure, a.household, a.geom
+            from """ + lbStructureTableName + """ a left join """ + buffTableName + """ b on ST_Within(a.geom, b.geom)
+            where b.equip_id = '""" + transID + "';"
+            cur.execute(sql5)
+            conn.commit()
+
+            self.refresh_layers()
