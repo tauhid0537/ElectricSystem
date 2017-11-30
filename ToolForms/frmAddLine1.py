@@ -2,7 +2,8 @@
 
 # Form implementation generated from reading ui file 'frmAddLine.ui'
 #
-# Created by: PyQt4 UI code generator 4.11.4
+# Created: Wed Nov 29 15:41:34 2017
+#      by: PyQt4 UI code generator 4.10.2
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -22,14 +23,14 @@ except AttributeError:
     def _translate(context, text, disambig):
         return QtGui.QApplication.translate(context, text, disambig)
 
-class Ui_frmAdLine(object):
-    def setupUi(self, frmAdLine):
-        frmAdLine.setObjectName(_fromUtf8("frmAdLine"))
-        frmAdLine.resize(352, 428)
+class Ui_frmAddLine(object):
+    def setupUi(self, frmAddLine):
+        frmAddLine.setObjectName(_fromUtf8("frmAddLine"))
+        frmAddLine.resize(352, 428)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/plugins/ElectricSystems/Resources/FormIcons/AddLine.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        frmAdLine.setWindowIcon(icon)
-        self.centralwidget = QtGui.QWidget(frmAdLine)
+        frmAddLine.setWindowIcon(icon)
+        self.centralwidget = QtGui.QWidget(frmAddLine)
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
         self.txtPro = QtGui.QLineEdit(self.centralwidget)
         self.txtPro.setGeometry(QtCore.QRect(160, 30, 161, 20))
@@ -109,38 +110,38 @@ class Ui_frmAdLine(object):
         self.groupBox_2 = QtGui.QGroupBox(self.centralwidget)
         self.groupBox_2.setGeometry(QtCore.QRect(20, 160, 311, 121))
         self.groupBox_2.setObjectName(_fromUtf8("groupBox_2"))
-        '''frmAdLine.setCentralWidget(self.centralwidget)
+        """frmAdLine.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(frmAdLine)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 352, 21))
         self.menubar.setObjectName(_fromUtf8("menubar"))
         frmAdLine.setMenuBar(self.menubar)
         self.statusbar = QtGui.QStatusBar(frmAdLine)
         self.statusbar.setObjectName(_fromUtf8("statusbar"))
-        frmAdLine.setStatusBar(self.statusbar)'''
+        frmAdLine.setStatusBar(self.statusbar)"""
 
-        self.retranslateUi(frmAdLine)
-        QtCore.QMetaObject.connectSlotsByName(frmAdLine)
+        self.retranslateUi(frmAddLine)
+        QtCore.QMetaObject.connectSlotsByName(frmAddLine)
 
-    def retranslateUi(self, frmAdLine):
-        frmAdLine.setWindowTitle(_translate("frmAdLine", "Add Line", None))
-        self.label.setText(_translate("frmAdLine", "Project Name", None))
-        self.label_2.setText(_translate("frmAdLine", "Database", None))
-        self.label_3.setText(_translate("frmAdLine", "Substation", None))
-        self.label_4.setText(_translate("frmAdLine", "Feeder", None))
-        self.label_5.setText(_translate("frmAdLine", "Project Number", None))
-        self.label_6.setText(_translate("frmAdLine", "Phase Configuration", None))
-        self.label_7.setText(_translate("frmAdLine", "Primary Conductor Size", None))
-        self.groupBox.setTitle(_translate("frmAdLine", "Dataset", None))
-        self.groupBox_2.setTitle(_translate("frmAdLine", "Project Parameters", None))
+    def retranslateUi(self, frmAddLine):
+        frmAddLine.setWindowTitle(_translate("frmAddLine", "Add Line", None))
+        self.label.setText(_translate("frmAddLine", "Project Name", None))
+        self.label_2.setText(_translate("frmAddLine", "Database", None))
+        self.label_3.setText(_translate("frmAddLine", "Substation", None))
+        self.label_4.setText(_translate("frmAddLine", "Feeder", None))
+        self.label_5.setText(_translate("frmAddLine", "Project Number", None))
+        self.label_6.setText(_translate("frmAddLine", "Phase Configuration", None))
+        self.label_7.setText(_translate("frmAddLine", "Primary Conductor Size", None))
+        self.groupBox.setTitle(_translate("frmAddLine", "Dataset", None))
+        self.groupBox_2.setTitle(_translate("frmAddLine", "Project Parameters", None))
 
 import resources
 
 if __name__ == "__main__":
     import sys
     app = QtGui.QApplication(sys.argv)
-    frmAdLine = QtGui.QMainWindow()
-    ui = Ui_frmAdLine()
-    ui.setupUi(frmAdLine)
-    frmAdLine.show()
+    frmAddLine = QtGui.QMainWindow()
+    ui = Ui_frmAddLine()
+    ui.setupUi(frmAddLine)
+    frmAddLine.show()
     sys.exit(app.exec_())
 

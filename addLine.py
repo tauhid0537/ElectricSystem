@@ -19,7 +19,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/Resources/FormIco
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/ToolForms")
 
 import resources
-from frmAddTransformer import *
+from frmAddLine import *
 
 class frmAddLine_dialog(QDialog, Ui_frmAdLine):
     def __init__(self, iface):
@@ -34,6 +34,6 @@ class frmAddLine_dialog(QDialog, Ui_frmAdLine):
 
     def onOK(self):
         extensionProject.ProjectNumber = self.txtProNum.text()
-        extensionProject.PhaseConfiguration = float(self.cmbConPhase.currentText())
-        extensionProject.PrimaryConductor = float(self.cmbConSize.currentText())
+        extensionProject.PhaseConfiguration = self.cmbConPhase.currentText()
+        extensionProject.PrimaryConductor = self.cmbConSize.currentText()
         self.close()

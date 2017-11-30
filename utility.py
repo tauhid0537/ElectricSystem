@@ -84,6 +84,58 @@ class basicOps:
                 check = True
         return check
 
+class phase:
+
+    def phase1(self, basePhase):
+        ph = None
+        if basePhase == 'RYB':
+            ph = 'R'
+        elif basePhase == 'ABC':
+            ph = 'A'
+        return ph
+
+    def phase2(self, basePhase):
+        ph = None
+        if basePhase == 'RYB':
+            ph = 'Y'
+        elif basePhase == 'ABC':
+            ph = 'B'
+        return ph
+    def phase3(self, basePhase):
+        ph = None
+        if basePhase == 'RYB':
+            ph = 'B'
+        elif basePhase == 'ABC':
+            ph = 'C'
+        return ph
+    def phase4(self, basePhase):
+        ph = None
+        if basePhase == 'RYB':
+            ph = 'R-Y'
+        elif basePhase == 'ABC':
+            ph = 'A-B'
+        return ph
+    def phase5(self, basePhase):
+        ph = None
+        if basePhase == 'RYB':
+            ph = 'Y-B'
+        elif basePhase == 'ABC':
+            ph = 'B-C'
+        return ph
+    def phase6(self, basePhase):
+        ph = None
+        if basePhase == 'RYB':
+            ph = 'B-R'
+        elif basePhase == 'ABC':
+            ph = 'C-A'
+        return ph
+    def phase7(self, basePhase):
+        ph = None
+        if basePhase == 'RYB':
+            ph = 'R-Y-B'
+        elif basePhase == 'ABC':
+            ph = 'A-B-C'
+        return ph
 
 class extensionProject:
     ProjectNumber = None

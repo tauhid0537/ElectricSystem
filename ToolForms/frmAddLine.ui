@@ -293,6 +293,26 @@
      <string>Project Parameters</string>
     </property>
    </widget>
+   <zorder>groupBox_2</zorder>
+   <zorder>groupBox</zorder>
+   <zorder>txtPro</zorder>
+   <zorder>txtPBS</zorder>
+   <zorder>txtSub</zorder>
+   <zorder>txtFed</zorder>
+   <zorder>txtProNum</zorder>
+   <zorder>cmbConPhase</zorder>
+   <zorder>cmbConSize</zorder>
+   <zorder>cmdOK</zorder>
+   <zorder>cmdHelp</zorder>
+   <zorder>cmdClose</zorder>
+   <zorder>label</zorder>
+   <zorder>label_2</zorder>
+   <zorder>label_3</zorder>
+   <zorder>label_4</zorder>
+   <zorder>label_5</zorder>
+   <zorder>label_6</zorder>
+   <zorder>label_7</zorder>
+   <zorder>frame_2</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">

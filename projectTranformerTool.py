@@ -61,6 +61,7 @@ class transformerTool(QgsMapTool):
         self.fed = basicOps.feeder
         self.hst = basicOps.hostname
         self.paswrd = basicOps.password
+
         self.lineLayerName = self.dbase + ": " + self.sub + "-" + self.fed + "-line"
         self.poleLayerName = self.dbase + ": " + self.sub + "-" + self.fed + "-pole"
         self.setLayerName = self.dbase + ": settlement"
@@ -76,15 +77,15 @@ class transformerTool(QgsMapTool):
 
         transForm = frmAddTransformer_dialog(self.iface)
         transForm.txtPro.setText(basicOps.usrname)
-        transForm.txtPro.setDisabled()
+        transForm.txtPro.setDisabled(True)
         transForm.txtDatabase.setText(basicOps.dbasename)
-        transForm.txtDatabase.setDisabled()
+        transForm.txtDatabase.setDisabled(True)
         transForm.txtSub.setText(basicOps.substation)
-        transForm.txtSub.setDisabled()
+        transForm.txtSub.setDisabled(True)
         transForm.txtFed.setText(basicOps.feeder)
-        transForm.txtFed.setDisabled()
+        transForm.txtFed.setDisabled(True)
         transForm.txtProNum.setText(extensionProject.ProjectNumber)
-        transForm.txtProNum.setDisabled()
+        transForm.txtProNum.setDisabled(True)
         trnSize = self.transformerMinMaxSize()
 
         transForm.txtMinTrn.setText(str(trnSize[0]))

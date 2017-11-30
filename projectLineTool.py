@@ -22,6 +22,9 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/ToolForms")
 import utility
 from utility import *
 
+from frmAddLine import *
+from addLine import *
+
 class prjLineTool(QgsMapTool):
     def __init__(self, iface):
         QgsMapTool.__init__(self, iface.mapCanvas())
@@ -62,7 +65,7 @@ class prjLineTool(QgsMapTool):
         self.sub = basicOps.substation
         self.fed = basicOps.feeder
         self.hst = basicOps.hostname
-        self.pas = basicOps.password
+        self.paswrd = basicOps.password
 
         self.lineLayerName = self.dbase + ": " + self.sub + "-" + self.fed + "-line"
         self.poleLayerName = self.dbase + ": " + self.sub + "-" + self.fed + "-pole"
@@ -77,29 +80,29 @@ class prjLineTool(QgsMapTool):
         cur = self.getcursor()
         cur.execute(sql)
         row = cur.fetchone()
-        phase = row[0]
+        self.basePhase = row[0]
 
         cur.execute(sql2)
         sizes = cur.fetchall()
         lsizes = []
         for size in sizes:
-            lsizes.append(size)
+            lsizes.append(size[0])
 
 
         lineForm = frmAddLine_dialog(self.iface)
         lineForm.txtPro.setText(basicOps.usrname)
-        lineForm.txtPro.setDisabled()
-        lineForm.txtDatabase.setText(basicOps.dbasename)
-        lineForm.txtDatabase.setDisabled()
+        lineForm.txtPro.setDisabled(True)
+        lineForm.txtPBS.setText(basicOps.dbasename)
+        lineForm.txtPBS.setDisabled(True)
         lineForm.txtSub.setText(basicOps.substation)
-        lineForm.txtSub.setDisabled()
+        lineForm.txtSub.setDisabled(True)
         lineForm.txtFed.setText(basicOps.feeder)
-        lineForm.txtFed.setDisabled()
+        lineForm.txtFed.setDisabled(True)
         lineForm.txtProNum.setText(extensionProject.ProjectNumber)
-        lineForm.txtProNum.setDisabled()
+        lineForm.txtProNum.setDisabled(True)
         lineForm.cmbConPhase.clear()
         lineForm.cmbConSize.clear()
-        if phase == "RYB":
+        if self.basePhase == "RYB":
             lineForm.cmbConPhase.addItem('R')
             lineForm.cmbConPhase.addItem('Y')
             lineForm.cmbConPhase.addItem('B')
@@ -107,7 +110,7 @@ class prjLineTool(QgsMapTool):
             lineForm.cmbConPhase.addItem('Y-B')
             lineForm.cmbConPhase.addItem('B-R')
             lineForm.cmbConPhase.addItem('R-Y-B')
-        elif phase == "ABC":
+        elif self.basePhase == "ABC":
             lineForm.cmbConPhase.addItem('A')
             lineForm.cmbConPhase.addItem('B')
             lineForm.cmbConPhase.addItem('C')
@@ -115,8 +118,10 @@ class prjLineTool(QgsMapTool):
             lineForm.cmbConPhase.addItem('B-C')
             lineForm.cmbConPhase.addItem('C-A')
             lineForm.cmbConPhase.addItem('A-B-C')
-        for lsize in lsizes:
-            lineForm.cmbConSize.additem(lsize)
+
+        lineForm.cmbConSize.addItems(lsizes)
+        lineForm.cmbConPhase.setCurrentIndex(-1)
+        lineForm.cmbConSize.setCurrentIndex(-1)
         lineForm.exec_()
 
 
@@ -148,6 +153,41 @@ class prjLineTool(QgsMapTool):
         cur = con.cursor()
         return cur
 
+    def phaseConSize(self, proPhase):
+        conSize1 = ""
+        conSize2 = ""
+        conSize3 = ""
+
+        phase = utility.phase()
+        if proPhase == phase.phase1(self.basePhase):
+            conSize1 = extensionProject.PrimaryConductor
+
+        elif proPhase == phase.phase2(self.basePhase):
+            conSize2 = extensionProject.PrimaryConductor
+
+        elif proPhase == phase.phase3(self.basePhase):
+            conSize3 = extensionProject.PrimaryConductor
+
+        elif proPhase == phase.phase4(self.basePhase):
+            conSize1 = extensionProject.PrimaryConductor
+            conSize2 = extensionProject.PrimaryConductor
+
+        elif proPhase == phase.phase5(self.basePhase):
+            conSize2 = extensionProject.PrimaryConductor
+            conSize3 = extensionProject.PrimaryConductor
+
+        elif proPhase == phase.phase6(self.basePhase):
+            conSize3 = extensionProject.PrimaryConductor
+            conSize1 = extensionProject.PrimaryConductor
+
+        elif proPhase == phase.phase7(self.basePhase):
+            conSize1 = extensionProject.PrimaryConductor
+            conSize2 = extensionProject.PrimaryConductor
+            conSize3 = extensionProject.PrimaryConductor
+
+        return conSize1, conSize2, conSize3
+
+
     def canvasMoveEvent(self,event):
         x = event.pos().x()
         y = event.pos().y()
@@ -158,25 +198,25 @@ class prjLineTool(QgsMapTool):
         ## Try to get a point from the foreground snapper.
         ## If we don't get one we try the backround snapper and
         ## at last we do not snap.
-        (retval,result) = snapper.snapToCurrentLayer (startingPoint,QgsSnapper.SnapToVertex)
+        (retval,result) = snapper.snapToCurrentLayer(startingPoint, QgsSnapper.SnapToVertex)
         if result <> []:
-            point = QgsPoint( result[0].snappedVertex )
+            point = QgsPoint(result[0].snappedVertex)
         else:
             (retval,result) = snapper.snapToBackgroundLayers(startingPoint)
             if result <> []:
-                point = QgsPoint( result[0].snappedVertex )
+                point = QgsPoint(result[0].snappedVertex)
             else:
-                point = self.canvas.getCoordinateTransform().toMapCoordinates( event.pos().x(), event.pos().y() );
+                point = self.canvas.getCoordinateTransform().toMapCoordinates(event.pos().x(), event.pos().y());
 
-        points = list( self.points )
-        points.append( point )
+        points = list(self.points)
+        points.append(point)
         #points = self.interpolate ( points )
         self.setRubberBandPoints(points)
 
     def createLine(self, xy):
         canvas = qgis.utils.iface.mapCanvas()
-        condb = psycopg2.connect(user = self.usr, host = self.hst, password = self.pas, dbname = self.dbase)
-        condb.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
+        condb = self.getConnection()
+
         cur = condb.cursor()
         self.bsOps = utility.basicOps()
         fedcode = self.bsOps.getFedCode(cur, self.sub, self.fed)
@@ -192,10 +232,16 @@ class prjLineTool(QgsMapTool):
         lineID = subcode + "-" + fedcode + "-pro-" + extensionProject.ProjectNumber + "-" + str(newNumber)
         linetablename = "exprojects." + extensionProject.LineTableName
         myXY = ','.join(map(str, xy))
+        QMessageBox.information(self.iface.mainWindow(),"Add Project Layers",extensionProject.PhaseConfiguration)
+        conSize = self.phaseConSize(extensionProject.PhaseConfiguration)
+        conSize1 = conSize[0]
+        conSize2 = conSize[1]
+        conSize3 = conSize[2]
+        QMessageBox.information(self.iface.mainWindow(),"Add Project Layers","Ph1- " + conSize1 + ", Ph2- " + conSize2 + ", Ph3- " + conSize3)
 
         sql2 = """INSERT INTO """ + linetablename + """ (substation, feeder, section_id, line_voltage,line_type, phase, con_size_1, con_size_2, con_size_3, geom)
-        VALUES('"""+self.sub+"""','""" + self.fed + """','"""+lineID+"""',"""+str(extensionProject.LineVoltage)+""",'"""+extensionProject.LineType+"""','"""+extensionProject.PhaseConfiguration+"""',
-        '"""+extensionProject.PrimaryConductor+"""','"""+extensionProject.PrimaryConductor+"""','"""+extensionProject.PrimaryConductor+"""',ST_GeomFromText('LINESTRING("""+myXY+""")',3857));"""
+        VALUES('""" + self.sub + """','""" + self.fed + """','""" + lineID + """','""" + str(extensionProject.LineVoltage)  +"""','""" + extensionProject.LineType + """','""" + extensionProject.PhaseConfiguration + """',
+        '"""+ conSize1 + """','""" + conSize2 + """','""" + conSize3 + """',ST_GeomFromText('LINESTRING(""" + myXY + """)',3857));"""
         cur.execute(sql2)
         condb.commit()
 
