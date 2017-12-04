@@ -1,5 +1,6 @@
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
+from PyQt4.QtXml import *
 
 from qgis.core import *
 from qgis.gui import *
@@ -61,6 +62,13 @@ class frmFinance_dialog(QDialog, Ui_frmFinance):
         self.linelayername = None
         self.polelayername = None
         self.structurelayername= None
+        self.extCurrency = None
+
+        sql = "select sysphase from sysinp.phase_con"
+        cur = self.getcursor()
+        cur.execute(sql)
+        row = cur.fetchone()
+        self.basePhase = row[0]
 
         self.tblView = self.tableView
         self.tblModel = QtGui.QStandardItemModel(self)
@@ -97,10 +105,316 @@ class frmFinance_dialog(QDialog, Ui_frmFinance):
         self.cmbScConSize.setCurrentIndex(-1)
 
         self.cmdInputTable.clicked.connect(self.openInputTable)
+        self.cmdCalCon.clicked.connect(self.onProjectCost)
         self.cmdCreatePro.clicked.connect(self.createProject)
         self.cmdAddPro.clicked.connect(self.addProLayers)
         self.cmdDelPro.clicked.connect(self.deleteSelectedTableRow)
         self.cmdClose.clicked.connect(self.onClose)
+
+    def onProjectCost(self):
+        poleTable = "exprojects." + self.poletablename
+        lineTable = "exprojects." + self.linetablename
+        extensionProject.SecondaryConductor = self.cmbScConSize.currentText()
+        extensionProject.SecondaryLength = float(self.txtAvgTrLen.text())
+        self.calculateConstructionCost(poleTable, lineTable,"sysinp.fin_construction_cost","sysinp.fin_households","sysinp.fin_subsidy", "sysinp.fin_cashflow_parameters","exprojects.fout_construction_cost")
+
+    def calculateConstructionCost(self, propoletable, prolinetable, conCostTab, hhGrowthTab, subsidyTab, cashFlowTab, outputTable):
+        dicConsumerAlias = {}
+        dicConSrvDrop = {}
+        sql = "select category, category_alias, rate from sysinp.fin_construction_cost where item = 'Consumer'"
+        conn = self.getConnection()
+        cur = conn.cursor()
+        cur.execute(sql)
+        rows = cur.fetchall()
+        for row in rows:
+            contype = row[0]
+            conalias = row[1]
+            consrvdrop = row[2]
+            dicConsumerAlias[contype] = conalias
+            dicConSrvDrop[contype] = consrvdrop
+
+        cur.execute("delete from exprojects.fout_construction_cost")
+        cur.execute("INSERT INTO exprojects.fout_construction_cost(separator, item, type) VALUES ('Project Information', 'Substation', '" + self.sub + "')")
+        cur.execute("INSERT INTO exprojects.fout_construction_cost(separator, item, type) VALUES ('Project Information', 'Feeder', '" + self.fed + "')")
+        cur.execute("INSERT INTO exprojects.fout_construction_cost(separator, item, type) VALUES ('Project Information', 'Project Number: ', '" + extensionProject.ProjectNumber + "')")
+        cur.execute("INSERT INTO exprojects.fout_construction_cost(separator, item, type) VALUES ('Project Information', 'Project Name', '" + extensionProject.ProjectName + "')")
+        cur.execute("INSERT INTO exprojects.fout_construction_cost(separator) VALUES ('')")
+        cur.execute("INSERT INTO exprojects.fout_construction_cost(item) VALUES ('Expected Consumer')")
+
+        sql2 = "select category, rate from sysinp.fin_construction_cost where item = 'Consumer'"
+        cur.execute(sql2)
+        items = cur.fetchall()
+        totalConsumer = 0
+        totalServiceDrop = 0
+        for item in items:
+            constype = item[0]
+            servdrop = item[1]
+            sql3 = "select sum(" + constype + ") consumer from exprojects." + self.poletablename
+            cur.execute(sql3)
+            consumer = cur.fetchone()
+            totalConsumer = totalConsumer + consumer[0]
+            srvDrop = round(consumer[0]*servdrop,0)
+            totalServiceDrop = totalServiceDrop + srvDrop
+            conAlias = dicConsumerAlias[constype]
+            if consumer[0] >0 :
+                cur.execute("INSERT INTO exprojects.fout_construction_cost(separator, type, quantity) VALUES ('Consumer', '" + conAlias + "', '" + str(consumer[0]) + "')")
+        cur.execute("INSERT INTO exprojects.fout_construction_cost(separator, type, quantity) VALUES ('Consumer', 'Total Consumer', '" + str(totalConsumer) + "')")
+
+        totalTrnPrice = 0
+        totalNumTrn = 0
+        volt = str(extensionProject.LineVoltage)
+        volts = volt.split('.')
+        voltage = int(volts[0])
+        sql4 = "select category, size, rate, unit from sysinp.fin_construction_cost where item = 'Equipment' and type = 'Transformer' and voltage = " + str(voltage)
+        cur.execute(sql4)
+        rows2 = cur.fetchall()
+        if cur.rowcount > 0:
+            cur.execute("INSERT INTO exprojects.fout_construction_cost(separator) VALUES ('')")
+            cur.execute("INSERT INTO exprojects.fout_construction_cost(item) VALUES ('Proposed Equipment')")
+
+            for row2 in rows2:
+                trnSize = row2[1]
+                trnRate = row2[2]
+                trnUnit = row2[3]
+                trnPhase = row2[0]
+                strPhase1 = ""
+                strPhase2 = ""
+                strPhase3 = ""
+                strPhase4 = ""
+                strPhase5 = ""
+                strPhase6 = ""
+                strPhase7 = ""
+                numTrn = 0
+                phase = utility.phase()
+
+                if trnPhase == "Three Phase":
+                    strPhase7 = phase.phase7(self.basePhase)
+                    sql5 = "select sum(equip_unit) numTrn from exprojects." + self.poletablename + " where equip_size = '" + trnSize + "' and equip_phase = '" + strPhase7 + "'"
+                    cur.execute(sql5)
+                    trans = cur.fetchone()
+                    numTrn = trans[0]
+                elif trnPhase == "Two Phase":
+                    strPhase4 = Phase.phase4(self.basePhase)
+                    strPhase5 = Phase.phase5(self.basePhase)
+                    strPhase6 = Phase.phase6(self.basePhase)
+                    sql5 = "select sum(equip_unit) numTrn from exprojects." + self.poletablename + " where equip_size = '" + trnSize + "' and equip_phase = '" + strPhase4 + "' or equip_phase = '" + strPhase5 + "' or equip_phase = '" + strPhase6 + "'"
+                    cur.execute(sql5)
+                    trans = cur.fetchone()
+                    numTrn = trans[0]
+                elif trnPhase == "Single Phase":
+                    strPhase1 = Phase.phase1(self.basePhase)
+                    strPhase2 = Phase.phase2(self.basePhase)
+                    strPhase3 = Phase.phase3(self.basePhase)
+                    sql5 = "select sum(equip_unit) numTrn from exprojects." + self.poletablename + " where equip_size = '" + trnSize + "' and equip_phase = '" + strPhase1 + "' or equip_phase = '" + strPhase2 + "' or equip_phase = '" + strPhase3 + "'"
+                    cur.execute(sql5)
+                    trans = cur.fetchone()
+                    numTrn = trans[0]
+
+                if numTrn > 0:
+                    trnkVA = str(trnSize) + " kVA - " + trnPhase
+                    lineV = extensionProject.LineVoltage/1000
+                    trnType = str(lineV) + "/0.4 kV"
+                    trnPrice = round(numTrn * trnRate, 0)
+                    totalNumTrn = totalNumTrn + numTrn
+
+                    allUnit = trnUnit.split(' ')
+                    self.extCurrency = allUnit[0]
+                    cur.execute("INSERT INTO exprojects.fout_construction_cost(separator, item, type, details, quantity, amount, amount_unit)VALUES ('Equipment', 'Transformer', '"+trnType+"','"+trnkVA+"',"+numTrn+","+trnPrice+",'"+self.extCurrency+"')")
+                    #QMessageBox.information(self.iface.mainWindow(),"Financial Analysis", str(trnPrice))
+        totalPriCost = 0
+        whereClause = "item = 'Electric Line' and type = 'Primary Distribution' and voltage = " + str(voltage)
+        sql6 = "select category, size, rate, unit from sysinp.fin_construction_cost where " + whereClause
+        cur.execute(sql6)
+        linerows = cur.fetchall()
+        if cur.rowcount > 0:
+            cur.execute("INSERT INTO exprojects.fout_construction_cost(separator) VALUES ('')")
+            cur.execute("INSERT INTO exprojects.fout_construction_cost(item) VALUES ('Proposed Line')")
+            for linerow in linerows:
+                lineSize = linerow[1]
+                lineRate = linerow[2]
+                lineUnit = linerow[3]
+                linePhase = linerow[0]
+
+                lineLen = self.getConductorLineLength(self.linetablename, lineSize, linePhase)
+                #QMessageBox.information(self.iface.mainWindow(),"Financial Analysis", str(lineRate))
+                if lineLen > 0:
+                    lineV = extensionProject.LineVoltage / 1000
+                    lineType = str(lineV) + " kV Primary Line - " + linePhase
+                    lineLength = round(lineLen/1000, 3)
+                    linePrice = round(lineLength * lineRate,0)
+                    totalPriCost = totalPriCost + linePrice
+                    #QMessageBox.information(self.iface.mainWindow(),"Financial Analysis", str(self.extCurrency))
+                    insertsql ="INSERT INTO exprojects.fout_construction_cost(separator, type, details, quantity,quantity_unit, amount, amount_unit)VALUES ('Electric Line', '"+lineType+"','"+lineSize+"','"+str(lineLength)+"','km','"+str(linePrice)+"','USD')"
+                    QMessageBox.information(self.iface.mainWindow(),"Financial Analysis", insertsql)
+                    #cur.execute(insertsql)
+        else:
+            QMessageBox.information(self.iface.mainWindow(),"Financial Analysis", "No Primary Line Definition Found in Construction Cost Table")
+
+        whereClause = "item = 'Electric Line' and type = 'Secondary Distribution' and size = '" + extensionProject.SecondaryConductor + "'"
+        sql7 = "select rate, unit from sysinp.fin_construction_cost where " + whereClause
+        cur.execute(sql7)
+        seclinerows = cur.fetchall()
+        totalSecCost = 0
+        if cur.rowcount > 0:
+            for seclinerow in seclinerows:
+                seclineRate = seclinerow[0]
+                seclineUnit = seclinerow[1]
+
+                secLineLength = round(extensionProject.SecondaryLength * totalNumTrn, 3)
+                totalSecCost = totalSecCost + round(seclineRate * secLineLength, 0)
+                if totalSecCost > 0:
+                    cur.execute("INSERT INTO exprojects.fout_construction_cost(separator, type, details, quantity,quantity_unit, amount, amount_unit)VALUES ('Electric Line', 'Secondary Line','"+extensionProject.SecondaryConductor+"',"+secLineLength+",'km',"+totalSecCost+",'"+ self.extCurrency+"')")
+        else:
+            QMessageBox.information(self.iface.mainWindow(),"Financial Analysis", "No Secondary Line Definition Found in Construction Cost Table")
+        if totalServiceDrop > 0:
+            cur.execute("INSERT INTO exprojects.fout_construction_cost(separator, type, details, amount, amount_unit)VALUES ('Electric Line', 'Service Drop','-','"+str(totalServiceDrop)+"','"+ self.extCurrency+"')")
+
+        finYear= self.getVal("sysinp.fin_cashflow_parameters", "value","category","Analysis Term")
+        midYear = self.getVal("sysinp.fin_cashflow_parameters", "value","category","Analysis Mid Term")
+        subYear =self.getVal("sysinp.fin_subsidy", "value","category","Service Drop Subsidy")
+        hhGrMidYear = self.getVal("sysinp.fin_households","percentage", "item", "Household Growth")
+        hhGrFinYear = self.getVal("sysinp.fin_households","percentage", "item", "Household Growth")
+
+        srvDropSubsidy = self.calculateServiceDropSubsidy(totalConsumer, hhGrMidYear, hhGrFinYear, subYear, midYear, finYear, dicConSrvDrop)
+
+        if srvDropSubsidy < 0:
+            srvDropSubsidy = 0
+        if srvDropSubsidy > 0:
+            cur.execute("INSERT INTO exprojects.fout_construction_cost(separator) VALUES ('')")
+            typ = "Service Drop Subsidy upto " + str(subYear) + " Year"
+            cur.execute("INSERT INTO exprojects.fout_construction_cost(separator, type, details, amount, amount_unit)VALUES ('Subsidy', '"+typ+"','-','"+str(round(srvDropSubsidy))+"','"+ self.extCurrency+"')")
+        totalConsCost = round((totalTrnPrice + totalServiceDrop + totalPriCost + totalSecCost + srvDropSubsidy), 0)
+        if totalConsCost > 0:
+            cur.execute("INSERT INTO exprojects.fout_construction_cost(separator) VALUES ('')")
+            cur.execute("INSERT INTO exprojects.fout_construction_cost(separator, item, amount, amount_unit)VALUES ('Project Cost', 'Total Construction Cost','"+str(totalConsCost)+"','"+ self.extCurrency+"')")
+        perConsumerCost = round((totalConsCost/totalConsumer), 0)
+        if perConsumerCost > 0:
+            cur.execute("INSERT INTO exprojects.fout_construction_cost(separator) VALUES ('')")
+            cur.execute("INSERT INTO exprojects.fout_construction_cost(separator, item, amount, amount_unit)VALUES ('Project Cost', 'Per Consumer Cost','"+str(perConsumerCost)+"','"+ self.extCurrency+"')")
+        conn.commit()
+
+
+
+    def calculateServiceDropSubsidy(self, yearHH, hhMidGrowth, hhFinGrowth, serviceDropYear, analysisMidYear, analysisFinYear, dicserdrop):
+        totalServDropSubsidy = 0
+        if serviceDropYear > 0:
+            yearServHH = 0
+            hhGrMidYear = hhMidGrowth / 100
+            hhGrFinYear = hhFinGrowth / 100
+            y = 0
+            while (y <= serviceDropYear):
+                y= y + 1
+                if y == 1:
+                    yearServHH = yearHH
+                else:
+                    if analysisMidYear != 0:
+                        if y <= analysisMidYear:
+                            yearServHH = yearServHH * (1 + hhGrMidYear)
+                        else:
+                            yearServHH == yearServHH * (1 + hhGrFinYear)
+                    else:
+                        yearServHH = yearServHH + (1 + hhGrFinYear)
+            sql = "SELECT consumer, ini_penetration, mid_penetration, fin_penetration, ratio FROM sysinp.fin_consumer_tariff"
+            cur = self.getcursor()
+            cur.execute(sql)
+            rows = cur.fetchall()
+            for row in rows:
+                conType = row[0]
+                iniPen = row[1] / 100
+                midPen = row[2] / 100
+                finPen = row[3] / 100
+                conRatio = row[4] / 100
+                calPen = iniPen
+                i = 0
+                while(i<=serviceDropYear):
+                    i = i + 1
+                    if i > 1 :
+                        if analysisMidYear != 0:
+                            if i <= analysisMidYear:
+                                midYear = analysisMidYear -1
+                                midYearDiff = 1 / midYear
+                                if calPen == 0:
+                                    conGrowth = pow((midPen/1),midYearDiff) - 1
+                                    calPen = calPen * (1 + conGrowth)
+                                else:
+                                    conGrowth = pow((midPen/iniPen), midYearDiff) - 1
+                                    calPen = calPen * (1 + conGrowth)
+                            else:
+                                finYear = analysisFinYear - analysisMidYear
+                                finYearDiff = 1 / finYear
+                                if calPen == 0:
+                                    conGrowth = pow((finPen/1), finYearDiff) -1
+                                    calPen = calPen * (1 + conGrowth)
+                                else:
+                                    conGrowth = pow((finPen/midPen),finYearDiff) - 1
+                                    calPen = calPen * (1 + conGrowth)
+                        else:
+                            finYear = analysisFinYear -1
+                            finYearDiff = 1/finYear
+                            if calPen == 0:
+                                conGrowth = pow((finPen/1), finYearDiff) -1
+                                calPen = calPen * (1 + conGrowth)
+                            else:
+                                conGrowth = pow((finPen / iniPen), finYearDiff) - 1
+                                calPen = calPen * (1 + conGrowth)
+                    oldConsumer = yearHH * conRatio
+                    newConsumer = yearServHH * calPen * conRatio
+                    addConsumer = newConsumer - oldConsumer
+                    srvDropRate = dicserdrop[conType]
+                    servDropCost = addConsumer * srvDropRate
+                    totalServDropSubsidy = totalServDropSubsidy + servDropCost
+            return totalServDropSubsidy
+
+
+    def getVal(self, table, valField, searchfield, searchString):
+        sql = "SELECT " + valField + " FROM " + table + " where "+searchfield+" = '"+searchString+"'"
+        cur = self.getcursor()
+        cur.execute(sql)
+        row = cur.fetchone()
+        val = row[0]
+        return val
+
+
+    def getConductorLineLength(self, tablename, conductorSize, phase):
+        length = 0
+        cur = self.getcursor()
+        r =None
+        sql = None
+        if phase == "Three Phase":
+            whereClause = "con_size_1 = '" + conductorSize + "'"
+            sql = "select sum(st_length(geom)) length from exprojects." + self.linetablename + " where " + whereClause
+            cur.execute(sql)
+            r = cur.fetchone()
+            length = r[0]
+        elif phase == "Two Phase":
+            whereClause = "con_size_1 = '" + conductorSize + "' AND con_size_2 = '" + conductorSize + "'"
+            sql = "select sum(st_length(geom)) length from exprojects." + self.linetablename + " where " + whereClause
+            cur.execute(sql)
+            r = cur.fetchone()
+            length = r[0]
+            if length == 0:
+                whereClause1 = "con_size_2 = '" + conductorSize + "' AND con_size_3 = '" + conductorSize + "'"
+                sql2 = "select sum(st_length(geom)) length from exprojects." + self.linetablename + " where " + whereClause
+                cur.execute(sql2)
+                r = cur.fetchone()
+                length = r[0]
+                if length == 0:
+                    whereClause2 = "con_size_3 = '" + conductorSize + "' AND con_size_1 = '" + conductorSize + "'"
+                    sql3 = "select sum(st_length(geom)) length from exprojects." + self.linetablename + " where " + whereClause
+                    cur.execute(sql3)
+                    r = cur.fetchone()
+                    length = r[0]
+
+        elif phase == "Single Phase":
+            whereClause = "con_size_1 = '" + conductorSize + "' or con_size_2 = '" + conductorSize + "'" + "or con_size_2 = '" + conductorSize + "'"
+            sql = "select sum(st_length(geom)) length from exprojects." + self.linetablename + " where " + whereClause
+            cur.execute(sql)
+            r = cur.fetchone()
+            length = r[0]
+        return length
+
+
+
 
 
     def getText(self):
@@ -440,8 +754,6 @@ class frmFinance_dialog(QDialog, Ui_frmFinance):
         hhtype = self.tableView.model().data(hhtypeIdx)
         extensionProject.HHSourceType = hhtype
 
-
-
         cur = self.getcursor()
         bsops = utility.basicOps()
         fedcode = bsops.getFedCode(cur, sub, fed)
@@ -500,6 +812,8 @@ class frmFinance_dialog(QDialog, Ui_frmFinance):
             QgsMapLayerRegistry.instance().addMapLayer(polelayer)
         else:
             QMessageBox.information(self.iface.mainWindow(),"Add Project Layers","{0} layer already exists!".format(layername))
+
+
 
     def refresh_layers(self):
         for layer in qgis.utils.iface.mapCanvas().layers():

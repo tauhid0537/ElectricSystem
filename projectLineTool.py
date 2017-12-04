@@ -232,12 +232,12 @@ class prjLineTool(QgsMapTool):
         lineID = subcode + "-" + fedcode + "-pro-" + extensionProject.ProjectNumber + "-" + str(newNumber)
         linetablename = "exprojects." + extensionProject.LineTableName
         myXY = ','.join(map(str, xy))
-        QMessageBox.information(self.iface.mainWindow(),"Add Project Layers",extensionProject.PhaseConfiguration)
+        #QMessageBox.information(self.iface.mainWindow(),"Add Project Layers",extensionProject.PhaseConfiguration)
         conSize = self.phaseConSize(extensionProject.PhaseConfiguration)
         conSize1 = conSize[0]
         conSize2 = conSize[1]
         conSize3 = conSize[2]
-        QMessageBox.information(self.iface.mainWindow(),"Add Project Layers","Ph1- " + conSize1 + ", Ph2- " + conSize2 + ", Ph3- " + conSize3)
+        #QMessageBox.information(self.iface.mainWindow(),"Add Project Layers","Ph1- " + conSize1 + ", Ph2- " + conSize2 + ", Ph3- " + conSize3)
 
         sql2 = """INSERT INTO """ + linetablename + """ (substation, feeder, section_id, line_voltage,line_type, phase, con_size_1, con_size_2, con_size_3, geom)
         VALUES('""" + self.sub + """','""" + self.fed + """','""" + lineID + """','""" + str(extensionProject.LineVoltage)  +"""','""" + extensionProject.LineType + """','""" + extensionProject.PhaseConfiguration + """',

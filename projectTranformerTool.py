@@ -268,7 +268,7 @@ class transformerTool(QgsMapTool):
 
         avgCon = ((rs * rsCon) + (sc * scCon) + (lc * lcCon) + (si * siCon) + (li * liCon) + (pb * pbCon) + (ag * agCon) + (st * stCon))/totalConsumer
         kW = self.powerDemand(totalConsumer, avgCon)
-        QMessageBox.information(self.iface.mainWindow(),"Test Tool","kW is: " + str(kW))
+        #QMessageBox.information(self.iface.mainWindow(),"Test Tool","kW is: " + str(kW))
         kVA = kW/0.9
 
         return rs, sc, lc, si, li, pb, ag, st, kVA
@@ -360,10 +360,10 @@ class transformerTool(QgsMapTool):
                     currentkVA = t
 
             if currentkVA >= minTrn:
-                sql3 = """INSERT INTO """ + poletablename + """ (substation, feeder, pole_use, pole_phase, equip_type, equip_id, equip_phase, equip_size, rs_con, sc_con, lc_con,
+                sql3 = """INSERT INTO """ + poletablename + """ (substation, feeder, pole_use, pole_phase, equip_type, equip_id, equip_phase,equip_unit, equip_size, rs_con, sc_con, lc_con,
                 si_con, li_con, pb_con, ag_con, st_con, geom)
                 VALUES('"""+self.sub+ """','""" + self.fed + """',
-                'Primary','R-Y-B','Transformer','"""+transID +"""','R-Y-B',"""+ str(round(currentkVA,0)) + ""","""+ str(rs) + """,""" + str(sc) + """
+                'Primary','""" + extensionProject.PhaseConfiguration + """',1,'Transformer','"""+transID +"""','R-Y-B',"""+ str(round(currentkVA,0)) + ""","""+ str(rs) + """,""" + str(sc) + """
                 ,""" + str(lc) + ""","""+ str(si)+""","""+str(li)+""","""+str(pb)+""","""+str(ag)+""","""+str(st)+""",ST_GeomFromText('POINT(""" + xx + ' ' + yy + """)',3857));"""
                 cur.execute(sql3)
                 conn.commit()
