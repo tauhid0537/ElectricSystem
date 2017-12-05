@@ -6,6 +6,8 @@ from qgis.core import *
 from qgis.gui import *
 import qgis
 
+#locale.setlocale(locale.LC_ALL, 'en_US')
+
 import os
 import sys
 import csv
@@ -106,10 +108,20 @@ class frmFinance_dialog(QDialog, Ui_frmFinance):
 
         self.cmdInputTable.clicked.connect(self.openInputTable)
         self.cmdCalCon.clicked.connect(self.onProjectCost)
+        self.cmdRepCon.clicked.connect(self.showProjectCostReport)
         self.cmdCreatePro.clicked.connect(self.createProject)
         self.cmdAddPro.clicked.connect(self.addProLayers)
         self.cmdDelPro.clicked.connect(self.deleteSelectedTableRow)
         self.cmdClose.clicked.connect(self.onClose)
+
+    def printer(self):
+        printer = QtGui.QPrinter()
+        printer = QtGui.QPrinter(QtGui.QPrinter.HighResolution)
+        printer.setPageSize(QtGui.QPrinter.A4)
+        printer.setColorMode(QtGui.QPrinter.Color)
+        printer.setOutputFormat(QtGui.QPrinter.PdfFormat)
+        printer.setOutputFileName('report.pdf')
+        self.page().mainFrame().print_(printer)
 
     def onProjectCost(self):
         poleTable = "exprojects." + self.poletablename
@@ -117,6 +129,9 @@ class frmFinance_dialog(QDialog, Ui_frmFinance):
         extensionProject.SecondaryConductor = self.cmbScConSize.currentText()
         extensionProject.SecondaryLength = float(self.txtAvgTrLen.text())
         self.calculateConstructionCost(poleTable, lineTable,"sysinp.fin_construction_cost","sysinp.fin_households","sysinp.fin_subsidy", "sysinp.fin_cashflow_parameters","exprojects.fout_construction_cost")
+    def showProjectCostReport(self):
+        self.createConstructionCostReport()
+        QMessageBox.information(self.iface.mainWindow(),"Financial Analysis", "Cost Report Created")
 
     def calculateConstructionCost(self, propoletable, prolinetable, conCostTab, hhGrowthTab, subsidyTab, cashFlowTab, outputTable):
         dicConsumerAlias = {}
@@ -165,15 +180,19 @@ class frmFinance_dialog(QDialog, Ui_frmFinance):
         volt = str(extensionProject.LineVoltage)
         volts = volt.split('.')
         voltage = int(volts[0])
+        #QMessageBox.information(self.iface.mainWindow(),"Financial Analysis", str(voltage)+"v")
         sql4 = "select category, size, rate, unit from sysinp.fin_construction_cost where item = 'Equipment' and type = 'Transformer' and voltage = " + str(voltage)
+        #QMessageBox.information(self.iface.mainWindow(),"Financial Analysis", "sql- "+sql4)
         cur.execute(sql4)
         rows2 = cur.fetchall()
         if cur.rowcount > 0:
-            cur.execute("INSERT INTO exprojects.fout_construction_cost(separator) VALUES ('')")
+            cur.execute("INSERT INTO exprojects.fout_construction_cost(separator) VALUES (' ')")
             cur.execute("INSERT INTO exprojects.fout_construction_cost(item) VALUES ('Proposed Equipment')")
 
             for row2 in rows2:
-                trnSize = row2[1]
+                allsize = row2[1].split('.')
+                trnSize = allsize[0]
+                #QMessageBox.information(self.iface.mainWindow(),"Financial Analysis", "trnize- "+trnSize)
                 trnRate = row2[2]
                 trnUnit = row2[3]
                 trnPhase = row2[0]
@@ -190,9 +209,11 @@ class frmFinance_dialog(QDialog, Ui_frmFinance):
                 if trnPhase == "Three Phase":
                     strPhase7 = phase.phase7(self.basePhase)
                     sql5 = "select sum(equip_unit) numTrn from exprojects." + self.poletablename + " where equip_size = '" + trnSize + "' and equip_phase = '" + strPhase7 + "'"
+                    #QMessageBox.information(self.iface.mainWindow(),"Financial Analysis", "sql- "+sql5)
                     cur.execute(sql5)
                     trans = cur.fetchone()
-                    numTrn = trans[0]
+                    if trans[0] is not None:
+                        numTrn = numTrn + trans[0]
                 elif trnPhase == "Two Phase":
                     strPhase4 = Phase.phase4(self.basePhase)
                     strPhase5 = Phase.phase5(self.basePhase)
@@ -219,15 +240,17 @@ class frmFinance_dialog(QDialog, Ui_frmFinance):
 
                     allUnit = trnUnit.split(' ')
                     self.extCurrency = allUnit[0]
-                    cur.execute("INSERT INTO exprojects.fout_construction_cost(separator, item, type, details, quantity, amount, amount_unit)VALUES ('Equipment', 'Transformer', '"+trnType+"','"+trnkVA+"',"+numTrn+","+trnPrice+",'"+self.extCurrency+"')")
+                    cur.execute("INSERT INTO exprojects.fout_construction_cost(separator, item, type, details, quantity, amount, amount_unit)VALUES ('Equipment', 'Transformer', '"+trnType+"','"+trnkVA+"','"+str(numTrn)+"','"+str(trnPrice)+"','USD')")
                     #QMessageBox.information(self.iface.mainWindow(),"Financial Analysis", str(trnPrice))
+        else:
+            QMessageBox.information(self.iface.mainWindow(),"Financial Analysis", "No Transformer Definition Found in Construction Cost Table")
         totalPriCost = 0
         whereClause = "item = 'Electric Line' and type = 'Primary Distribution' and voltage = " + str(voltage)
         sql6 = "select category, size, rate, unit from sysinp.fin_construction_cost where " + whereClause
         cur.execute(sql6)
         linerows = cur.fetchall()
         if cur.rowcount > 0:
-            cur.execute("INSERT INTO exprojects.fout_construction_cost(separator) VALUES ('')")
+            cur.execute("INSERT INTO exprojects.fout_construction_cost(separator) VALUES (' ')")
             cur.execute("INSERT INTO exprojects.fout_construction_cost(item) VALUES ('Proposed Line')")
             for linerow in linerows:
                 lineSize = linerow[1]
@@ -244,11 +267,11 @@ class frmFinance_dialog(QDialog, Ui_frmFinance):
                     linePrice = round(lineLength * lineRate,0)
                     totalPriCost = totalPriCost + linePrice
                     #QMessageBox.information(self.iface.mainWindow(),"Financial Analysis", str(self.extCurrency))
-                    insertsql ="INSERT INTO exprojects.fout_construction_cost(separator, type, details, quantity,quantity_unit, amount, amount_unit)VALUES ('Electric Line', '"+lineType+"','"+lineSize+"','"+str(lineLength)+"','km','"+str(linePrice)+"','USD')"
-                    QMessageBox.information(self.iface.mainWindow(),"Financial Analysis", insertsql)
-                    #cur.execute(insertsql)
+                    insertsql ="INSERT INTO exprojects.fout_construction_cost(separator, type, details, quantity,quantity_unit, amount, amount_unit)VALUES ('Electric Line', '"+lineType+"','"+lineSize+"','"+str(lineLength)+"','km','"+str(linePrice)+"', 'USD')"
+                    #QMessageBox.information(self.iface.mainWindow(),"Financial Analysis", insertsql)
+                    cur.execute(insertsql)
         else:
-            QMessageBox.information(self.iface.mainWindow(),"Financial Analysis", "No Primary Line Definition Found in Construction Cost Table")
+            QMessageBox.information(self.iface.mainWindow(),"Financial Analysis", "No Transformer Definition Found in Construction Cost Table")
 
         whereClause = "item = 'Electric Line' and type = 'Secondary Distribution' and size = '" + extensionProject.SecondaryConductor + "'"
         sql7 = "select rate, unit from sysinp.fin_construction_cost where " + whereClause
@@ -263,15 +286,15 @@ class frmFinance_dialog(QDialog, Ui_frmFinance):
                 secLineLength = round(extensionProject.SecondaryLength * totalNumTrn, 3)
                 totalSecCost = totalSecCost + round(seclineRate * secLineLength, 0)
                 if totalSecCost > 0:
-                    cur.execute("INSERT INTO exprojects.fout_construction_cost(separator, type, details, quantity,quantity_unit, amount, amount_unit)VALUES ('Electric Line', 'Secondary Line','"+extensionProject.SecondaryConductor+"',"+secLineLength+",'km',"+totalSecCost+",'"+ self.extCurrency+"')")
+                    cur.execute("INSERT INTO exprojects.fout_construction_cost(separator, type, details, quantity,quantity_unit, amount, amount_unit)VALUES ('Electric Line', 'Secondary Line','"+extensionProject.SecondaryConductor+"','"+str(secLineLength)+"','km','"+str(totalSecCost)+"','USD')")
         else:
             QMessageBox.information(self.iface.mainWindow(),"Financial Analysis", "No Secondary Line Definition Found in Construction Cost Table")
         if totalServiceDrop > 0:
-            cur.execute("INSERT INTO exprojects.fout_construction_cost(separator, type, details, amount, amount_unit)VALUES ('Electric Line', 'Service Drop','-','"+str(totalServiceDrop)+"','"+ self.extCurrency+"')")
+            cur.execute("INSERT INTO exprojects.fout_construction_cost(separator, type, details, amount, amount_unit)VALUES ('Electric Line', 'Service Drop','-','"+str(totalServiceDrop)+"','USD')")
 
         finYear= self.getVal("sysinp.fin_cashflow_parameters", "value","category","Analysis Term")
         midYear = self.getVal("sysinp.fin_cashflow_parameters", "value","category","Analysis Mid Term")
-        subYear =self.getVal("sysinp.fin_subsidy", "value","category","Service Drop Subsidy")
+        subYear =self.getVal("sysinp.fin_subsidy", "value","type","Service Drop Subsidy")
         hhGrMidYear = self.getVal("sysinp.fin_households","percentage", "item", "Household Growth")
         hhGrFinYear = self.getVal("sysinp.fin_households","percentage", "item", "Household Growth")
 
@@ -280,20 +303,19 @@ class frmFinance_dialog(QDialog, Ui_frmFinance):
         if srvDropSubsidy < 0:
             srvDropSubsidy = 0
         if srvDropSubsidy > 0:
-            cur.execute("INSERT INTO exprojects.fout_construction_cost(separator) VALUES ('')")
+            cur.execute("INSERT INTO exprojects.fout_construction_cost(separator) VALUES (' ')")
             typ = "Service Drop Subsidy upto " + str(subYear) + " Year"
-            cur.execute("INSERT INTO exprojects.fout_construction_cost(separator, type, details, amount, amount_unit)VALUES ('Subsidy', '"+typ+"','-','"+str(round(srvDropSubsidy))+"','"+ self.extCurrency+"')")
+            cur.execute("INSERT INTO exprojects.fout_construction_cost(separator, type, details, amount, amount_unit)VALUES ('Subsidy', '"+typ+"','-','"+str(round(srvDropSubsidy))+"','USD')")
         totalConsCost = round((totalTrnPrice + totalServiceDrop + totalPriCost + totalSecCost + srvDropSubsidy), 0)
         if totalConsCost > 0:
-            cur.execute("INSERT INTO exprojects.fout_construction_cost(separator) VALUES ('')")
-            cur.execute("INSERT INTO exprojects.fout_construction_cost(separator, item, amount, amount_unit)VALUES ('Project Cost', 'Total Construction Cost','"+str(totalConsCost)+"','"+ self.extCurrency+"')")
+            cur.execute("INSERT INTO exprojects.fout_construction_cost(separator) VALUES (' ')")
+            cur.execute("INSERT INTO exprojects.fout_construction_cost(separator, item, amount, amount_unit)VALUES ('Project Cost', 'Total Construction Cost','"+str(totalConsCost)+"','USD')")
         perConsumerCost = round((totalConsCost/totalConsumer), 0)
         if perConsumerCost > 0:
-            cur.execute("INSERT INTO exprojects.fout_construction_cost(separator) VALUES ('')")
-            cur.execute("INSERT INTO exprojects.fout_construction_cost(separator, item, amount, amount_unit)VALUES ('Project Cost', 'Per Consumer Cost','"+str(perConsumerCost)+"','"+ self.extCurrency+"')")
+            cur.execute("INSERT INTO exprojects.fout_construction_cost(separator) VALUES (' ')")
+            cur.execute("INSERT INTO exprojects.fout_construction_cost(separator, item, amount, amount_unit)VALUES ('Project Cost', 'Per Consumer Cost','"+str(perConsumerCost)+"','USD')")
         conn.commit()
-
-
+        #self.createConstructionCostReport()
 
     def calculateServiceDropSubsidy(self, yearHH, hhMidGrowth, hhFinGrowth, serviceDropYear, analysisMidYear, analysisFinYear, dicserdrop):
         totalServDropSubsidy = 0
@@ -374,7 +396,6 @@ class frmFinance_dialog(QDialog, Ui_frmFinance):
         val = row[0]
         return val
 
-
     def getConductorLineLength(self, tablename, conductorSize, phase):
         length = 0
         cur = self.getcursor()
@@ -413,9 +434,212 @@ class frmFinance_dialog(QDialog, Ui_frmFinance):
             length = r[0]
         return length
 
+    def createConstructionCostReport(self):
+        msg = None
+        reportName = self.sub + '_' + self.fed +'_' + extensionProject.ProjectNumber
+        cur = self.getcursor()
 
+        htmlfilepath = os.path.dirname(__file__) + "/AnalysisResult/"+reportName+"_"+"ConstructionCost.html"
+        htmlfirst = """<html>
+        <meta http-equiv='X-UA-Compatible' content='IE=edge' />
+        <style type='text/css'>
+        BODY
+        {
+        font-family:'Verdana';
+        font-size:8pt;
+        margin :2px;
+        margin-left:10px;
+        margin-right:10px;
+        padding: 0px;
+        }
+        .maintable
+        {
+        font-family:'Verdana';
+        font-size:9px;
+        border: 1px solid rgb(138,204,192);
+        margin-top:8px;
+        margin-bottom:8px;
+        width: 100%;
+        }
+        .maintable .tr1
+        {
+        background-color:rgb(138,204,192);
+        text-align:left;
+        font-weight:bold;
+        }
+        .maintable .tr2
+        {
+        background-color:rgb(196,231,221);
+        text-align:left;
+        font-weight:normal;
+        }
+        .maintable .td1
+        {
+        border: 0px solid white;
+        }
+        .maintable .td2
+        {
+        border: 0px solid white;
+        font-weight:normal;
+        }
+        .maintable .td3
+        {
+        border: 1px solid white;
+        }
+        </style>
+        <body>
+        <table border='0' cellspacing = '0' style='text-align:left;width:100%;border: 0px solid white;'>
+        <tr style='Height: 30px;'>
+        <td><font size='2' face='Verdana'><b>Expansion Project Construction Cost</b></td>
+        </tr>
+        </table>
+        <table class = 'maintable' border='1' cellspacing='1' cellpadding='2' style='width:100%;'>
+        <tr>
+        <td class='td3' style = 'width:40%'>
+        <b>Project Information</b>
+        <table class = 'maintable' border='1' cellspacing='2' cellpadding='3' style='width:98%;'>
+        """
+        if os.path.exists(htmlfilepath):
+            os.remove(htmlfilepath)
+        htmlfile = open(htmlfilepath, 'w')
+        htmlfile.write(htmlfirst)
 
+        proClause = "separator = 'Project Information'"
+        prosql = " select item, type from exprojects.fout_construction_cost where " + proClause
+        cur.execute(prosql)
+        prorows = cur.fetchall()
+        for prorow in prorows:
+            itemStr = prorow[0]
+            typeStr = prorow[1]
+            htmlfile.write("<tr class='tr1'>")
+            htmlfile.write("<td class = 'td1' style = 'width:50%'>" + itemStr + "</td>")
+            htmlfile.write("<td class = 'td2' style = 'width:50%'>" + typeStr + "</td>")
+            htmlfile.write("</tr>")
+        htmlfile.write("</table>")
 
+        htmlfile.write("<b>Expected Consumer During Project Construction</b>")
+        htmlfile.write("<table class = 'maintable' border='1' cellspacing= '2' cellpadding = '3' style='width:98%;'>")
+        htmlfile.write("<tr class='tr1'>")
+        htmlfile.write("<th class='td1' style = 'width:50%'>Consumer Type</th>")
+        htmlfile.write("<th class='td1' style = 'width:50%'>Number</th>")
+        htmlfile.write("</tr>")
+
+        consumerClause = "separator = 'Consumer'"
+        csql = " select type, quantity from exprojects.fout_construction_cost where " + consumerClause
+        cur.execute(csql)
+        consumers = cur.fetchall()
+        for consumer in consumers:
+            typStr = consumer[0]
+            quantitycons = str(consumer[1])
+            htmlfile.write("<tr class='tr2'>")
+            htmlfile.write("<td class = 'td2'>" + typStr + "</td>")
+            htmlfile.write("<td class = 'td2' style='text-align:right'>" + quantitycons + "</td>")
+            htmlfile.write("</tr>")
+        htmlfile.write("</table>")
+
+        htmlfile.write("<b>Proposed Equipment</b>")
+        htmlfile.write("<table class = 'maintable' border='1' cellspacing= '2' cellpadding = '3' style='width:98%;'>")
+        htmlfile.write("<tr class='tr1'>")
+        htmlfile.write("<th class='td1' style = 'width:20%'>Type</th>")
+        htmlfile.write("<th class='td1' style = 'width:20%'>Voltage</th>")
+        htmlfile.write("<th class='td1' style = 'width:20%'>Detail</th>")
+        htmlfile.write("<th class='td1' style = 'width:20%'>Number</th>")
+        htmlfile.write("<th class='td1' style = 'width:20%'>Cost (USD)</th>")
+        htmlfile.write("</tr>")
+
+        equipClause = "separator = 'Equipment'"
+        eqsql = " select item, type, details, quantity, amount from exprojects.fout_construction_cost where " + equipClause
+        cur.execute(eqsql)
+        equipments = cur.fetchall()
+
+        for equipment in equipments:
+            eitmStr = equipment[0]
+            etypStr = equipment[1]
+            edetailStr = equipment[2]
+            equantityStr = equipment[3]
+            ecost = equipment[4]
+            htmlfile.write("<tr class='tr2'>")
+            htmlfile.write("<td class = 'td2'>" + eitmStr + "</td>")
+            htmlfile.write("<td class = 'td2'>" + etypStr + "</td>")
+            htmlfile.write("<td class = 'td2'>" + edetailStr + "</td>")
+            htmlfile.write("<td class = 'td2' style='text-align:right'>" + str(equantityStr) + "</td>")
+            htmlfile.write("<td class = 'td2' style='text-align:right'>" + str(ecost) + "</td>")
+            htmlfile.write("</tr>")
+        htmlfile.write("</table>")
+
+        htmlfile.write("<b>Proposed Line</b>")
+        htmlfile.write("<table class = 'maintable' border='1' cellspacing= '2' cellpadding = '3' style='width:98%;'>")
+        htmlfile.write("<tr class='tr1'>")
+        htmlfile.write("<th class='td1' style = 'width:25%'>Type</th>")
+        htmlfile.write("<th class='td1' style = 'width:25%'>Detail</th>")
+        htmlfile.write("<th class='td1' style = 'width:25%'>Length (kM)</th>")
+        htmlfile.write("<th class='td1' style = 'width:25%'>Cost (USD)</th>")
+        htmlfile.write("</tr>")
+
+        lineClause = "separator = 'Equipment'"
+        linesql = " select type, details, quantity, amount from exprojects.fout_construction_cost where " + lineClause
+        cur.execute(linesql)
+        lines = cur.fetchall()
+        for line in lines:
+            typStr = line[0]
+            detail = line[1]
+            quantity = str(line[2])
+            cost = str(line[3])
+
+            htmlfile.write("<tr class='tr2'>")
+            htmlfile.write("<td class = 'td2'>" + typStr + "</td>")
+            htmlfile.write("<td class = 'td2'>" + detail + "</td>")
+            htmlfile.write("<td class = 'td2' style='text-align:right'>" + quantity + "</td>")
+            htmlfile.write("<td class = 'td2' style='text-align:right'>" + cost + "</td>")
+            htmlfile.write("</tr>")
+        htmlfile.write("</table>")
+
+        subsClause = "separator = 'Subsidy'"
+        subssql = " select type, amount from exprojects.fout_construction_cost where " + subsClause
+        cur.execute(subssql)
+        if cur.rowcount > 0:
+            subsidys = cur.fetchall()
+            htmlfile.write("<b>Connection Subsidy Included in Project Cost</b>")
+            htmlfile.write("<table class = 'maintable' border='1' cellspacing= '2' cellpadding = '3' style='width:98%;'>")
+            htmlfile.write("<tr class='tr1'>")
+            htmlfile.write("<th class='td1' style = 'width:50%'>Cost Head</th>")
+            htmlfile.write("<th class='td1' style = 'width:50%'>Cost (USD)</th>")
+            htmlfile.write("</tr>")
+            for sub in subsidys:
+                itemStr = sub[0]
+                cost = str(sub[1])
+                htmlfile.write("<tr class='tr2'>")
+                htmlfile.write("<td class = 'td2'>" + itemStr + "</td>")
+                htmlfile.write("<td class = 'td2' style='text-align:right'>" + cost + "</td>")
+                htmlfile.write("</tr>")
+            htmlfile.write("</table>")
+
+        htmlfile.write("<b>Project Cost</b>")
+        htmlfile.write("<table class = 'maintable' border='1' cellspacing= '2' cellpadding = '3' style='width:98%;'>")
+        htmlfile.write("<tr class='tr1'>")
+        htmlfile.write("<th class='td1' style = 'width:50%'>Cost Head</th>")
+        htmlfile.write("<th class='td1' style = 'width:50%'>Cost (USD)</th>")
+        htmlfile.write("</tr>")
+
+        costClause = "separator = 'Project Cost'"
+        costsql = " select item, amount from exprojects.fout_construction_cost where " + costClause
+        cur.execute(costsql)
+        costs = cur.fetchall()
+        for cost in costs:
+            itemStr = cost[0]
+            cst = str(cost[1])
+
+            htmlfile.write("<tr class='tr2'>")
+            htmlfile.write("<td class = 'td2'>" + itemStr + "</td>")
+            htmlfile.write("<td class = 'td2' style='text-align:right'>" + cst + "</td>")
+            htmlfile.write("</tr>")
+        htmlfile.write("</table>")
+        htmlfile.write("</td>")
+        htmlfile.write("</tr>")
+        htmlfile.write("</table>")
+        htmlfile.write("</body>")
+        htmlfile.write("</html>")
+        htmlfile.close()
 
     def getText(self):
         msgBox = QtGui.QMessageBox()

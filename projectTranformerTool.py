@@ -358,12 +358,14 @@ class transformerTool(QgsMapTool):
                 if diff < currentDiff:
                     currentDiff = diff
                     currentkVA = t
-
-            if currentkVA >= minTrn:
+            allValue = str(round(currentkVA))
+            trValue = allValue.split('.')
+            transkVA = int(trValue[0])
+            if transkVA >= minTrn:
                 sql3 = """INSERT INTO """ + poletablename + """ (substation, feeder, pole_use, pole_phase, equip_type, equip_id, equip_phase,equip_unit, equip_size, rs_con, sc_con, lc_con,
                 si_con, li_con, pb_con, ag_con, st_con, geom)
                 VALUES('"""+self.sub+ """','""" + self.fed + """',
-                'Primary','""" + extensionProject.PhaseConfiguration + """',1,'Transformer','"""+transID +"""','R-Y-B',"""+ str(round(currentkVA,0)) + ""","""+ str(rs) + """,""" + str(sc) + """
+                'Primary','""" + extensionProject.PhaseConfiguration + """',1,'Transformer','"""+transID +"""','R-Y-B',"""+ str(transkVA) + ""","""+ str(rs) + """,""" + str(sc) + """
                 ,""" + str(lc) + ""","""+ str(si)+""","""+str(li)+""","""+str(pb)+""","""+str(ag)+""","""+str(st)+""",ST_GeomFromText('POINT(""" + xx + ' ' + yy + """)',3857));"""
                 cur.execute(sql3)
                 conn.commit()
