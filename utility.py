@@ -161,6 +161,7 @@ class extensionProject:
     BufferTableName = None
     HHSourceTableName = None
     lbTablename = None
+    reportfile = None
 
 
 

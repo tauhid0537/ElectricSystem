@@ -86,14 +86,14 @@ class Ui_frmReport(object):
         self.cmdHelp.setIcon(icon1)
         self.cmdHelp.setIconSize(QtCore.QSize(32, 32))
         self.cmdHelp.setObjectName(_fromUtf8("cmdHelp"))
-        self.pushButton = QtGui.QPushButton(self.groupBox)
-        self.pushButton.setGeometry(QtCore.QRect(760, 20, 50, 40))
-        self.pushButton.setText(_fromUtf8(""))
+        self.cmdPrint = QtGui.QPushButton(self.groupBox)
+        self.cmdPrint.setGeometry(QtCore.QRect(760, 20, 50, 40))
+        self.cmdPrint.setText(_fromUtf8(""))
         icon2 = QtGui.QIcon()
         icon2.addPixmap(QtGui.QPixmap(_fromUtf8(":/plugins/ElectricSystems/Resources/FormIcons/print.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.pushButton.setIcon(icon2)
-        self.pushButton.setIconSize(QtCore.QSize(32, 32))
-        self.pushButton.setObjectName(_fromUtf8("pushButton"))
+        self.cmdPrint.setIcon(icon2)
+        self.cmdPrint.setIconSize(QtCore.QSize(32, 32))
+        self.cmdPrint.setObjectName(_fromUtf8("cmdPrint"))
         self.webView = QtWebKit.QWebView(self.centralwidget)
         self.webView.setGeometry(QtCore.QRect(10, 110, 951, 491))
         self.webView.setUrl(QtCore.QUrl(_fromUtf8("about:blank")))
@@ -118,6 +118,7 @@ class Ui_frmReport(object):
         self.label_4.setText(_translate("frmReport", "Feeder", None))
         self.cmdClose.setToolTip(_translate("frmReport", "Close", None))
         self.cmdHelp.setToolTip(_translate("frmReport", "Help", None))
+        self.cmdPrint.setToolTip(_translate("frmReport", "Print Report", None))
 
 from PyQt4 import QtWebKit
 import resources

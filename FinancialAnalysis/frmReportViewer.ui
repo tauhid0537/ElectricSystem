@@ -213,7 +213,7 @@
       </size>
      </property>
     </widget>
-    <widget class="QPushButton" name="pushButton">
+    <widget class="QPushButton" name="cmdPrint">
      <property name="geometry">
       <rect>
        <x>760</x>

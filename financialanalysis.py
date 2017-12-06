@@ -13,6 +13,8 @@ import sys
 import csv
 from os import listdir
 from os.path import isfile, join
+import numpy
+
 import math
 
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
@@ -29,6 +31,8 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/FinancialAnalysis
 from frmFinance import *
 from frmInputTable import *
 from fininputtable import *
+from frmReportViewer import *
+from finreportviewer import *
 
 #sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/Resources/FormIcons")
 #import resources
@@ -109,6 +113,7 @@ class frmFinance_dialog(QDialog, Ui_frmFinance):
         self.cmdInputTable.clicked.connect(self.openInputTable)
         self.cmdCalCon.clicked.connect(self.onProjectCost)
         self.cmdRepCon.clicked.connect(self.showProjectCostReport)
+        self.cmdCalFin.clicked.connect(self.fianncialAnalysis)
         self.cmdCreatePro.clicked.connect(self.createProject)
         self.cmdAddPro.clicked.connect(self.addProLayers)
         self.cmdDelPro.clicked.connect(self.deleteSelectedTableRow)
@@ -128,15 +133,507 @@ class frmFinance_dialog(QDialog, Ui_frmFinance):
         lineTable = "exprojects." + self.linetablename
         extensionProject.SecondaryConductor = self.cmbScConSize.currentText()
         extensionProject.SecondaryLength = float(self.txtAvgTrLen.text())
-        self.calculateConstructionCost(poleTable, lineTable,"sysinp.fin_construction_cost","sysinp.fin_households","sysinp.fin_subsidy", "sysinp.fin_cashflow_parameters","exprojects.fout_construction_cost")
-    def showProjectCostReport(self):
-        self.createConstructionCostReport()
-        QMessageBox.information(self.iface.mainWindow(),"Financial Analysis", "Cost Report Created")
 
-    def calculateConstructionCost(self, propoletable, prolinetable, conCostTab, hhGrowthTab, subsidyTab, cashFlowTab, outputTable):
+        self.calculateConstructionCost(poleTable, lineTable,"sysinp.fin_construction_cost","sysinp.fin_households","sysinp.fin_subsidy", "sysinp.fin_cashflow_parameters")
+        self.createConstructionCostReport()
+
+        proname = self.txtPro.text()
+        frmReport = frmReportViewer_dialog(self.iface)
+        frmReport.txtPro.setText(proname)
+        frmReport.txtPBS.setText(basicOps.dbasename)
+        frmReport.txtSub.setText(basicOps.substation)
+        frmReport.txtFed.setText(basicOps.feeder)
+        frmReport.webView.setHtml('')
+        htmlfile = extensionProject.reportfile
+        local_url = QUrl.fromLocalFile(htmlfile)
+        frmReport.webView.load(local_url)
+        frmReport.exec_()
+
+    def showProjectCostReport(self):
+        sql = "select "
+        self.createConstructionCostReport()
+        reportName = self.sub + '_' + self.fed +'_' + extensionProject.ProjectNumber
+        #cur = self.getcursor()
+
+        htmlfilepath = os.path.dirname(__file__) + "/AnalysisResult/"+reportName+"_"+"ConstructionCost.html"
+        if os.path.exists(htmlfilepath):
+            proname = self.txtPro.text()
+            frmReport = frmReportViewer_dialog(self.iface)
+            frmReport.txtPro.setText(proname)
+            frmReport.txtPBS.setText(basicOps.dbasename)
+            frmReport.txtSub.setText(basicOps.substation)
+            frmReport.txtFed.setText(basicOps.feeder)
+            frmReport.webView.setHtml('')
+            htmlfile = htmlfilepath
+            local_url = QUrl.fromLocalFile(htmlfile)
+            frmReport.webView.load(local_url)
+            frmReport.exec_()
+        else:
+            QMessageBox.warning(self.iface.mainWindow(),"Financial Analysis", "Construction Cost Report does not Exist\n\nPlease Calculate Construction Cost First")
+        #extensionProject.reportfile = htmlfilepath
+        #QMessageBox.information(self.iface.mainWindow(),"Financial Analysis", "Cost Report Created")
+
+    def fianncialAnalysis(self):
+        conn = self.getConnection()
+        cur = conn.cursor()
+        poleTable = "exprojects." + self.poletablename
+        lineTable = "exprojects." + self.linetablename
+        extensionProject.SecondaryConductor = self.cmbScConSize.currentText()
+        extensionProject.SecondaryLength = float(self.txtAvgTrLen.text())
+
+        inCostTab = "sysinp.fin_construction_cost"
+        inConsumerTab = "sysinp.fin_consumer_tariff"
+        inDistLossTab = "sysinp.fin_distribution_loss"
+        inExpenseTab = "sysinp.fin_expense"
+        inHouseRatTab = "sysinp.fin_households"
+        inSubsidyTab = "sysinp.fin_subsidy"
+        inCashFlowPar = "sysinp.fin_cashflow_parameters"
+        inOtherRevTab = "sysinp.fin_additional_revenue"
+
+        outCostTab = "exprojects.fout_construction_cost"
+        outConsumerTab = "exprojects.fout_consumer_finance"
+        outSummaryTab = "exprojects.fout_project_summery"
+
+        self.calculateConstructionCost(poleTable,lineTable,inCostTab,inHouseRatTab,inSubsidyTab,inCashFlowPar)
+
+        #Cash Flow Parameters
+        extensionProject.AnalysisYear = self.getVal(inCashFlowPar, "value", "category", "Analysis Term")
+        extensionProject.MidAnalysisYear = self.getVal(inCashFlowPar, "value", "category", "Analysis Mid Term")
+        extensionProject.InterestYear = self.getVal(inCashFlowPar, "value", "category", "Interest Payment Year")
+        discountRate = (self.getVal(inCashFlowPar, "value", "category", "Discount Rate")) / 100
+        if extensionProject.AnalysisYear == 0:
+            QMessageBox.information(self.iface.mainWindow(),"Financial Analysis", "Cash Flow Analysis Year is Zero\n\nPlease Update Cash Flow Parameters Table")
+        else:
+            #QMessageBox.information(self.iface.mainWindow(),"Financial Analysis", "Analysis Year: " + str(extensionProject.AnalysisYear))
+            #Construction cost for this project
+            totConstCost = self.getVal(outCostTab, "amount", "item","Total Construction Cost")
+
+            #Distribution Loss
+            distLoss = (self.getVal(inDistLossTab, "technical", "region", extensionProject.HouseholdType)) / 100
+            colEff = (self.getVal(inDistLossTab, "collection", "region", extensionProject.HouseholdType)) / 100
+
+            #Subsidy
+            subCap = (self.getVal(inSubsidyTab, "value", "type", "Capital Subsidy")) / 100
+            subIni = (self.getVal(inSubsidyTab, "value", "type", "Operational Subsidy-First Year")) / 100
+            subMid = (self.getVal(inSubsidyTab, "value", "type", "Operational Subsidy-Upto Mid Year")) / 100
+            subFin = (self.getVal(inSubsidyTab, "value", "type", "Operational Subsidy-Upto Final Year")) / 100
+            subSrv = self.getVal(inSubsidyTab, "value", "type", "Service Drop Subsidy")
+
+            #Household Ratio
+            hhRatio = (self.getVal(inHouseRatTab, "percentage", "item", "Household Ratio")) / 100
+            hhGrMidYear = (self.getVal(inHouseRatTab, "percentage", "item", "Household Growth Upto Mid Year")) / 100
+            hhGrFinYear = (self.getVal(inHouseRatTab, "percentage", "item", "Household Growth Upto Final Year")) / 100
+            hhPotential = (self.getVal(inHouseRatTab, "percentage", "item", "Potential Household")) / 100
+
+            # Clear Output Tables
+            cur.execute("delete from " + outConsumerTab)
+            cur.execute("delete from " + outSummaryTab)
+
+            #Get Line Length of project line in km
+            linesql = " select st_length(geom) length from "+ lineTable
+            cur.execute(linesql)
+            row = cur.fetchone()
+            lineLength = round(row[0]/1000,3)
+
+            #Consumption
+            dicConsumption = {}
+
+            rs = self.getVal(inConsumerTab, "ini_consumption", "consumer", "RS_Con")
+            sc = self.getVal(inConsumerTab, "ini_consumption", "consumer", "SC_Con")
+            lc = self.getVal(inConsumerTab, "ini_consumption", "consumer", "LC_Con")
+            si = self.getVal(inConsumerTab, "ini_consumption", "consumer", "SI_Con")
+            li = self.getVal(inConsumerTab, "ini_consumption", "consumer", "LI_Con")
+            pb = self.getVal(inConsumerTab, "ini_consumption", "consumer", "PB_Con")
+            ag = self.getVal(inConsumerTab, "ini_consumption", "consumer", "AG_Con")
+            st = self.getVal(inConsumerTab, "ini_consumption", "consumer", "ST_Con")
+
+            dicConsumption["RS_Con"] = rs
+            dicConsumption["SC_Con"] = sc
+            dicConsumption["LC_Con"] = lc
+            dicConsumption["SI_Con"] = si
+            dicConsumption["LI_Con"] = li
+            dicConsumption["PB_Con"] = pb
+            dicConsumption["AG_Con"] = ag
+            dicConsumption["ST_Con"] = st
+
+            #Initial Penetration
+            dicIniPen = {}
+
+            penRS = (self.getVal(inConsumerTab, "ini_penetration", "consumer", "RS_Con")) / 100
+            penSC = (self.getVal(inConsumerTab, "ini_penetration", "consumer", "SC_Con")) / 100
+            penLC = (self.getVal(inConsumerTab, "ini_penetration", "consumer", "LC_Con")) / 100
+            penSI = (self.getVal(inConsumerTab, "ini_penetration", "consumer", "SI_Con")) / 100
+            penLI = (self.getVal(inConsumerTab, "ini_penetration", "consumer", "LI_Con")) / 100
+            penPB = (self.getVal(inConsumerTab, "ini_penetration", "consumer", "PB_Con")) / 100
+            penAG = (self.getVal(inConsumerTab, "ini_penetration", "consumer", "AG_Con")) / 100
+            penST = (self.getVal(inConsumerTab, "ini_penetration", "consumer", "ST_Con")) / 100
+
+            dicIniPen["RS_Con"] = penRS
+            dicIniPen["SC_Con"] = penSC
+            dicIniPen["LC_Con"] = penLC
+            dicIniPen["SI_Con"] = penSI
+            dicIniPen["LI_Con"] = penLI
+            dicIniPen["PB_Con"] = penPB
+            dicIniPen["AG_Con"] = penAG
+            dicIniPen["ST_Con"] = penST
+
+            #Get total potential consumer by category from proposed pole layer
+            dicConsumer = {}
+            totRSCon = round(self.getSumValLayer(poleTable, "RS_Con"), 0)
+            totSCCon = round(self.getSumValLayer(poleTable, "SC_Con"), 0)
+            totLCCon = round(self.getSumValLayer(poleTable, "LC_Con"), 0)
+            totSICon = round(self.getSumValLayer(poleTable, "SI_Con"), 0)
+            totLICon = round(self.getSumValLayer(poleTable, "LI_Con"), 0)
+            totPBCon = round(self.getSumValLayer(poleTable, "PB_Con"), 0)
+            totAGCon = round(self.getSumValLayer(poleTable, "AG_Con"), 0)
+            totSTCon = round(self.getSumValLayer(poleTable, "ST_Con"), 0)
+
+            totalHousehold = totRSCon + totSCCon + totLCCon + totSICon + totLICon + totPBCon + totAGCon + totSTCon
+
+            dicConsumer["RS_Con"] = totRSCon * penRS
+            dicConsumer["SC_Con"] = totSCCon * penSC
+            dicConsumer["LC_Con"] = totLCCon * penLC
+            dicConsumer["SI_Con"] = totSICon * penSI
+            dicConsumer["LI_Con"] = totLICon * penLI
+            dicConsumer["PB_Con"] = totPBCon * penPB
+            dicConsumer["AG_Con"] = totAGCon * penAG
+            dicConsumer["ST_Con"] = totSTCon * penST
+
+            #QMessageBox.information(self.iface.mainWindow(),"Financial Analysis", "Total Consumer: " + str(totalHousehold))
+
+            # Service Drop
+            dicServiceDrop = {}
+            sdcostRS = self.getVal(inConsumerTab, "rate", "", "RS_Con")
+            sdcostSC = self.getVal(inConsumerTab, "rate", "category", "SC_Con")
+            sdcostLC = self.getVal(inConsumerTab, "rate", "category", "LC_Con")
+            sdcostSI = self.getVal(inConsumerTab, "rate", "category", "SI_Con")
+            sdcostLI = self.getVal(inConsumerTab, "rate", "category", "LI_Con")
+            sdcostPB = self.getVal(inConsumerTab, "rate", "category", "PB_Con")
+            sdcostAG = self.getVal(inConsumerTab, "rate", "category", "AG_Con")
+            sdcostST = self.getVal(inConsumerTab, "rate", "category", "ST_Con")
+
+            dicServiceDrop["RS_Con"] = sdcostRS
+            dicServiceDrop["SC_Con"] = sdcostSC
+            dicServiceDrop["LC_Con"] = sdcostLC
+            dicServiceDrop["SI_Con"] = sdcostSI
+            dicServiceDrop["LI_Con"] = sdcostLI
+            dicServiceDrop["PB_Con"] = sdcostPB
+            dicServiceDrop["AG_Con"] = sdcostAG
+            dicServiceDrop["ST_Con"] = sdcostST
+
+            #Consumer Alias
+            dicConsumerAlias = {}
+            conAliassql = "select category, category_alias from " + inCostTab + " where item = 'Consumer'"
+            cur.execute(sql)
+            rows = cur.fetchall()
+            for row in rows:
+                contype = row[0]
+                consAlias = row[1]
+                dicConsumerAlias[contype] = consAlias
+
+            # year 0 Calculation: Subsidy
+            self.updateRow(outConsumerTab, "item = 'Total Expense'", "Year0", totConstCost)
+            capSubsidyY0 = round((totConstCost *subCap), 0)
+            self.updateRow(outConsumerTab, "item = 'Capital Subsidy'", "Year0", capSubsidyY0)
+            self.updateRow(outConsumerTab, "item = 'Total Subsidy'", "Year0", capSubsidyY0)
+            self.updateRow(outConsumerTab, "item = 'Total Revenue'", "Year0", capSubsidyY0)
+            netRevSub = capSubsidyY0 - totConstCost
+            self.updateRow(outConsumerTab, "item = 'Net Revenue'", "Year0", netRevSub)
+            capSubRest = totConstCost - capSubsidyY0
+
+            #Cashflow into an array
+            cashFlow = [extensionProject.AnalysisYear]
+
+            # Start Loop
+            yearHousehold = 0
+            y = 0
+            while(y <= extensionProject.AnalysisYear):
+                y= y + 1
+                if y == 1:
+                    yearHousehold = totalHousehold
+                else:
+                    if extensionProject.MidYearAnalysis != 0:
+                        if y <= extensionProject.MidYearAnalysis:
+                            yearHousehold = yearHousehold * (1 + hhGrMidYear)
+                        else:
+                            yearHousehold = yearHousehold * (1 + hhGrFinYear)
+                    else:
+                        yearHousehold = yearHousehold * (1 + hhGrFinYear)
+            newConsumer = 0
+            yearConsumer = 0
+            yearPowUsage = 0
+            yearTechLoss = 0
+            yearSrvDrop = 0
+            yearPowRev = 0
+            yearConRev = 0
+            yearFixRev = 0
+            yearPurPower = 0
+
+            consumerTarsql = """SELECT consumer, ini_penetration, mid_penetration, fin_penetration,
+            mid_consumer_gr, fin_consumer_gr, ini_consumption, mid_consumption_gr, fin_consumption_gr, connnect_charge, fixed_charge, energy_charge, ratio from """ + inConsumerTab
+            cur.execute(consumerTarsql)
+            contarRows = cur.fetchall()
+            for tarrow in contarRows:
+                conType = tarrow[0]
+                conRatio = tarrow[12] / 100
+                iniPen = tarrow[1] / 100
+                midPen = tarrow[2] / 100
+                finPen = tarrow[3] / 100
+
+                midConGr = tarrow[7] / 100
+                finConGr = tarrow[8] / 100
+
+                conChargeReg = tarrow[9]
+                conChargeSub = tarrow[9]
+                fixedCharge = tarrow[10]
+                powCharge = tarrow[11]
+
+                newConsump = 0
+                powUsage = 0
+                techLoss = 0
+                srvDropCost = 0
+                powRev = 0
+                conRev = 0
+                fixRev = 0
+                consumpGrowth = 0
+
+                dicConsumerAlias[conType]
+                calPen = dicIniPen[conType]
+                oldConsumer = dicConsumer[conType]
+                oldConsump = dicConsumption[conType]
+                srvDropRate = dicServiceDrop[conType]
+
+                if y <= subSrv:
+                    srvDropRate = 0
+                    conChargeReg = conChargeSub
+                if y == 1:
+                    newConsumer = totalHousehold * iniPen * conRatio
+                    yearConsumer = yearConsumer + newConsumer
+                    calPen = iniPen
+                    newConsump = oldConsump
+
+                    powUsage = (newConsumer * newConsump) * 12
+                    techLoss = distLoss * (powUsage / (1 - distLoss))
+
+                    yearPowUsage = yearPowUsage + powUsage
+                    yearTechLoss = yearTechLoss + techLoss
+
+                    #Revenue
+                    powRev = powUsage * powCharge;
+                    conRev = newConsumer * conChargeReg;
+                    fixRev = newConsumer * fixCharge * 12;
+
+                    yearPowRev = yearPowRev + powRev
+                    yearConRev = yearConRev + conRev
+                    yearFixRev = yearFixRev + fixRev
+                else:
+                    if extensionProject.MidYearAnalysis != 0:
+                        if y <= extensionProject.MidYearAnalysis:
+                            midYear = extensionProject.MidAnalysisYear - 1
+                            midYearDiff = 1 / midYear
+                            if calPen == 0:
+                                conGrowth = pow((midPen / 1),midYearDiff) - 1
+                                calPen = calPen * (1 + conGrowth)
+                            else:
+                                conGrowth = pow((midPen / iniPen),midYearDiff) - 1
+                                calPen = calPen * (1 + conGrowth)
+                            consumpGrowth = midConGr
+                        else:
+                            finYear = extensionProject.AnalysisYear - extensionProject.MidYearAnalysis
+                            finYearDiff = 1 / finYear
+                            if calPen == 0:
+                                conGrowth = pow((finPen / 1),finYearDiff) - 1
+                                calPen = calPen * (1 + conGrowth)
+                            else:
+                                conGrowth = pow((finPen / midPen),finYearDiff) - 1
+                                calPen = calPen * (1 + conGrowth)
+                            consumpGrowth = finConGr
+                    else:
+                        finYear = extensionProject.AnalysisYear - 1
+                        finYearDiff = 1 / finYear
+                        if calPen == 0:
+                            conGrowth = pow((finPen / 1),finYearDiff) - 1
+                            calPen = calPen * (1 + conGrowth)
+                        else:
+                            conGrowth = pow((finPen / iniPen),finYearDiff) - 1
+                            calPen = calPen * (1 + conGrowth)
+                        consumpGrowth = finConGr
+
+                    newConsumer = yearHousehold * calPen * conRatio
+                    addConsumer = newConsumer - oldConsumer
+                    yearConsumer = yearConsumer + newConsumer
+
+                    #Consumption
+                    newConsump = oldConsump + (oldConsump * consumpGrowth)
+                    powUsage = newConsumer * newConsump * 12
+                    techLoss = distLoss * (powUsage / (1 - distLoss))
+                    srvDropCost = addConsumer * srvDropRate
+
+                    yearPowUsage = yearPowUsage + powUsage
+                    yearTechLoss = yearTechLoss + techLoss
+                    yearSrvDrop = yearSrvDrop + srvDropCost
+
+                    #Revenue
+                    powRev = powUsage * powCharge
+                    conRev = addConsumer * conChargeReg
+                    fixRev = newConsumer * fixCharge * 12
+
+                    yearPowRev = yearPowRev + powRev
+                    yearConRev = yearConRev + conRev
+                    yearFixRev = yearFixRev + fixRev
+
+                del dicConsumer[conType]
+                dicConsumer[conType] = newConsumer
+                del dicConsumption[conType]
+                dicConsumption[conType] = newConsump
+                del dicIniPen[conType]
+                dicIniPen[conType] = calPen
+
+                typCons = consAlias + " Consumption"
+                typUsag = consAlias + " Usage"
+                typSrvD = consAlias + " Service Drop"
+                typPowR = consAlias + " Power Revenue"
+                typConC = consAlias + " Connection Charge"
+                typFixC = consAlias + " Fixed Charge"
+
+                self.updateRow(outConsumerTab, "item = '" + consAlias + "'","Year" + str(y), round(newConsumer, 0))
+                self.updateRow(outConsumerTab, "item = '" + typCons + "'","Year" + str(y), round(newConsump, 0))
+                self.updateRow(outConsumerTab, "item = '" + typUsag + "'","Year" + str(y), round(powUsage, 0))
+                self.updateRow(outConsumerTab, "item = '" + typSrvD + "'","Year" + str(y), round(srvDropCost, 0))
+                self.updateRow(outConsumerTab, "item = '" + typPowR + "'","Year" + str(y), round(powRev, 0))
+                self.updateRow(outConsumerTab, "item = '" + typConC + "'","Year" + str(y), round(conRev, 0))
+                self.updateRow(outConsumerTab, "item = '" + typFixC + "'","Year" + str(y), round(fixRev, 0))
+            yearPurPower = yearPowUsage + yearTechLoss
+            self.updateRow(outConsumerTab, "item = 'Total Consumer'","Year" + str(y), round(yearConsumer, 0))
+            self.updateRow(outConsumerTab, "item = 'Total Energy Usage'","Year" + str(y), round(yearPowUsage, 0))
+            self.updateRow(outConsumerTab, "item = 'Technical Loss'","Year" + str(y), round(yearTechLoss, 0))
+            self.updateRow(outConsumerTab, "item = 'Power Purchase'","Year" + str(y), round(yearPurPower, 0))
+            self.updateRow(outConsumerTab, "item = 'Total Service Drop Expense'","Year" + str(y), round(yearSrvDrop, 0))
+            self.updateRow(outConsumerTab, "item = 'Total Power Revenue'","Year" + str(y), round(yearPowRev, 0))
+            self.updateRow(outConsumerTab, "item = 'Total Connection Charge'","Year" + str(y), round(yearConRev, 0))
+            self.updateRow(outConsumerTab, "item = 'Total Fixed Charge'","Year" + str(y), round(yearFixRev, 0))
+
+            #Add to Summary Table
+            self.updateRow(outSummaryTab, "item = 'Total Consumer'","Year" + str(y), round(yearConsumer, 0))
+            self.updateRow(outConsumerTab, "item = 'Power Purchase'","Year" + str(y), round(yearPurPower, 0))
+
+            #expense
+            expensesql = "SELECT category, unit, value FROM " + inExpenseTab
+            cur.execute(expensesql)
+            exrows = cur.fetchall()
+            powerRate = 0
+            totalOpCost = 0
+            for exrow in exrows:
+                costCate = exrow[0]
+                costUnit = exrow[1]
+                costValu = exrow[2]
+
+                if "Power Cost" in costCate:
+                    powerRate = costValu
+                costItem = 0
+                if "Interest" in costCate:
+                    if y < extensionProject.InterestYear:
+                        costItem = 0
+                    else:
+                        if "Percentage of Construction" in costUnit:
+                            costItem = round((totConstCost * (costValu / 100)), 0)
+                        if "Line" in costUnit:
+                            costItem = round((lineLength * costValu), 0)
+                else:
+                    if "kWH Purchased" in costUnit:
+                        costItem = round((yearPurPower * costValu), 0)
+                    if "kWH Sold" in costUnit:
+                        costItem = round((yearPowUsage * costValu), 0)
+                    if "Consumer" in costUnit:
+                        costItem = round((yearConsumer * costValu), 0)
+                    if "Percentage of Construction" in costUnit:
+                        costItem = round((totConstCost * (costValu / 100)), 0)
+                    if "Line" in costUnit:
+                        costItem = round((lineLength * costValu), 0)
+                    if "Percentage of Power Cost" in costUnit:
+                        powerCost = yearPurPower * powerRate
+                        costItem = round((powerCost * (costValu / 100)), 0)
+                totalOpCost = totalOpCost + costItem
+                self.updateRow(outConsumerTab, "item = '" + costCate + "'", "Year" + str(y), costItem)
+            self.updateRow(outConsumerTab, "item = 'Total Operating Expense'", "Year" + str(y), totalOpCost)
+            totalExpense = round((totalOpCost + yearSrvDrop), 0)
+            self.updateRow(outConsumerTab, "item = 'Total Expense'", "Year" + str(y), totalExpense)
+
+            #Subsidy
+            subYear = round((capSubRest / extensionProject.AnalysisYear), 0)
+            self.updateRow(outConsumerTab, "item = 'Capital Subsidy'", "Year" + str(y), subYear)
+            subIniYear = 0
+            subMidYear = 0
+            subFinYear = 0
+            self.updateRow(outConsumerTab, "item = 'First Year'", "Year" + str(y), subIniYear)
+            self.updateRow(outConsumerTab, "item = 'Upto Mid Year'", "Year" + str(y), subMidYear)
+            self.updateRow(outConsumerTab, "item = 'Upto Final Year'", "Year" + str(y), subFinYear)
+            totalSubsidy = subYear + subIniYear + subMidYear + subFinYear
+            self.updateRow(outConsumerTab, "item = 'Total Subsidy'", "Year" + str(y), totalSubsidy)
+
+            #Collection Efficiency
+            totalColEff = ((yearPowRev + yearFixRev) * colEff) - (yearPowRev + yearFixRev)
+            self.updateRow(outConsumerTab, "item = 'Collection Efficiency'", "Year" + str(y), round(totalColEff, 0))
+
+            #Revenue from Power
+            totalPowerRelRev = yearPowRev + yearFixRev + yearConRev + totalColEff
+
+            #Other Revenue
+            totalAddRev = 0
+            othrsql = "SELECT category, unit, value  FROM " + inOtherRevTab
+            cur.execute(othrsql)
+            othrrows = cur.fetchall()
+            for otrrow in othrrows:
+                revCate = otrrow[0]
+                revUnit = otrrow[1]
+                revValue = otrrow[2]
+                revItem = 0
+                if "Percentage of Total Revenue" in revUnit:
+                    revItem = totalPowerRelRev * (revValue / 100)
+                if "Percentage of Power Revenue" in revUnit:
+                    revItem = yearPowRev * (revValue / 100)
+                self.updateRow(outConsumerTab, "item = '" + revCate + "'", "Year" + str(y), round(revItem, 0))
+                totalAddRev = totalAddRev + revItem
+            self.updateRow(outConsumerTab, "item = 'Total Additional Revenue'", "Year" + str(y), round(totalAddRev, 0))
+            totalRevenue = totalPowerRelRev + totalAddRev
+            self.updateRow(outConsumerTab, "item = 'Total Revenue'", "Year" + str(y), round(totalRevenue, 0))
+            netRevenue = totalRevenue - totalExpense
+            self.updateRow(outConsumerTab, "item = 'Net Revenue'", "Year" + str(y), round(netRevenue, 0))
+
+            self.updateRow(outSummaryTab, "item = 'Total Expense'", "Year" + str(y), round(totalExpense, 0))
+            self.updateRow(outSummaryTab, "item = 'Total Revenue'", "Year" + str(y), round(totalRevenue, 0))
+            self.updateRow(outSummaryTab, "item = 'Net Revenue'", "Year" + str(y), round(netRevenue, 0))
+
+            cashFlow[y-1] = netRevenue
+        NPV = round(npv(discountRate, cashFlow), 0)
+        self.updateRow(outSummaryTab, "item = 'Net Present Value (NPV)'", "Year1", NPV)
+        self.updateRow(outConsumerTab, "item = 'Net Present Value (NPV)'", "Year1", NPV)
+        QMessageBox.information(self.iface.mainWindow(),"Financial Analysis", "NPV- "+str(NPV))
+
+
+
+
+
+    def updateRow(self, table, searchString, updateField, updateValue):
+        sql = "UPDATE " + table + " SET "+updateField+" = '" + updateValue + "' WHERE " + searchString
+        conn = self.getConnection()
+        cur = conn.cursor()
+        cur.execute(sql)
+        conn.commit()
+
+    def getSumValLayer(self, table, searchfield):
+        sql3 = "select sum(" + searchfield + ") consumer from " + table
+        cur = self.getcursor()
+        cur.execute(sql3)
+        row = cur.fetchone()
+        val = row[0]
+        return val
+
+
+    def calculateConstructionCost(self, propoletable, prolinetable, conCostTab, hhGrowthTab, subsidyTab, cashFlowTab):
         dicConsumerAlias = {}
         dicConSrvDrop = {}
-        sql = "select category, category_alias, rate from sysinp.fin_construction_cost where item = 'Consumer'"
+        sql = "select category, category_alias, rate from " + conCostTab + " where item = 'Consumer'"
         conn = self.getConnection()
         cur = conn.cursor()
         cur.execute(sql)
@@ -156,7 +653,7 @@ class frmFinance_dialog(QDialog, Ui_frmFinance):
         cur.execute("INSERT INTO exprojects.fout_construction_cost(separator) VALUES ('')")
         cur.execute("INSERT INTO exprojects.fout_construction_cost(item) VALUES ('Expected Consumer')")
 
-        sql2 = "select category, rate from sysinp.fin_construction_cost where item = 'Consumer'"
+        sql2 = "select category, rate from "+ conCostTab + " where item = 'Consumer'"
         cur.execute(sql2)
         items = cur.fetchall()
         totalConsumer = 0
@@ -181,7 +678,7 @@ class frmFinance_dialog(QDialog, Ui_frmFinance):
         volts = volt.split('.')
         voltage = int(volts[0])
         #QMessageBox.information(self.iface.mainWindow(),"Financial Analysis", str(voltage)+"v")
-        sql4 = "select category, size, rate, unit from sysinp.fin_construction_cost where item = 'Equipment' and type = 'Transformer' and voltage = " + str(voltage)
+        sql4 = "select category, size, rate, unit from " + conCostTab + " where item = 'Equipment' and type = 'Transformer' and voltage = " + str(voltage)
         #QMessageBox.information(self.iface.mainWindow(),"Financial Analysis", "sql- "+sql4)
         cur.execute(sql4)
         rows2 = cur.fetchall()
@@ -246,7 +743,7 @@ class frmFinance_dialog(QDialog, Ui_frmFinance):
             QMessageBox.information(self.iface.mainWindow(),"Financial Analysis", "No Transformer Definition Found in Construction Cost Table")
         totalPriCost = 0
         whereClause = "item = 'Electric Line' and type = 'Primary Distribution' and voltage = " + str(voltage)
-        sql6 = "select category, size, rate, unit from sysinp.fin_construction_cost where " + whereClause
+        sql6 = "select category, size, rate, unit from " + conCostTab + " where " + whereClause
         cur.execute(sql6)
         linerows = cur.fetchall()
         if cur.rowcount > 0:
@@ -274,7 +771,7 @@ class frmFinance_dialog(QDialog, Ui_frmFinance):
             QMessageBox.information(self.iface.mainWindow(),"Financial Analysis", "No Transformer Definition Found in Construction Cost Table")
 
         whereClause = "item = 'Electric Line' and type = 'Secondary Distribution' and size = '" + extensionProject.SecondaryConductor + "'"
-        sql7 = "select rate, unit from sysinp.fin_construction_cost where " + whereClause
+        sql7 = "select rate, unit from " + conCostTab + " where " + whereClause
         cur.execute(sql7)
         seclinerows = cur.fetchall()
         totalSecCost = 0
@@ -291,12 +788,12 @@ class frmFinance_dialog(QDialog, Ui_frmFinance):
             QMessageBox.information(self.iface.mainWindow(),"Financial Analysis", "No Secondary Line Definition Found in Construction Cost Table")
         if totalServiceDrop > 0:
             cur.execute("INSERT INTO exprojects.fout_construction_cost(separator, type, details, amount, amount_unit)VALUES ('Electric Line', 'Service Drop','-','"+str(totalServiceDrop)+"','USD')")
-
-        finYear= self.getVal("sysinp.fin_cashflow_parameters", "value","category","Analysis Term")
-        midYear = self.getVal("sysinp.fin_cashflow_parameters", "value","category","Analysis Mid Term")
-        subYear =self.getVal("sysinp.fin_subsidy", "value","type","Service Drop Subsidy")
-        hhGrMidYear = self.getVal("sysinp.fin_households","percentage", "item", "Household Growth")
-        hhGrFinYear = self.getVal("sysinp.fin_households","percentage", "item", "Household Growth")
+        #hhGrowthTab, subsidyTab, cashFlowTab
+        finYear= self.getVal(cashFlowTab, "value","category","Analysis Term")
+        midYear = self.getVal(cashFlowTab, "value","category","Analysis Mid Term")
+        subYear =self.getVal(subsidyTab, "value","type","Service Drop Subsidy")
+        hhGrMidYear = self.getVal(hhGrowthTab,"percentage", "item", "Household Growth")
+        hhGrFinYear = self.getVal(hhGrowthTab,"percentage", "item", "Household Growth")
 
         srvDropSubsidy = self.calculateServiceDropSubsidy(totalConsumer, hhGrMidYear, hhGrFinYear, subYear, midYear, finYear, dicConSrvDrop)
 
@@ -389,7 +886,7 @@ class frmFinance_dialog(QDialog, Ui_frmFinance):
 
 
     def getVal(self, table, valField, searchfield, searchString):
-        sql = "SELECT " + valField + " FROM " + table + " where "+searchfield+" = '"+searchString+"'"
+        sql = "SELECT " + valField + " FROM " + table + " where " + searchfield + " = '" + searchString + "'"
         cur = self.getcursor()
         cur.execute(sql)
         row = cur.fetchone()
@@ -440,6 +937,7 @@ class frmFinance_dialog(QDialog, Ui_frmFinance):
         cur = self.getcursor()
 
         htmlfilepath = os.path.dirname(__file__) + "/AnalysisResult/"+reportName+"_"+"ConstructionCost.html"
+        extensionProject.reportfile = htmlfilepath
         htmlfirst = """<html>
         <meta http-equiv='X-UA-Compatible' content='IE=edge' />
         <style type='text/css'>
@@ -576,7 +1074,7 @@ class frmFinance_dialog(QDialog, Ui_frmFinance):
         htmlfile.write("<th class='td1' style = 'width:25%'>Cost (USD)</th>")
         htmlfile.write("</tr>")
 
-        lineClause = "separator = 'Equipment'"
+        lineClause = "separator = 'Electric Line'"
         linesql = " select type, details, quantity, amount from exprojects.fout_construction_cost where " + lineClause
         cur.execute(linesql)
         lines = cur.fetchall()
