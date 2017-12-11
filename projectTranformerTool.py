@@ -337,8 +337,30 @@ class transformerTool(QgsMapTool):
 
         if kVA < extensionProject.MinimumTransformerkVA:
             QMessageBox.information(self.iface.mainWindow(),"Test Tool","Proposed Transformer size {0} kVA is less than ".format(str(kVA))+ str(extensionProject.MinimumTransformerkVA) + " kVA\n\nPlease increase buffer size and try again")
+            transForm = frmAddTransformer_dialog(self.iface)
+            transForm.txtPro.setText(basicOps.usrname)
+            transForm.txtDatabase.setText(basicOps.dbasename)
+            transForm.txtSub.setText(basicOps.substation)
+            transForm.txtFed.setText(basicOps.feeder)
+            transForm.txtProNum.setText('1')
+            transForm.txtMinTrn.setText('20')
+            transForm.txtMaxTrn.setText('500')
+
+            transForm.exec_()
+            #self.deactivate()
         elif kVA > extensionProject.MaximumTransformerkVA:
             QMessageBox.information(self.iface.mainWindow(),"Test Tool","Proposed Transformer size {0} kVA is greater than ".format(str(kVA))+ str(extensionProject.MaximumTransformerkVA) + " kVA\n\nPlease decrease buffer size and try again")
+            transForm = frmAddTransformer_dialog(self.iface)
+            transForm.txtPro.setText(basicOps.usrname)
+            transForm.txtDatabase.setText(basicOps.dbasename)
+            transForm.txtSub.setText(basicOps.substation)
+            transForm.txtFed.setText(basicOps.feeder)
+            transForm.txtProNum.setText('1')
+            transForm.txtMinTrn.setText('20')
+            transForm.txtMaxTrn.setText('500')
+
+            transForm.exec_()
+            #self.deactivate()
         else:
             bsops = utility.basicOps()
             fedcode = bsops.getFedCode(cur, self.sub, self.fed)

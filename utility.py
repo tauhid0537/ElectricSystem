@@ -152,7 +152,7 @@ class extensionProject:
     SecondaryLength = 0
     HouseholdType = None
     AnalysisYear = 0
-    MidAnalysisYear = 0
+    MidYearAnalysis = 0
     InterestYear = 0
     EquipmentType = 0
     EquipmentSize = 0
