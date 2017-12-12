@@ -21,14 +21,31 @@
  ***************************************************************************/
 """
 
+def name():
+  return "NRECA Electric Systems"
+
+def version():
+  return "Version 1.0"
+
+def description():
+  return "A QGIS plugin to develop, process, validate and Analyze Electricity Network data"
+
+def qgisMinimumVersion():
+  return "1.8"
+
+def experimental():
+  return True
+
+def author():
+  return "MD TAUHIDUL ISLAM"
+
+def authorName():
+  return author()
+
+def email():
+  return "tislam@nreca-intl.org, tauhid0537@gmail.com"
 
 # noinspection PyPep8Naming
 def classFactory(iface):  # pylint: disable=invalid-name
-    """Load MultiForm class from file MultiForm.
-
-    :param iface: A QGIS interface instance.
-    :type iface: QgsInterface
-    """
-    #
     from .mainclass import ElectricSystems
     return ElectricSystems(iface)

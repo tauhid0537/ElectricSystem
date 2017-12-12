@@ -113,6 +113,7 @@ class frmFinance_dialog(QDialog, Ui_frmFinance):
         self.cmdInputTable.clicked.connect(self.openInputTable)
         self.cmdCalCon.clicked.connect(self.onProjectCost)
         self.cmdRepCon.clicked.connect(self.showProjectCostReport)
+        self.cmdRepFin.clicked.connect(self.showProjectFinancialReport)
         self.cmdCalFin.clicked.connect(self.fianncialAnalysis)
         self.cmdCreatePro.clicked.connect(self.createProject)
         self.cmdAddPro.clicked.connect(self.addProLayers)
@@ -148,7 +149,6 @@ class frmFinance_dialog(QDialog, Ui_frmFinance):
         frmReport.exec_()
 
     def showProjectCostReport(self):
-        sql = "select "
         self.createConstructionCostReport()
         reportName = self.sub + '_' + self.fed +'_' + extensionProject.ProjectNumber
         #cur = self.getcursor()
@@ -168,8 +168,26 @@ class frmFinance_dialog(QDialog, Ui_frmFinance):
             frmReport.exec_()
         else:
             QMessageBox.warning(self.iface.mainWindow(),"Financial Analysis", "Construction Cost Report does not Exist\n\nPlease Calculate Construction Cost First")
-        #extensionProject.reportfile = htmlfilepath
-        #QMessageBox.information(self.iface.mainWindow(),"Financial Analysis", "Cost Report Created")
+
+    def showProjectFinancialReport(self):
+        self.createSummaryReport()
+        reportName = self.sub + '_' + self.fed +'_' + extensionProject.ProjectNumber
+
+        htmlfilepath = os.path.dirname(__file__) + "/AnalysisResult/"+reportName+"_"+"ExtensionAnalysis.html"
+        if os.path.exists(htmlfilepath):
+            proname = self.txtPro.text()
+            frmReport = frmReportViewer_dialog(self.iface)
+            frmReport.txtPro.setText(proname)
+            frmReport.txtPBS.setText(basicOps.dbasename)
+            frmReport.txtSub.setText(basicOps.substation)
+            frmReport.txtFed.setText(basicOps.feeder)
+            frmReport.webView.setHtml('')
+            htmlfile = htmlfilepath
+            local_url = QUrl.fromLocalFile(htmlfile)
+            frmReport.webView.load(local_url)
+            frmReport.exec_()
+        else:
+            QMessageBox.warning(self.iface.mainWindow(),"Financial Analysis", "Financial Analysis Report does not Exist\n\nPlease Run Financial Analysis First")
 
     def updateRow(self, table, searchString, updateField, updateValue):
 		sql = "update "+table+" set "+updateField+" = " + str(updateValue) + " WHERE item = '" + searchString +"';"
@@ -177,28 +195,6 @@ class frmFinance_dialog(QDialog, Ui_frmFinance):
 		cur = conn.cursor()
 		cur.execute(sql)
 		conn.commit()
-
-    """def getValMultipleWhereCLause(self, searchString, updatefield, updateval):
-        conn = self.getConnection()
-        cur = conn.cursor()
-        funcname = 'exprojects.updatesumrow'
-        cur.callproc(funcname, [searchval, updateval, updatefield])
-        conn.commit()
-
-    def updateFinRow(self, searchval, updatefield, updateval):
-        conn = self.getConnection()
-        cur = conn.cursor()
-        funcname = 'exprojects.updatefinrow'
-        cur.callproc(funcname, [searchval, updateval, updatefield])
-        conn.commit()
-
-    def insertIntoTemp(self, table, item, yr, val):
-        conn = self.getConnection()
-        cur = conn.cursor()
-        sql = 'insert into ' + table +'(item, year, val) values('+item+','+ yr +','+ val + ')'
-        cur.execute(sql)
-        conn.commit()"""
-
 
     def fianncialAnalysis(self):
         conn = self.getConnection()
@@ -231,7 +227,6 @@ class frmFinance_dialog(QDialog, Ui_frmFinance):
             extensionProject.InterestYear = self.getVal(inCashFlowPar, "value", "category", "Interest Payment Year")
             discountRate = (self.getVal(inCashFlowPar, "value", "category", "Discount Rate")) / 100
 
-            #QMessageBox.information(self.iface.mainWindow(),"Financial Analysis", " Mid Analysis Year: " + str(extensionProject.MidAnalysisYear))
             #Construction cost for this project
             totConstCost = self.getVal(outCostTab, "amount", "item","Total Construction Cost")
 
@@ -251,10 +246,6 @@ class frmFinance_dialog(QDialog, Ui_frmFinance):
             hhGrMidYear = (self.getVal(inHouseRatTab, "percentage", "item", "Household Growth Upto Mid Year")) / 100
             hhGrFinYear = (self.getVal(inHouseRatTab, "percentage", "item", "Household Growth Upto Final Year")) / 100
             hhPotential = (self.getVal(inHouseRatTab, "percentage", "item", "Potential Household")) / 100
-
-            # Clear Output Tables
-            #cur.execute("delete from " + outConsumerTab)
-            #cur.execute("delete from " + outSummaryTab)
 
             #Get Line Length of project line in km
             linesql = " select st_length(geom) length from "+ lineTable
@@ -326,8 +317,6 @@ class frmFinance_dialog(QDialog, Ui_frmFinance):
             dicConsumer["AG_Con"] = totAGCon * penAG
             dicConsumer["ST_Con"] = totSTCon * penST
 
-            #QMessageBox.information(self.iface.mainWindow(),"Financial Analysis", "Total Consumer: " + str(totalHousehold))
-
             # Service Drop
             dicServiceDrop = {}
             srvdropsql = "select rate, category from " + inCostTab + " where type = 'Service Drop'"
@@ -382,14 +371,12 @@ class frmFinance_dialog(QDialog, Ui_frmFinance):
 
             #Cashflow into an array
             cashFlow = range(int(extensionProject.AnalysisYear))
-            #QMessageBox.information(self.iface.mainWindow(),"Financial Analysis", "Year: " + str(len(cashFlow)))
 
             # Start Loop
             yearHousehold = 0
             y = 0
             while(y < extensionProject.AnalysisYear):
                 y= y + 1
-                #QMessageBox.information(self.iface.mainWindow(),"Financial Analysis", "Analysis Year: " + str(y))
                 if y == 1:
                     yearHousehold = totalHousehold
                 else:
@@ -400,7 +387,6 @@ class frmFinance_dialog(QDialog, Ui_frmFinance):
                             yearHousehold = yearHousehold * (1 + hhGrFinYear)
                     else:
                         yearHousehold = yearHousehold * (1 + hhGrFinYear)
-                #QMessageBox.information(self.iface.mainWindow(),"Financial Analysis", "HH GRMidYear: " + str(hhGrMidYear))
                 newConsumer = 0
                 yearConsumer = 0
                 yearPowUsage = 0
@@ -424,7 +410,6 @@ class frmFinance_dialog(QDialog, Ui_frmFinance):
 
                     midConGr = tarrow[4] / 100
                     finConGr = tarrow[5] / 100
-                    #QMessageBox.information(self.iface.mainWindow(),"Financial Analysis", "Mid Comsumption Growth: " + str(midConGr))
 
                     conChargeReg = tarrow[6]
                     conChargeSub = tarrow[6]
@@ -456,7 +441,7 @@ class frmFinance_dialog(QDialog, Ui_frmFinance):
                         newConsump = oldConsump
 
                         powUsage = round(newConsumer * newConsump * 12, 0)
-                        techLoss = round(distLoss * (powUsage / (1 - distLoss)), 0)
+                        techLoss = round(distLoss * (round(powUsage, 0) / (1 - distLoss)), 0)
 
                         yearPowUsage = yearPowUsage + powUsage
                         yearTechLoss = yearTechLoss + techLoss
@@ -541,7 +526,6 @@ class frmFinance_dialog(QDialog, Ui_frmFinance):
                         if j == conType:
                             del dicConsumption[conType]
                             dicConsumption[conType] = newConsump
-                            #QMessageBox.information(self.iface.mainWindow(),"Financial Analysis", "Residential Consumption before del Year 2: "+str(newConsump))
 
                     for i in dicIniPen.keys():
                         if i == conType:
@@ -614,7 +598,6 @@ class frmFinance_dialog(QDialog, Ui_frmFinance):
                             costItem = round((lineLength * costValu), 0)
                         if "Per kWH" in costUnit:
                             powerCost = yearPurPower * powerRate
-                            #costItem = round((powerCost * (costValu / 100)), 0)
                             costItem = round(powerCost, 0)
                     totalOpCost = totalOpCost + costItem
                     self.updateRow(outConsumerTab, costCate, "year" + str(y), str(costItem))
@@ -672,8 +655,19 @@ class frmFinance_dialog(QDialog, Ui_frmFinance):
         NPV = round(numpy.npv(discountRate, cashFlow), 0)
         self.updateRow(outSummaryTab, "Net Present Value (NPV)", "year1", str(NPV))
         self.updateRow(outConsumerTab, "Net Present Value (NPV)", "year1", str(NPV))
+        self.createSummaryReport()
 
-        QMessageBox.information(self.iface.mainWindow(),"Financial Analysis", "NPV: "+str(NPV))
+        proname = self.txtPro.text()
+        frmReport = frmReportViewer_dialog(self.iface)
+        frmReport.txtPro.setText(proname)
+        frmReport.txtPBS.setText(basicOps.dbasename)
+        frmReport.txtSub.setText(basicOps.substation)
+        frmReport.txtFed.setText(basicOps.feeder)
+        frmReport.webView.setHtml('')
+        htmlfile = extensionProject.reportfile
+        local_url = QUrl.fromLocalFile(htmlfile)
+        frmReport.webView.load(local_url)
+        frmReport.exec_()
 
     def getSumValLayer(self, table, searchfield):
         sql3 = "select sum(" + searchfield + ") consumer from " + table
@@ -723,13 +717,11 @@ class frmFinance_dialog(QDialog, Ui_frmFinance):
             consumer = cur.fetchone()
             totalConsumer = totalConsumer + consumer[0]
             srvDrop = round(round(consumer[0],0)*servdrop,0)
-            #QMessageBox.information(self.iface.mainWindow(),"Financial Analysis", constype+": "+ str(srvDrop))
             totalServiceDrop = totalServiceDrop + srvDrop
             conAlias = dicConsumerAlias[constype]
             if consumer[0] > 0:
                 cur.execute("INSERT INTO exprojects.fout_construction_cost(separator, type, quantity) VALUES ('Consumer', '" + conAlias + "', '" + str(round(consumer[0],0)) + "')")
         cur.execute("INSERT INTO exprojects.fout_construction_cost(separator, type, quantity) VALUES ('Consumer', 'Total Consumer', '" + str(totalConsumer) + "')")
-       # QMessageBox.information(self.iface.mainWindow(),"Financial Analysis", "Total Service Drop: "+ str(srvDrop))
 
         totalTrnPrice = 0
         totalNumTrn = 0
@@ -746,7 +738,6 @@ class frmFinance_dialog(QDialog, Ui_frmFinance):
             for row2 in rows2:
                 allsize = row2[1].split('.')
                 trnSize = allsize[0]
-                #QMessageBox.information(self.iface.mainWindow(),"Financial Analysis", "trnize- "+trnSize)
                 trnRate = row2[2]
                 trnUnit = row2[3]
                 trnPhase = row2[0]
@@ -799,7 +790,6 @@ class frmFinance_dialog(QDialog, Ui_frmFinance):
                     allUnit = trnUnit.split(' ')
                     self.extCurrency = allUnit[0]
                     cur.execute("INSERT INTO exprojects.fout_construction_cost(separator, item, type, details, quantity, amount, amount_unit)VALUES ('Equipment', 'Transformer', '"+trnType+"','"+trnkVA+"','"+str(numTrn)+"','"+str(trnPrice)+"','USD')")
-                    #QMessageBox.information(self.iface.mainWindow(),"Financial Analysis", "Number of Transformer: " + str(numTrn))
         else:
             QMessageBox.information(self.iface.mainWindow(),"Financial Analysis", "No Transformer Definition Found in Construction Cost Table")
         totalPriCost = 0
@@ -870,7 +860,6 @@ class frmFinance_dialog(QDialog, Ui_frmFinance):
             cur.execute("INSERT INTO exprojects.fout_construction_cost(separator) VALUES (' ')")
             cur.execute("INSERT INTO exprojects.fout_construction_cost(separator, item, amount, amount_unit)VALUES ('Project Cost', 'Per Consumer Cost','"+str(perConsumerCost)+"','USD')")
         conn.commit()
-        #self.createConstructionCostReport()
 
     def calculateServiceDropSubsidy(self, yearHH, hhMidGrowth, hhFinGrowth, serviceDropYear, analysisMidYear, analysisFinYear, dicserdrop):
         totalServDropSubsidy = 0
@@ -989,6 +978,414 @@ class frmFinance_dialog(QDialog, Ui_frmFinance):
             length = r[0]
         return length
 
+    def createSummaryReport(self):
+        msg = None
+        reportName = self.sub + '_' + self.fed +'_' + extensionProject.ProjectNumber
+        cur = self.getcursor()
+        htmlfilepath = os.path.dirname(__file__) + "/AnalysisResult/"+reportName+"_"+"ExtensionAnalysis.html"
+        extensionProject.reportfile = htmlfilepath
+
+        htmlfirst = """<html>
+        <meta http-equiv='X-UA-Compatible' content='IE=edge' />
+        <style type='text/css'>
+        BODY
+        {
+        font-family:'Verdana';
+        font-size:8pt;
+        margin :2px;
+        margin-left:10px;
+        margin-right:10px;
+        padding: 0px;
+        }
+        .maintable
+        {
+        font-family:'Verdana';
+        font-size:9px;
+        border: 1px solid rgb(138,204,192);
+        margin-top:8px;
+        margin-bottom:8px;
+        width: 100%;
+        }
+        .maintable .tr1
+        {
+        background-color:rgb(138,204,192);
+        text-align:left;
+        font-weight:bold;
+        }
+        .maintable .tr2
+        {
+        background-color:rgb(196,231,221);
+        text-align:left;
+        font-weight:normal;
+        }
+        .maintable .td1
+        {
+        border: 0px solid white;
+        }
+        .maintable .td2
+        {
+        border: 0px solid white;
+        font-weight:normal;
+        }
+        .maintable .td3
+        {
+        border: 1px solid white;
+        }
+        </style>
+        <body>
+        <table border='0' cellspacing = '0' style='text-align:left;width:100%;border: 0px solid white;'>
+        <tr style='Height: 30px;'>
+        <td><font size='2' face='Verdana'><b>Expansion Project Financial Analysis</b></td>
+        </tr>
+        </table>
+        <table class = 'maintable' border='1' cellspacing='1' cellpadding='2' style='width:100%;'>
+        <tr>
+        <td class='td3' style = 'width:40%'>
+        <b>Project Information</b>
+        <table class = 'maintable' border='1' cellspacing='2' cellpadding='3' style='width:98%;'>
+        """
+        if os.path.exists(htmlfilepath):
+            os.remove(htmlfilepath)
+        htmlfile = open(htmlfilepath, 'w')
+        htmlfile.write(htmlfirst)
+
+        proClause = "separator = 'Project Information'"
+        prosql = " select item, type from exprojects.fout_construction_cost where " + proClause
+        cur.execute(prosql)
+        prorows = cur.fetchall()
+        for prorow in prorows:
+            itemStr = prorow[0]
+            typeStr = prorow[1]
+            htmlfile.write("<tr class='tr1'>")
+            htmlfile.write("<td class = 'td1' style = 'width:50%'>" + itemStr + "</td>")
+            htmlfile.write("<td class = 'td2' style = 'width:50%'>" + typeStr + "</td>")
+            htmlfile.write("</tr>")
+        htmlfile.write("</table>")
+
+        htmlfile.write("<b>Expected Consumer During Project Construction</b>")
+        htmlfile.write("<table class = 'maintable' border='1' cellspacing= '2' cellpadding = '3' style='width:98%;'>")
+        htmlfile.write("<tr class='tr1'>")
+        htmlfile.write("<th class='td1' style = 'width:50%'>Consumer Type</th>")
+        htmlfile.write("<th class='td1' style = 'width:50%'>Number</th>")
+        htmlfile.write("</tr>")
+
+        consumerClause = "separator = 'Consumer'"
+        csql = " select type, quantity from exprojects.fout_construction_cost where " + consumerClause
+        cur.execute(csql)
+        consumers = cur.fetchall()
+        for consumer in consumers:
+            typStr = consumer[0]
+            quantitycons = str(consumer[1])
+            htmlfile.write("<tr class='tr2'>")
+            htmlfile.write("<td class = 'td2'>" + typStr + "</td>")
+            htmlfile.write("<td class = 'td2' style='text-align:right'>" + quantitycons + "</td>")
+            htmlfile.write("</tr>")
+        htmlfile.write("</table>")
+
+        htmlfile.write("<b>Proposed Equipment</b>")
+        htmlfile.write("<table class = 'maintable' border='1' cellspacing= '2' cellpadding = '3' style='width:98%;'>")
+        htmlfile.write("<tr class='tr1'>")
+        htmlfile.write("<th class='td1' style = 'width:20%'>Type</th>")
+        htmlfile.write("<th class='td1' style = 'width:20%'>Voltage</th>")
+        htmlfile.write("<th class='td1' style = 'width:20%'>Detail</th>")
+        htmlfile.write("<th class='td1' style = 'width:20%'>Number</th>")
+        htmlfile.write("<th class='td1' style = 'width:20%'>Cost (USD)</th>")
+        htmlfile.write("</tr>")
+
+        equipClause = "separator = 'Equipment'"
+        eqsql = " select item, type, details, quantity, amount from exprojects.fout_construction_cost where " + equipClause
+        cur.execute(eqsql)
+        equipments = cur.fetchall()
+
+        for equipment in equipments:
+            eitmStr = equipment[0]
+            etypStr = equipment[1]
+            edetailStr = equipment[2]
+            equantityStr = equipment[3]
+            ecost = equipment[4]
+            htmlfile.write("<tr class='tr2'>")
+            htmlfile.write("<td class = 'td2'>" + eitmStr + "</td>")
+            htmlfile.write("<td class = 'td2'>" + etypStr + "</td>")
+            htmlfile.write("<td class = 'td2'>" + edetailStr + "</td>")
+            htmlfile.write("<td class = 'td2' style='text-align:right'>" + str(equantityStr) + "</td>")
+            htmlfile.write("<td class = 'td2' style='text-align:right'>" + str(ecost) + "</td>")
+            htmlfile.write("</tr>")
+        htmlfile.write("</table>")
+
+        htmlfile.write("<b>Proposed Line</b>")
+        htmlfile.write("<table class = 'maintable' border='1' cellspacing= '2' cellpadding = '3' style='width:98%;'>")
+        htmlfile.write("<tr class='tr1'>")
+        htmlfile.write("<th class='td1' style = 'width:25%'>Type</th>")
+        htmlfile.write("<th class='td1' style = 'width:25%'>Detail</th>")
+        htmlfile.write("<th class='td1' style = 'width:25%'>Length (kM)</th>")
+        htmlfile.write("<th class='td1' style = 'width:25%'>Cost (USD)</th>")
+        htmlfile.write("</tr>")
+
+        lineClause = "separator = 'Electric Line'"
+        linesql = " select type, details, quantity, amount from exprojects.fout_construction_cost where " + lineClause
+        cur.execute(linesql)
+        lines = cur.fetchall()
+        for line in lines:
+            typStr = line[0]
+            detail = line[1]
+            quantity = str(line[2])
+            cost = str(line[3])
+
+            htmlfile.write("<tr class='tr2'>")
+            htmlfile.write("<td class = 'td2'>" + typStr + "</td>")
+            htmlfile.write("<td class = 'td2'>" + detail + "</td>")
+            htmlfile.write("<td class = 'td2' style='text-align:right'>" + quantity + "</td>")
+            htmlfile.write("<td class = 'td2' style='text-align:right'>" + cost + "</td>")
+            htmlfile.write("</tr>")
+        htmlfile.write("</table>")
+
+        subsClause = "separator = 'Subsidy'"
+        subssql = " select type, amount from exprojects.fout_construction_cost where " + subsClause
+        cur.execute(subssql)
+        if cur.rowcount > 0:
+            subsidys = cur.fetchall()
+            htmlfile.write("<b>Connection Subsidy Included in Project Cost</b>")
+            htmlfile.write("<table class = 'maintable' border='1' cellspacing= '2' cellpadding = '3' style='width:98%;'>")
+            htmlfile.write("<tr class='tr1'>")
+            htmlfile.write("<th class='td1' style = 'width:50%'>Cost Head</th>")
+            htmlfile.write("<th class='td1' style = 'width:50%'>Cost (USD)</th>")
+            htmlfile.write("</tr>")
+            for sub in subsidys:
+                itemStr = sub[0]
+                cost = str(sub[1])
+                htmlfile.write("<tr class='tr2'>")
+                htmlfile.write("<td class = 'td2'>" + itemStr + "</td>")
+                htmlfile.write("<td class = 'td2' style='text-align:right'>" + cost + "</td>")
+                htmlfile.write("</tr>")
+            htmlfile.write("</table>")
+
+        htmlfile.write("<b>Project Cost</b>")
+        htmlfile.write("<table class = 'maintable' border='1' cellspacing= '2' cellpadding = '3' style='width:98%;'>")
+        htmlfile.write("<tr class='tr1'>")
+        htmlfile.write("<th class='td1' style = 'width:50%'>Cost Head</th>")
+        htmlfile.write("<th class='td1' style = 'width:50%'>Cost (USD)</th>")
+        htmlfile.write("</tr>")
+
+        costClause = "separator = 'Project Cost'"
+        costsql = " select item, amount from exprojects.fout_construction_cost where " + costClause
+        cur.execute(costsql)
+        costs = cur.fetchall()
+        for cost in costs:
+            itemStr = cost[0]
+            cst = str(cost[1])
+
+            htmlfile.write("<tr class='tr2'>")
+            htmlfile.write("<td class = 'td2'>" + itemStr + "</td>")
+            htmlfile.write("<td class = 'td2' style='text-align:right'>" + cst + "</td>")
+            htmlfile.write("</tr>")
+        htmlfile.write("</table>")
+
+        htmlfile.write("<b>Proejct Summary</b>")
+        htmlfile.write("<table class = 'maintable' border='1' cellspacing= '2' cellpadding = '3' style='width:98%;'>")
+        htmlfile.write("<tr class='tr1'>")
+        htmlfile.write("<th class='td1' style = 'width:50%'>Item</th>")
+        htmlfile.write("<th class='td1' style = 'width:50%'>Unit</th>")
+        htmlfile.write("<th class='td1' style = 'width:50%'>Year1</th>")
+        htmlfile.write("<th class='td1' style = 'width:50%'>Year2</th>")
+        htmlfile.write("<th class='td1' style = 'width:50%'>Year3</th>")
+        htmlfile.write("<th class='td1' style = 'width:50%'>Year4</th>")
+        htmlfile.write("<th class='td1' style = 'width:50%'>Year5</th>")
+        htmlfile.write("<th class='td1' style = 'width:50%'>Year6</th>")
+        htmlfile.write("<th class='td1' style = 'width:50%'>Year7</th>")
+        htmlfile.write("<th class='td1' style = 'width:50%'>Year8</th>")
+        htmlfile.write("<th class='td1' style = 'width:50%'>Year9</th>")
+        htmlfile.write("<th class='td1' style = 'width:50%'>Year10</th>")
+        htmlfile.write("</tr>")
+
+        prosumsql = "SELECT item, unit, year1, year2, year3, year4, year5, year6, year7, year8, year9, year10 FROM exprojects.fout_project_summery"
+        cur.execute(prosumsql)
+        prosumrows = cur.fetchall()
+        for prosumrow in prosumrows:
+            y1Str = ""
+            y2Str = ""
+            y3Str = ""
+            y4Str = ""
+            y5Str = ""
+            y6Str = ""
+            y7Str = ""
+            y8Str = ""
+            y9Str = ""
+            y10Str = ""
+            itemStr = prosumrow[0]
+            unitStr = prosumrow[1]
+            htmlfile.write("<tr class='tr2'>")
+            htmlfile.write("<td class = 'td1' style = 'width:20%'>" + itemStr + "</td>")
+            htmlfile.write("<td class = 'td2' style = 'width:20%'>" + unitStr + "</td>")
+            if prosumrow[2] is not None:
+                y1Str = int(prosumrow[2])
+                htmlfile.write("<td class = 'td2' style = 'text-align:right'>" + '{:,}'.format(y1Str) + "</td>")
+            else:
+                htmlfile.write("<td class = 'td2' style = 'text-align:right'>" + y1Str + "</td>")
+            if prosumrow[3] is not None:
+                y2Str = int(prosumrow[3])
+                htmlfile.write("<td class = 'td2' style = 'text-align:right'>" + '{:,}'.format(y2Str) + "</td>")
+            else:
+                htmlfile.write("<td class = 'td2' style = 'text-align:right'>" + y2Str + "</td>")
+            if prosumrow[4] is not None:
+                y3Str = int(prosumrow[4])
+                htmlfile.write("<td class = 'td2' style = 'text-align:right'>" + '{:,}'.format(y3Str) + "</td>")
+            else:
+                htmlfile.write("<td class = 'td2' style = 'text-align:right'>" + y3Str + "</td>")
+            if prosumrow[5] is not None:
+                y4Str = int(prosumrow[5])
+                htmlfile.write("<td class = 'td2' style = 'text-align:right'>" + '{:,}'.format(y4Str) + "</td>")
+            else:
+                htmlfile.write("<td class = 'td2' style = 'text-align:right'>" + y4Str + "</td>")
+            if prosumrow[6] is not None:
+                y5Str = int(prosumrow[6])
+                htmlfile.write("<td class = 'td2' style = 'text-align:right'>" + '{:,}'.format(y5Str) + "</td>")
+            else:
+                htmlfile.write("<td class = 'td2' style = 'text-align:right'>" + y5Str + "</td>")
+            if prosumrow[7] is not None:
+                y6Str = int(prosumrow[7])
+                htmlfile.write("<td class = 'td2' style = 'text-align:right'>" + '{:,}'.format(y6Str) + "</td>")
+            else:
+                htmlfile.write("<td class = 'td2' style = 'text-align:right'>" + y6Str + "</td>")
+            if prosumrow[8] is not None:
+                y7Str = int(prosumrow[8])
+                htmlfile.write("<td class = 'td2' style = 'text-align:right'>" + '{:,}'.format(y7Str) + "</td>")
+            else:
+                htmlfile.write("<td class = 'td2' style = 'text-align:right'>" + y7Str + "</td>")
+            if prosumrow[9] is not None:
+                y8Str = int(prosumrow[9])
+                htmlfile.write("<td class = 'td2' style = 'text-align:right'>" + '{:,}'.format(y8Str) + "</td>")
+            else:
+                htmlfile.write("<td class = 'td2' style = 'text-align:right'>" + y8Str + "</td>")
+            if prosumrow[10] is not None:
+                y9Str = int(prosumrow[10])
+                htmlfile.write("<td class = 'td2' style = 'text-align:right'>" + '{:,}'.format(y9Str) + "</td>")
+            else:
+                htmlfile.write("<td class = 'td2' style = 'text-align:right'>" + y9Str + "</td>")
+            if prosumrow[11] is not None:
+                y10Str = int(prosumrow[11])
+                htmlfile.write("<td class = 'td2' style = 'text-align:right'>" + '{:,}'.format(y10Str) + "</td>")
+            else:
+                htmlfile.write("<td class = 'td2' style = 'text-align:right'>" + y10Str + "</td>")
+            htmlfile.write("</tr>")
+        htmlfile.write("</table>")
+        htmlfile.write("<b>Consumer and Cash Flow Model</b>")
+        htmlfile.write("<table class = 'maintable' border='1' cellspacing= '2' cellpadding = '3' style='width:98%;'>")
+        htmlfile.write("<tr class='tr1'>")
+        htmlfile.write("<th class='td1' style = 'width:50%'>Item</th>")
+        htmlfile.write("<th class='td1' style = 'width:50%'>Unit</th>")
+        htmlfile.write("<th class='td1' style = 'width:50%'>Year0</th>")
+        htmlfile.write("<th class='td1' style = 'width:50%'>Year1</th>")
+        htmlfile.write("<th class='td1' style = 'width:50%'>Year2</th>")
+        htmlfile.write("<th class='td1' style = 'width:50%'>Year3</th>")
+        htmlfile.write("<th class='td1' style = 'width:50%'>Year4</th>")
+        htmlfile.write("<th class='td1' style = 'width:50%'>Year5</th>")
+        htmlfile.write("<th class='td1' style = 'width:50%'>Year6</th>")
+        htmlfile.write("<th class='td1' style = 'width:50%'>Year7</th>")
+        htmlfile.write("<th class='td1' style = 'width:50%'>Year8</th>")
+        htmlfile.write("<th class='td1' style = 'width:50%'>Year9</th>")
+        htmlfile.write("<th class='td1' style = 'width:50%'>Year10</th>")
+        htmlfile.write("</tr>")
+        npv = ""
+        profinsql = "SELECT item, unit, year0, year1, year2, year3, year4, year5, year6, year7, year8, year9, year10 FROM exprojects.fout_consumer_finance order by id"
+        cur.execute(profinsql)
+        profinrows = cur.fetchall()
+        for profinrow in profinrows:
+            itemStr = ""
+            unitStr = ""
+            y0Str = ""
+            y1Str = ""
+            y2Str = ""
+            y3Str = ""
+            y4Str = ""
+            y5Str = ""
+            y6Str = ""
+            y7Str = ""
+            y8Str = ""
+            y9Str = ""
+            y10Str = ""
+
+            if profinrow[0] is not None:
+                htmlfile.write("<tr class='tr2'>")
+                itemStr = profinrow[0]
+                if itemStr != 'Net Present Value (NPV)':
+                    htmlfile.write("<td class = 'td1' style = 'width:20%'>" + itemStr + "</td>")
+                    if profinrow[1] is not None:
+                        unitStr = profinrow[1]
+                        htmlfile.write("<td class = 'td2' style = 'width:20%'>" + unitStr + "</td>")
+                    else:
+                        htmlfile.write("<td class = 'td2' style = 'width:20%'>" + unitStr + "</td>")
+                    if profinrow[2] is not None:
+                        y0Str = int(profinrow[2])
+                        htmlfile.write("<td class = 'td2' style = 'text-align:right'>" + '{:,}'.format(y0Str) + "</td>")
+                    else:
+                        htmlfile.write("<td class = 'td2' style = 'text-align:right'>" + y0Str + "</td>")
+                    if profinrow[3] is not None:
+                        y1Str = int(profinrow[3])
+                        htmlfile.write("<td class = 'td2' style = 'text-align:right'>" + '{:,}'.format(y1Str) + "</td>")
+                    else:
+                        htmlfile.write("<td class = 'td2' style = 'text-align:right'>" + y1Str + "</td>")
+                    if profinrow[4] is not None:
+                        y2Str = int(profinrow[4])
+                        htmlfile.write("<td class = 'td2' style = 'text-align:right'>" + '{:,}'.format(y2Str) + "</td>")
+                    else:
+                        htmlfile.write("<td class = 'td2' style = 'text-align:right'>" + y2Str + "</td>")
+                    if profinrow[5] is not None:
+                        y3Str = int(profinrow[5])
+                        htmlfile.write("<td class = 'td2' style = 'text-align:right'>" + '{:,}'.format(y3Str) + "</td>")
+                    else:
+                        htmlfile.write("<td class = 'td2' style = 'text-align:right'>" + y3Str + "</td>")
+                    if profinrow[6] is not None:
+                        y4Str = int(profinrow[6])
+                        htmlfile.write("<td class = 'td2' style = 'text-align:right'>" + '{:,}'.format(y4Str) + "</td>")
+                    else:
+                        htmlfile.write("<td class = 'td2' style = 'text-align:right'>" + y4Str + "</td>")
+                    if profinrow[7] is not None:
+                        y5Str = int(profinrow[7])
+                        htmlfile.write("<td class = 'td2' style = 'text-align:right'>" + '{:,}'.format(y5Str) + "</td>")
+                    else:
+                        htmlfile.write("<td class = 'td2' style = 'text-align:right'>" + y5Str + "</td>")
+                    if profinrow[8] is not None:
+                        y6Str = int(profinrow[8])
+                        htmlfile.write("<td class = 'td2' style = 'text-align:right'>" + '{:,}'.format(y6Str) + "</td>")
+                    else:
+                        htmlfile.write("<td class = 'td2' style = 'text-align:right'>" + y6Str + "</td>")
+                    if profinrow[9] is not None:
+                        y7Str = int(profinrow[9])
+                        htmlfile.write("<td class = 'td2' style = 'text-align:right'>" + '{:,}'.format(y7Str) + "</td>")
+                    else:
+                        htmlfile.write("<td class = 'td2' style = 'text-align:right'>" + y7Str + "</td>")
+                    if profinrow[10] is not None:
+                        y8Str = int(profinrow[10])
+                        htmlfile.write("<td class = 'td2' style = 'text-align:right'>" + '{:,}'.format(y8Str) + "</td>")
+                    else:
+                        htmlfile.write("<td class = 'td2' style = 'text-align:right'>" + y8Str + "</td>")
+                    if profinrow[11] is not None:
+                        y9Str = int(profinrow[11])
+                        htmlfile.write("<td class = 'td2' style = 'text-align:right'>" + '{:,}'.format(y9Str) + "</td>")
+                    else:
+                        htmlfile.write("<td class = 'td2' style = 'text-align:right'>" + y9Str + "</td>")
+                    if profinrow[12] is not None:
+                        y10Str = int(profinrow[12])
+                        htmlfile.write("<td class = 'td2' style = 'text-align:right'>" + '{:,}'.format(y10Str) + "</td>")
+                    else:
+                        htmlfile.write("<td class = 'td2' style = 'text-align:right'>" + y10Str + "</td>")
+                htmlfile.write("</tr>")
+                if itemStr == 'Net Present Value (NPV)':
+                    y1Str = profinrow[3]
+                    npv = '{:,}'.format(int(y1Str))
+            else:
+                htmlfile.write("<tr class='tr2'>")
+                htmlfile.write("<td class = 'td1' style = 'width:20%'>" + itemStr + "</td>")
+                htmlfile.write("</tr>")
+        htmlfile.write("</table>")
+
+        htmlfile.write("<b> Net Present Value (NPV): " + npv + "</b>")
+
+        htmlfile.write("</td>")
+        htmlfile.write("</tr>")
+        htmlfile.write("</table>")
+        htmlfile.close()
+
     def createConstructionCostReport(self):
         msg = None
         reportName = self.sub + '_' + self.fed +'_' + extensionProject.ProjectNumber
@@ -1046,7 +1443,7 @@ class frmFinance_dialog(QDialog, Ui_frmFinance):
         <body>
         <table border='0' cellspacing = '0' style='text-align:left;width:100%;border: 0px solid white;'>
         <tr style='Height: 30px;'>
-        <td><font size='2' face='Verdana'><b>Expansion Project Construction Cost</b></td>
+        <td><font size='2' face='Verdana'><b>Expansion Project Construction Cost Estimation</b></td>
         </tr>
         </table>
         <table class = 'maintable' border='1' cellspacing='1' cellpadding='2' style='width:100%;'>
@@ -1207,7 +1604,6 @@ class frmFinance_dialog(QDialog, Ui_frmFinance):
         self.close()
 
     def getTableinfo(self, tablename):
-
         sql = "select column_name from information_schema.columns where table_name ='%s'" %tablename
         cur = self.getcursor()
         cur.execute(sql)
@@ -1234,7 +1630,6 @@ class frmFinance_dialog(QDialog, Ui_frmFinance):
             return name[0], name[1]
 
     def getprojectTableinfo(self):
-
         sql = "select column_name from information_schema.columns where table_name ='fout_expansion_projects'"
         cur = self.getcursor()
         cur.execute(sql)
@@ -1306,7 +1701,6 @@ class frmFinance_dialog(QDialog, Ui_frmFinance):
         QMessageBox.information(self.iface.mainWindow(),"Financial Analysis",'Project Tables Created')
 
     def createProjectTables(self, sub, fed, pro):
-
         cur = self.getcursor()
         bsops = utility.basicOps()
         fedcode = bsops.getFedCode(cur, sub, fed)
@@ -1424,7 +1818,6 @@ class frmFinance_dialog(QDialog, Ui_frmFinance):
         cur.execute(seqpolesql)
         cur.execute(polesql)
 
-        #seqstrucsql = 'create sequence exprojects.%s'+'_seq;' %structuretablename
         structuresql = None
         if self.proPopSource == 'structure':
             structuresql = """CREATE TABLE exprojects."""+self.structuretablename+"""
@@ -1448,7 +1841,6 @@ class frmFinance_dialog(QDialog, Ui_frmFinance):
         cur.execute(structuresql)
 
     def deleteProjectTables(self, sub, fed, pro):
-
         conn = self.getConnection()
         cur = conn.cursor()
 
@@ -1571,7 +1963,6 @@ class frmFinance_dialog(QDialog, Ui_frmFinance):
 
         self.refresh_layers()
 
-
     def removelayer(self, layername):
         layers = qgis.utils.iface.mapCanvas().layers()
         for layer in layers:
@@ -1593,8 +1984,6 @@ class frmFinance_dialog(QDialog, Ui_frmFinance):
         else:
             QMessageBox.information(self.iface.mainWindow(),"Add Project Layers","{0} layer already exists!".format(layername))
 
-
-
     def refresh_layers(self):
         for layer in qgis.utils.iface.mapCanvas().layers():
             layer.triggerRepaint()
@@ -1609,4 +1998,3 @@ class frmFinance_dialog(QDialog, Ui_frmFinance):
         gpsForm.txtSub.setText(basicOps.substation)
         gpsForm.txtFed.setText(basicOps.feeder)
         gpsForm.exec_()
-

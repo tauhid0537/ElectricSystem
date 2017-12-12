@@ -12,7 +12,7 @@ qgisMinimumVersion=2.0
 description=Develops and Analyzes Electric Systems GIS Database
 version=1.1
 author=NRECA International Ltd.
-email=atm.selim@nreca-intl.org
+email=tislam@nreca-intl.org
 
 about=This plugin is developed by NRECA International Ltd. to develop and analyze electric systems for its projects.
 
@@ -26,7 +26,7 @@ repository=false
 # changelog=
 
 # Tags are comma separated with spaces allowed
-tags=
+tags= NRECA, PostGRESQL, postgis, Electrical Data Editing
 
 homepage=
 category=Plugins
